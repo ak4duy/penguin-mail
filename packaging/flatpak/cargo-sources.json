@@ -67,14 +67,14 @@
     {
         "type": "archive",
         "archive-type": "tar-gzip",
-        "url": "https://static.crates.io/crates/ammonia/ammonia-4.2.3.crate",
-        "sha256": "061e83b03c2681c18a6787d956e355c74e0b98ba7ba3d69b0822ade1e6f1d716",
-        "dest": "cargo/vendor/ammonia-4.2.3"
+        "url": "https://static.crates.io/crates/ammonia/ammonia-4.2.4.crate",
+        "sha256": "1f45dfa685e1ec33b1bf1a3b93b8047cbdbef41b6040deebbe6bea7720a45574",
+        "dest": "cargo/vendor/ammonia-4.2.4"
     },
     {
         "type": "inline",
-        "contents": "{\"package\": \"061e83b03c2681c18a6787d956e355c74e0b98ba7ba3d69b0822ade1e6f1d716\", \"files\": {}}",
-        "dest": "cargo/vendor/ammonia-4.2.3",
+        "contents": "{\"package\": \"1f45dfa685e1ec33b1bf1a3b93b8047cbdbef41b6040deebbe6bea7720a45574\", \"files\": {}}",
+        "dest": "cargo/vendor/ammonia-4.2.4",
         "dest-filename": ".cargo-checksum.json"
     },
     {
