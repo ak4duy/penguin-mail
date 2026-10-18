@@ -28,6 +28,9 @@ pub(crate) struct OpenAiChat {
     pub(super) history: History,
     /// Set once the server rejects `tools`; later requests leave them out.
     pub(super) tools_off: bool,
+    pub(super) think: bool,
+    /// Some compatible servers reject reasoning controls altogether.
+    pub(super) reasoning_off: bool,
     client: reqwest::Client,
 }
 
@@ -62,6 +65,8 @@ impl OpenAiChat {
             system_prompt,
             history: History::default(),
             tools_off: false,
+            think: false,
+            reasoning_off: false,
             client: http_client(),
         }
     }
@@ -121,30 +126,38 @@ impl OpenAiChat {
         Err(too_many_rounds())
     }
 
-    /// One streamed request. Retries once without tools when the server
-    /// turns them down.
+    /// Each rejected optional field is removed once before retrying.
     async fn round(
         &mut self,
         specs: &[ToolSpec],
         events: &async_channel::Sender<AgentEvent>,
     ) -> Result<Reply, AiError> {
-        let with_tools = !self.tools_off && !specs.is_empty();
-        let mut response = self.post(specs, with_tools).await?;
-        if !response.status().is_success() {
+        loop {
+            let with_tools = !self.tools_off && !specs.is_empty();
+            let response = self.post(specs, with_tools).await?;
+            if response.status().is_success() {
+                return read_stream(SseReader::new(response), events).await;
+            }
             let (status, message) = error_text(response).await;
+            if matches!(status, 400 | 422)
+                && !self.think
+                && !self.reasoning_off
+                && message.to_lowercase().contains("reasoning_effort")
+            {
+                tracing::warn!(
+                    status,
+                    "server rejected reasoning control; using its default"
+                );
+                self.reasoning_off = true;
+                continue;
+            }
             if with_tools && (400..500).contains(&status) && mentions_tools(&message) {
                 tracing::warn!(status, "server rejected tools; continuing without them");
                 self.tools_off = true;
-                response = self.post(specs, false).await?;
-                if !response.status().is_success() {
-                    let (status, message) = error_text(response).await;
-                    return Err(AiError::Api(format!("HTTP {status}: {message}")));
-                }
-            } else {
-                return Err(AiError::Api(format!("HTTP {status}: {message}")));
+                continue;
             }
+            return Err(AiError::Api(format!("HTTP {status}: {message}")));
         }
-        read_stream(SseReader::new(response), events).await
     }
 
     async fn post(
@@ -168,6 +181,9 @@ impl OpenAiChat {
             "stream": true,
             "messages": messages,
         });
+        if !self.think && !self.reasoning_off {
+            body["reasoning_effort"] = json!("none");
+        }
         if with_tools {
             body["tools"] = specs.iter().map(tool_json).collect();
         }

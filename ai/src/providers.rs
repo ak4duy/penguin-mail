@@ -73,6 +73,7 @@ impl State {
                     chat.api_key = api_key.clone();
                     chat.model = model.clone();
                     chat.tools_off = false;
+                    chat.reasoning_off = false;
                 }
                 return;
             }
@@ -118,12 +119,13 @@ impl State {
         }
     }
 
-    /// Only Anthropic's API takes a request for thinking. Claude Code thinks
-    /// as its own settings say, and local servers think when their model
-    /// does, sending it back as `reasoning_content` or `<think>` spans.
+    /// The assistant keeps the local server's thinking default. Short
+    /// tasks ask to skip it. Claude Code follows its own settings.
     pub(crate) fn ask_for_thinking(&mut self) {
-        if let State::Anthropic(chat) = self {
-            chat.think = true;
+        match self {
+            State::Anthropic(chat) => chat.think = true,
+            State::OpenAi(chat) => chat.think = true,
+            State::ClaudeCode(_) => {}
         }
     }
 

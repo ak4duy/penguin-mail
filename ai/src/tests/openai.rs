@@ -548,3 +548,148 @@ async fn changing_models_after_a_quota_error_keeps_the_conversation() {
         ])
     );
 }
+
+#[tokio::test]
+async fn short_tasks_skip_thinking_and_assistant_handoffs_keep_the_server_default() {
+    let server = MockServer::start().await;
+    Mock::given(method("POST"))
+        .respond_with(stream(&[delta(json!({"content": "Translated."}))]))
+        .expect(4)
+        .mount(&server)
+        .await;
+    let local = || ProviderConfig::OpenAiCompatible {
+        base_url: server.uri(),
+        api_key: None,
+        model: "qwen".into(),
+    };
+    for thinking in [false, true] {
+        let mut chat = crate::Conversation::new(local(), "Translate.".into());
+        if thinking {
+            chat = chat.with_thinking();
+        }
+        let (events, _) = async_channel::unbounded();
+        chat.send("Hello".into(), Arc::new(crate::NoTools), events.clone())
+            .await
+            .unwrap();
+        chat.set_provider(ProviderConfig::Anthropic {
+            api_key: "test-only".into(),
+            model: "test".into(),
+        });
+        chat.set_provider(local());
+        chat.send("Again".into(), Arc::new(crate::NoTools), events)
+            .await
+            .unwrap();
+    }
+    for (at, request) in server.received_requests().await.unwrap().iter().enumerate() {
+        let body: Value = request.body_json().unwrap();
+        if at < 2 {
+            assert_eq!(body["reasoning_effort"], "none");
+        } else {
+            assert!(body.get("reasoning_effort").is_none());
+        }
+    }
+}
+
+#[tokio::test]
+async fn a_rejected_reasoning_control_is_left_out_until_the_model_changes() {
+    let server = MockServer::start().await;
+    let answer = stream(&[delta(json!({"content": "Translated."}))]);
+    Mock::given(method("POST"))
+        .respond_with(Sequence::new(vec![
+            ResponseTemplate::new(422).set_body_json(json!({
+                "error": {"message": "Unsupported value for reasoning_effort: none"}
+            })),
+            answer.clone(),
+            answer.clone(),
+            answer,
+        ]))
+        .expect(4)
+        .mount(&server)
+        .await;
+    let config = |model: &str| ProviderConfig::OpenAiCompatible {
+        base_url: server.uri(),
+        api_key: None,
+        model: model.into(),
+    };
+    let mut chat = crate::Conversation::new(config("old"), "Translate.".into());
+    let (events, _) = async_channel::unbounded();
+    for text in ["Hello", "Goodbye"] {
+        chat.send(text.into(), Arc::new(crate::NoTools), events.clone())
+            .await
+            .unwrap();
+    }
+    chat.set_provider(config("new"));
+    chat.send("Hello".into(), Arc::new(crate::NoTools), events)
+        .await
+        .unwrap();
+    let requests = server.received_requests().await.unwrap();
+    for (at, request) in requests.iter().enumerate() {
+        let body: Value = request.body_json().unwrap();
+        assert_eq!(body.get("reasoning_effort").is_some(), matches!(at, 0 | 3));
+    }
+    let retry: Value = requests[1].body_json().unwrap();
+    assert_eq!(retry["messages"].as_array().unwrap().len(), 2);
+}
+
+#[tokio::test]
+async fn reasoning_fallback_stops_after_one_retry_and_leaves_other_errors_alone() {
+    for (message, requests) in [("Invalid messages", 1), ("Unknown reasoning_effort", 2)] {
+        let server = MockServer::start().await;
+        Mock::given(method("POST"))
+            .respond_with(ResponseTemplate::new(400).set_body_json(json!({
+                "error": {"message": message}
+            })))
+            .expect(requests)
+            .mount(&server)
+            .await;
+        let mut chat = crate::Conversation::new(
+            ProviderConfig::OpenAiCompatible {
+                base_url: server.uri(),
+                api_key: None,
+                model: "test".into(),
+            },
+            String::new(),
+        );
+        let (events, _) = async_channel::unbounded();
+        let error = chat
+            .send("Hello".into(), Arc::new(crate::NoTools), events)
+            .await
+            .unwrap_err();
+        assert!(error.to_string().contains(message));
+    }
+}
+
+#[tokio::test]
+async fn servers_can_reject_both_optional_fields_in_either_order() {
+    for errors in [
+        ["Unknown reasoning_effort", "Tools are not supported"],
+        ["Tools are not supported", "Unknown reasoning_effort"],
+    ] {
+        let server = MockServer::start().await;
+        let mut answers: Vec<_> = errors
+            .iter()
+            .map(|message| {
+                ResponseTemplate::new(400).set_body_json(json!({"error": {"message": message}}))
+            })
+            .collect();
+        answers.push(stream(&[delta(json!({"content": "Translated."}))]));
+        Mock::given(method("POST"))
+            .respond_with(Sequence::new(answers))
+            .expect(3)
+            .mount(&server)
+            .await;
+        let mut chat = OpenAiChat::new(&server.uri(), None, "test".into(), String::new());
+        let (events, _) = async_channel::unbounded();
+        assert_eq!(
+            chat.send("Hello".into(), Arc::new(FakeHost::default()), &events)
+                .await
+                .unwrap(),
+            "Translated."
+        );
+        let requests = server.received_requests().await.unwrap();
+        let final_body: Value = requests[2].body_json().unwrap();
+        assert!(final_body.get("tools").is_none());
+        assert!(final_body.get("reasoning_effort").is_none());
+        assert_eq!(final_body["messages"].as_array().unwrap().len(), 2);
+    }
+}
