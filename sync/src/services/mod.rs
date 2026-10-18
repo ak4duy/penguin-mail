@@ -221,6 +221,13 @@ pub enum RemoteChange {
         thread_id: String,
         memberships: Vec<Membership>,
     },
+    /// Memberships found during a repair, applied only to messages the
+    /// store already holds. A repair fetches no missing mail and raises
+    /// no new-mail notice.
+    Refresh {
+        id: String,
+        memberships: Vec<Membership>,
+    },
     Lost {
         id: String,
         memberships: Vec<Membership>,

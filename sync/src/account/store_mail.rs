@@ -620,7 +620,9 @@ impl Moves<'_> {
         let ids: Vec<String> = changes
             .iter()
             .filter_map(|change| match change {
-                RemoteChange::Gained { id, .. } | RemoteChange::Lost { id, .. } => Some(id.clone()),
+                RemoteChange::Gained { id, .. }
+                | RemoteChange::Refresh { id, .. }
+                | RemoteChange::Lost { id, .. } => Some(id.clone()),
                 _ => None,
             })
             .collect();
@@ -657,6 +659,7 @@ fn named_in(change: &RemoteChange) -> Option<&str> {
         RemoteChange::Added { id, .. }
         | RemoteChange::Deleted { id }
         | RemoteChange::Gained { id, .. }
+        | RemoteChange::Refresh { id, .. }
         | RemoteChange::Lost { id, .. } => Some(id),
         RemoteChange::Vanished { .. }
         | RemoteChange::Holds { .. }
@@ -686,6 +689,10 @@ fn change_as_stored(
         } => RemoteChange::Gained {
             id: stored_id(&id, resolved)?,
             thread_id,
+            memberships,
+        },
+        RemoteChange::Refresh { id, memberships } => RemoteChange::Refresh {
+            id: stored_id(&id, resolved)?,
             memberships,
         },
         RemoteChange::Lost { id, memberships } => RemoteChange::Lost {
@@ -728,6 +735,14 @@ fn still_to_apply(
                 thread_id,
                 memberships,
             })
+        }
+        RemoteChange::Refresh { id, memberships } => {
+            let current = held.get(&id)?;
+            let memberships: Vec<_> = memberships
+                .into_iter()
+                .filter(|m| !current.has(m))
+                .collect();
+            (!memberships.is_empty()).then_some(RemoteChange::Refresh { id, memberships })
         }
         RemoteChange::Lost { id, memberships } => {
             let current = held.get(&id);

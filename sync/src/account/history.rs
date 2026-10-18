@@ -133,7 +133,8 @@ impl AccountSync {
         let named_mailboxes: BTreeSet<String> = changes
             .iter()
             .filter_map(|change| match change {
-                RemoteChange::Gained { memberships, .. } => Some(memberships),
+                RemoteChange::Gained { memberships, .. }
+                | RemoteChange::Refresh { memberships, .. } => Some(memberships),
                 _ => None,
             })
             .flatten()
@@ -156,9 +157,9 @@ impl AccountSync {
                 let named: Vec<String> = changes
                     .iter()
                     .filter_map(|change| match change {
-                        RemoteChange::Added { id, .. } | RemoteChange::Gained { id, .. } => {
-                            Some(id.clone())
-                        }
+                        RemoteChange::Added { id, .. }
+                        | RemoteChange::Gained { id, .. }
+                        | RemoteChange::Refresh { id, .. } => Some(id.clone()),
                         _ => None,
                     })
                     .collect();
@@ -189,6 +190,13 @@ impl AccountSync {
                             batch.extend(
                                 memberships.iter().map(|m| Change::of(id, m.clone(), true)),
                             );
+                        }
+                        RemoteChange::Refresh { id, memberships } => {
+                            if stored.contains(id) {
+                                batch.extend(
+                                    memberships.iter().map(|m| Change::of(id, m.clone(), true)),
+                                );
+                            }
                         }
                         RemoteChange::Gained { id, .. } => {
                             if let Some(meta) = fetched.get(id) {
