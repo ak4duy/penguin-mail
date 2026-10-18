@@ -95,11 +95,11 @@ msgstr "助理可使用本機模型或 Claude，選擇模型後才會啟用"
 #: app/data/io.github.c9dev.PenguinMail.metainfo.xml:33
 msgid ""
 "Every control named for screen readers and reachable from the keyboard, in "
-"American English, British English, French, German, Spanish, European "
-"Portuguese, Traditional Chinese (Taiwan) and Vietnamese"
+"American English, British English, French, German, Indonesian, Italian, "
+"Japanese, Korean, Polish, Russian, Spanish, European Portuguese, Simplified "
+"Chinese, Traditional Chinese (Taiwan), Turkish and Vietnamese"
 msgstr ""
-"所有控制項都有螢幕閱讀器可讀取的名稱，也能以鍵盤操作；介面提供美式英文、英式"
-"英文、法文、德文、西班牙文、歐洲葡萄牙文、正體中文（台灣）與越南文。"
+"所有控制項都有螢幕閱讀器可讀取的名稱，也能以鍵盤操作；介面提供美式英文、英式英文、法文、德文、印尼文、義大利文、日文、韓文、波蘭文、俄文、西班牙文、歐洲葡萄牙文、簡體中文、正體中文（台灣）、土耳其文與越南文。"
 
 #: app/data/io.github.c9dev.PenguinMail.metainfo.xml:35
 msgid ""
@@ -5142,28 +5142,24 @@ msgid "Each feature sends what it reads to the model chosen for it."
 msgstr "每項功能會將讀取的內容傳送至為該功能選擇的模型。"
 
 #: app/src/ui/assistant_prefs.rs:178
-#, fuzzy
-#| msgid "Running"
 msgid "Reasoning"
-msgstr "執行中"
+msgstr "推理"
 
 #: app/src/ui/assistant_prefs.rs:180
 msgid ""
 "Ask supported models to think before answering. Turning this off can make "
 "replies faster. Claude Code uses its own settings."
 msgstr ""
+"要求支援此功能的模型在回答前思考。關閉此選項可能會加快回覆。Claude Code 使用"
+"自己的設定。"
 
 #: app/src/ui/assistant_prefs.rs:186
-#, fuzzy
-#| msgid "Assistant Actions"
 msgid "Assistant Chats"
-msgstr "助理操作"
+msgstr "助理對話"
 
 #: app/src/ui/assistant_prefs.rs:191
-#, fuzzy
-#| msgid "Translation"
 msgid "Email Translations"
-msgstr "翻譯"
+msgstr "郵件翻譯"
 
 #: app/src/ui/assistant_prefs.rs:208 app/src/ui/conversation.rs:698
 #: app/src/ui/window/detached.rs:65

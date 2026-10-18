@@ -101,13 +101,15 @@ msgstr ""
 #: app/data/io.github.c9dev.PenguinMail.metainfo.xml:33
 msgid ""
 "Every control named for screen readers and reachable from the keyboard, in "
-"American English, British English, French, German, Spanish, European "
-"Portuguese, Traditional Chinese (Taiwan) and Vietnamese"
+"American English, British English, French, German, Indonesian, Italian, "
+"Japanese, Korean, Polish, Russian, Spanish, European Portuguese, Simplified "
+"Chinese, Traditional Chinese (Taiwan), Turkish and Vietnamese"
 msgstr ""
 "Jedes Bedienelement ist für Bildschirmleser benannt und per Tastatur "
 "erreichbar, in amerikanischem Englisch, britischem Englisch, Französisch, "
-"Deutsch, Spanisch, europäischem Portugiesisch, traditionellem Chinesisch "
-"(Taiwan) und Vietnamesisch"
+"Deutsch, Indonesisch, Italienisch, Japanisch, Koreanisch, Polnisch, "
+"Russisch, Spanisch, europäischem Portugiesisch, vereinfachtem Chinesisch, "
+"traditionellem Chinesisch (Taiwan), Türkisch und Vietnamesisch"
 
 #: app/data/io.github.c9dev.PenguinMail.metainfo.xml:35
 msgid ""
@@ -5500,28 +5502,25 @@ msgid "Each feature sends what it reads to the model chosen for it."
 msgstr "Jede Funktion sendet, was sie liest, an das für sie gewählte Modell."
 
 #: app/src/ui/assistant_prefs.rs:178
-#, fuzzy
-#| msgid "Running"
 msgid "Reasoning"
-msgstr "Läuft"
+msgstr "Nachdenken"
 
 #: app/src/ui/assistant_prefs.rs:180
 msgid ""
 "Ask supported models to think before answering. Turning this off can make "
 "replies faster. Claude Code uses its own settings."
 msgstr ""
+"Unterstützte Modelle vor dem Antworten nachdenken lassen. Ohne diese Option "
+"können Antworten schneller sein. Claude Code verwendet seine eigenen "
+"Einstellungen."
 
 #: app/src/ui/assistant_prefs.rs:186
-#, fuzzy
-#| msgid "Assistant Actions"
 msgid "Assistant Chats"
-msgstr "Assistentenaktionen"
+msgstr "Assistenten-Chats"
 
 #: app/src/ui/assistant_prefs.rs:191
-#, fuzzy
-#| msgid "Translation"
 msgid "Email Translations"
-msgstr "Übersetzung"
+msgstr "E-Mail-Übersetzungen"
 
 #: app/src/ui/assistant_prefs.rs:208 app/src/ui/conversation.rs:698
 #: app/src/ui/window/detached.rs:65

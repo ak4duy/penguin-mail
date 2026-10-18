@@ -96,12 +96,15 @@ msgstr ""
 #: app/data/io.github.c9dev.PenguinMail.metainfo.xml:33
 msgid ""
 "Every control named for screen readers and reachable from the keyboard, in "
-"American English, British English, French, German, Spanish, European "
-"Portuguese, Traditional Chinese (Taiwan) and Vietnamese"
+"American English, British English, French, German, Indonesian, Italian, "
+"Japanese, Korean, Polish, Russian, Spanish, European Portuguese, Simplified "
+"Chinese, Traditional Chinese (Taiwan), Turkish and Vietnamese"
 msgstr ""
 "Mọi điều khiển đều có tên cho trình đọc màn hình và sử dụng được bằng bàn "
-"phím, bằng tiếng Anh Mỹ, tiếng Anh Anh, tiếng Pháp, tiếng Đức, tiếng Tây Ban "
-"Nha, tiếng Bồ Đào Nha châu Âu, tiếng Trung phồn thể (Đài Loan) và tiếng Việt"
+"phím, bằng tiếng Anh Mỹ, tiếng Anh Anh, tiếng Pháp, tiếng Đức, tiếng "
+"Indonesia, tiếng Ý, tiếng Nhật, tiếng Hàn, tiếng Ba Lan, tiếng Nga, tiếng "
+"Tây Ban Nha, tiếng Bồ Đào Nha châu Âu, tiếng Trung giản thể, tiếng Trung "
+"phồn thể (Đài Loan), tiếng Thổ Nhĩ Kỳ và tiếng Việt"
 
 #: app/data/io.github.c9dev.PenguinMail.metainfo.xml:35
 msgid ""
@@ -5238,28 +5241,24 @@ msgid "Each feature sends what it reads to the model chosen for it."
 msgstr "Mỗi tính năng gửi nội dung nó đọc tới mô hình được chọn."
 
 #: app/src/ui/assistant_prefs.rs:178
-#, fuzzy
-#| msgid "Running"
 msgid "Reasoning"
-msgstr "Đang chạy"
+msgstr "Suy luận"
 
 #: app/src/ui/assistant_prefs.rs:180
 msgid ""
 "Ask supported models to think before answering. Turning this off can make "
 "replies faster. Claude Code uses its own settings."
 msgstr ""
+"Yêu cầu các mô hình có hỗ trợ suy nghĩ trước khi trả lời. Tắt tùy chọn này "
+"có thể giúp trả lời nhanh hơn. Claude Code dùng thiết lập riêng."
 
 #: app/src/ui/assistant_prefs.rs:186
-#, fuzzy
-#| msgid "Assistant Actions"
 msgid "Assistant Chats"
-msgstr "Thao tác của trợ lý"
+msgstr "Trò chuyện với trợ lý"
 
 #: app/src/ui/assistant_prefs.rs:191
-#, fuzzy
-#| msgid "Translation"
 msgid "Email Translations"
-msgstr "Dịch"
+msgstr "Dịch thư"
 
 #: app/src/ui/assistant_prefs.rs:208 app/src/ui/conversation.rs:698
 #: app/src/ui/window/detached.rs:65

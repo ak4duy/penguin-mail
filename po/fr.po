@@ -12,8 +12,8 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Language-Name: Français\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Language-Name: Français\n"
 
 #: app/data/io.github.c9dev.PenguinMail.desktop:5
 msgid "Mail and calendar for Linux"
@@ -103,12 +103,15 @@ msgstr ""
 #: app/data/io.github.c9dev.PenguinMail.metainfo.xml:33
 msgid ""
 "Every control named for screen readers and reachable from the keyboard, in "
-"American English, British English, French, German, Spanish, European "
-"Portuguese, Traditional Chinese (Taiwan) and Vietnamese"
+"American English, British English, French, German, Indonesian, Italian, "
+"Japanese, Korean, Polish, Russian, Spanish, European Portuguese, Simplified "
+"Chinese, Traditional Chinese (Taiwan), Turkish and Vietnamese"
 msgstr ""
 "Chaque contrôle est nommé pour les lecteurs d’écran et accessible au "
 "clavier, en anglais américain, anglais britannique, français, allemand, "
-"espagnol, portugais européen, chinois traditionnel (Taïwan) et vietnamien"
+"indonésien, italien, japonais, coréen, polonais, russe, espagnol, portugais "
+"européen, chinois simplifié, chinois traditionnel (Taïwan), turc et "
+"vietnamien"
 
 #: app/data/io.github.c9dev.PenguinMail.metainfo.xml:35
 msgid ""
@@ -5470,28 +5473,25 @@ msgstr ""
 "Chaque fonctionnalité envoie ce qu’elle lit au modèle choisi pour elle."
 
 #: app/src/ui/assistant_prefs.rs:178
-#, fuzzy
-#| msgid "Running"
 msgid "Reasoning"
-msgstr "En cours"
+msgstr "Raisonnement"
 
 #: app/src/ui/assistant_prefs.rs:180
 msgid ""
 "Ask supported models to think before answering. Turning this off can make "
 "replies faster. Claude Code uses its own settings."
 msgstr ""
+"Demander aux modèles compatibles de réfléchir avant de répondre. Désactiver "
+"cette option peut accélérer les réponses. Claude Code utilise ses propres "
+"paramètres."
 
 #: app/src/ui/assistant_prefs.rs:186
-#, fuzzy
-#| msgid "Assistant Actions"
 msgid "Assistant Chats"
-msgstr "Actions de l’assistant"
+msgstr "Conversations avec l’assistant"
 
 #: app/src/ui/assistant_prefs.rs:191
-#, fuzzy
-#| msgid "Translation"
 msgid "Email Translations"
-msgstr "Traduction"
+msgstr "Traductions des messages"
 
 #: app/src/ui/assistant_prefs.rs:208 app/src/ui/conversation.rs:698
 #: app/src/ui/window/detached.rs:65
