@@ -295,9 +295,145 @@ async fn microsoft_a_longer_window_brings_older_mail_and_follows_its_changes() {
     assert!(h.held(&old).await.keywords.iter().any(|k| k == "$flagged"));
 }
 
-/// The look that finds the window changed starts each folder's delta
-/// again. Mail that arrives while it reads must reach the store all the
-/// same, through this look or the next.
+#[tokio::test]
+async fn microsoft_reading_old_inbox_mail_elsewhere_clears_its_unread_count() {
+    let h = outlook().await;
+    let inbox = h.fake.folder_id("inbox");
+    let ids: Vec<_> = (0..7)
+        .map(|_| {
+            h.fake.deliver(
+                &inbox,
+                FakeMail {
+                    at: days_ago(400),
+                    ..FakeMail::default()
+                },
+            )
+        })
+        .collect();
+    load(&outlook_sync(&h.fake, &h.db, h.account_id, ALL_MAIL), &h.db).await;
+    let sync = outlook_sync(&h.fake, &h.db, h.account_id, 30);
+    load(&sync, &h.db).await;
+    sync.incremental().await.unwrap();
+    let account = h.account_id;
+    let before = h.db.read(mailrs_store::threads::mail_counts).await.unwrap();
+    assert_eq!(
+        before.account(account, &MailSet::Role(Role::Inbox)).unread,
+        7
+    );
+
+    for id in &ids {
+        h.fake.mark(id, Some(true), None);
+    }
+    sync.incremental().await.unwrap();
+
+    let after = h.db.read(mailrs_store::threads::mail_counts).await.unwrap();
+    assert_eq!(
+        after.account(account, &MailSet::Role(Role::Inbox)).unread,
+        0
+    );
+    assert_eq!(after.account(account, &MailSet::Mailbox(inbox)).unread, 0);
+}
+
+#[tokio::test]
+async fn microsoft_an_old_filtered_cursor_repairs_stale_inbox_marks() {
+    use crate::services::microsoft::GraphApi;
+
+    let h = outlook().await;
+    let inbox = h.fake.folder_id("inbox");
+    let old = h.fake.deliver(
+        &inbox,
+        FakeMail {
+            at: days_ago(400),
+            ..FakeMail::default()
+        },
+    );
+    load(&outlook_sync(&h.fake, &h.db, h.account_id, ALL_MAIL), &h.db).await;
+    let since = chrono::DateTime::from_timestamp_millis(days_ago(30))
+        .unwrap()
+        .to_rfc3339();
+    let link = h
+        .fake
+        .message_delta(&inbox, None, Some(&since))
+        .await
+        .unwrap()
+        .delta_link
+        .unwrap();
+    let state = serde_json::json!({"folders": {inbox: link}, "days": 30}).to_string();
+    let account = h.account_id;
+    h.db.write(move |c| accounts::set_sync_state(c, account, &state))
+        .await
+        .unwrap();
+    h.fake.mark(&old, Some(true), None);
+
+    let sync = outlook_sync(&h.fake, &h.db, account, 30);
+    load(&sync, &h.db).await;
+    sync.incremental().await.unwrap();
+
+    assert!(h.held(&old).await.keywords.iter().any(|k| k == "$seen"));
+    let counts = h.db.read(mailrs_store::threads::mail_counts).await.unwrap();
+    assert_eq!(
+        counts.account(account, &MailSet::Role(Role::Inbox)).unread,
+        0
+    );
+}
+
+#[tokio::test]
+async fn microsoft_inbox_repair_keeps_its_next_page_when_the_window_changes() {
+    use crate::services::microsoft::GraphApi;
+
+    let h = outlook().await;
+    let inbox = h.fake.folder_id("inbox");
+    let ids: Vec<_> = (0..1100)
+        .map(|_| {
+            h.fake.deliver(
+                &inbox,
+                FakeMail {
+                    at: days_ago(400),
+                    ..FakeMail::default()
+                },
+            )
+        })
+        .collect();
+    load(&outlook_sync(&h.fake, &h.db, h.account_id, ALL_MAIL), &h.db).await;
+    let since = chrono::DateTime::from_timestamp_millis(days_ago(30))
+        .unwrap()
+        .to_rfc3339();
+    let link = h
+        .fake
+        .message_delta(&inbox, None, Some(&since))
+        .await
+        .unwrap()
+        .delta_link
+        .unwrap();
+    let state = serde_json::json!({"folders": {inbox: link}, "days": 30}).to_string();
+    let account = h.account_id;
+    h.db.write(move |c| accounts::set_sync_state(c, account, &state))
+        .await
+        .unwrap();
+    for id in ids {
+        h.fake.mark(&id, Some(true), None);
+    }
+
+    let sync = outlook_sync(&h.fake, &h.db, account, 14);
+    load(&sync, &h.db).await;
+    sync.incremental().await.unwrap();
+    let counts = h.db.read(mailrs_store::threads::mail_counts).await.unwrap();
+    assert_eq!(
+        counts.account(account, &MailSet::Role(Role::Inbox)).unread,
+        100
+    );
+
+    sync.incremental().await.unwrap();
+    let counts = h.db.read(mailrs_store::threads::mail_counts).await.unwrap();
+    assert_eq!(
+        counts.account(account, &MailSet::Role(Role::Inbox)).unread,
+        0
+    );
+}
+
+/// A window change restarts the windowed folders' deltas. Inbox mail
+/// arriving while they start must still reach the store through this
+/// look or the next.
 #[tokio::test]
 async fn microsoft_mail_arriving_as_the_window_changes_is_not_lost() {
     let h = outlook().await;

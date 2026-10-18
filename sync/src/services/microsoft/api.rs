@@ -32,7 +32,7 @@ pub trait GraphApi: Send + Sync + 'static {
         &self,
         folder: &str,
         link: Option<&str>,
-        received_since: &str,
+        received_since: Option<&str>,
     ) -> impl Future<Output = Answer<DeltaPage<Message>>> + Send;
     fn list_messages(
         &self,
@@ -216,7 +216,7 @@ impl GraphApi for Graph {
         &self,
         folder: &str,
         link: Option<&str>,
-        received_since: &str,
+        received_since: Option<&str>,
     ) -> Answer<DeltaPage<Message>> {
         Graph::message_delta(self, folder, link, received_since).await
     }

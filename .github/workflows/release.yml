@@ -364,6 +364,8 @@ jobs:
         run: |
           sudo snap install core26 mesa-2604
           sudo snap install --dangerous "$SNAP_FILE"
+          # The headless smoke test uses software rendering and cannot check GPU access.
+          sudo snap run --shell penguin-mail -c 'snapctl is-connected opengl'
           sudo scripts/smoke-start.sh snap run penguin-mail
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:

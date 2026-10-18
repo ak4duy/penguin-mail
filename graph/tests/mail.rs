@@ -104,7 +104,7 @@ async fn a_first_delta_asks_for_the_window_and_small_pages() {
         .mount(&server)
         .await;
     let page = common::graph(&server)
-        .message_delta("AAMk-inbox", None, "2026-08-28T00:00:00Z")
+        .message_delta("AAMk-inbox", None, Some("2026-08-28T00:00:00Z"))
         .await
         .unwrap();
     assert_eq!(page.value.len(), 2);
@@ -126,6 +126,30 @@ async fn a_first_delta_asks_for_the_window_and_small_pages() {
         prefer.iter().any(|p| p == "odata.maxpagesize=50"),
         "{prefer:?}"
     );
+}
+
+#[tokio::test]
+async fn a_whole_folder_delta_has_no_received_date_filter() {
+    let server = MockServer::start().await;
+    common::token_endpoint(&server, "r").await;
+    Mock::given(method("GET"))
+        .and(path("/v1.0/me/mailFolders/inbox/messages/delta"))
+        .and(|request: &Request| !request.url.query_pairs().any(|(key, _)| key == "$filter"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(json!({
+            "value": [{"id": "old", "isRead": true}],
+            "@odata.deltaLink": format!("{}/v1.0/me/mailFolders/inbox/messages/delta?$deltatoken=d1", server.uri()),
+        })))
+        .expect(1)
+        .mount(&server)
+        .await;
+
+    let page = common::graph(&server)
+        .message_delta("inbox", None, None)
+        .await
+        .unwrap();
+
+    assert_eq!(page.value.len(), 1);
+    assert_eq!(page.value[0].id, "old");
 }
 
 #[tokio::test]

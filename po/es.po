@@ -4075,7 +4075,7 @@ msgid "Claude Subscription"
 msgstr "Suscripción a Claude"
 
 #: app/src/settings/mod.rs:227 app/src/ui/window.rs:3288
-#: app/src/ui/window.rs:3365
+#: app/src/ui/window.rs:3368
 msgid "Assistant"
 msgstr "Asistente"
 
@@ -4447,7 +4447,7 @@ msgstr "Abrir Penguin Mail"
 msgid "New Message"
 msgstr "Mensaje nuevo"
 
-#: app/src/tray.rs:238 app/src/ui/sidebar.rs:1929 app/src/ui/window.rs:3291
+#: app/src/tray.rs:238 app/src/ui/sidebar.rs:1929 app/src/ui/window.rs:3294
 msgid "Check for Mail"
 msgstr "Comprobar el correo"
 
@@ -4465,7 +4465,7 @@ msgstr "Novedades de la versión {version}"
 msgid "Check for Updates"
 msgstr "Buscar actualizaciones"
 
-#: app/src/tray.rs:254 app/src/ui/window.rs:3304
+#: app/src/tray.rs:254 app/src/ui/window.rs:3307
 #: app/src/ui/window/shortcuts.rs:644
 msgid "Quit"
 msgstr "Salir"
@@ -4486,7 +4486,7 @@ msgstr "Novedades"
 msgid "Website"
 msgstr "Sitio web"
 
-#: app/src/ui/about.rs:179 app/src/ui/window.rs:3303
+#: app/src/ui/about.rs:179 app/src/ui/window.rs:3306
 msgid "Donate"
 msgstr "Donar"
 
@@ -4494,7 +4494,7 @@ msgstr "Donar"
 msgid "License"
 msgstr "Licencia"
 
-#: app/src/ui/about.rs:203 app/src/ui/window.rs:3302
+#: app/src/ui/about.rs:203 app/src/ui/window.rs:3305
 msgid "About Penguin Mail"
 msgstr "Acerca de Penguin Mail"
 
@@ -4997,7 +4997,7 @@ msgstr ""
 "Este servidor no distingue sus mensajes entre sí, así que Penguin Mail no "
 "puede descargar de él con seguridad."
 
-#: app/src/ui/assistant.rs:35 app/src/ui/window.rs:3451
+#: app/src/ui/assistant.rs:35 app/src/ui/window.rs:3454
 msgid "Summarize this conversation"
 msgstr "Resume esta conversación"
 
@@ -5023,13 +5023,13 @@ msgstr "Redacta una respuesta a la conversación abierta"
 msgid "Choose a Model"
 msgstr "Elegir un modelo"
 
-#: app/src/ui/assistant.rs:123 app/src/ui/window.rs:3412
-#: app/src/ui/window.rs:3413
+#: app/src/ui/assistant.rs:123 app/src/ui/window.rs:3415
+#: app/src/ui/window.rs:3416
 msgid "Detach"
 msgstr "Separar"
 
 #: app/src/ui/assistant.rs:124 app/src/ui/key_import.rs:213
-#: app/src/ui/key_import.rs:217 app/src/ui/window.rs:4022
+#: app/src/ui/key_import.rs:217 app/src/ui/window.rs:4025
 msgid "Close"
 msgstr "Cerrar"
 
@@ -8088,7 +8088,7 @@ msgstr ""
 msgid "Allow Hide My Email"
 msgstr "Permitir Ocultar mi correo"
 
-#: app/src/ui/hide_my_email.rs:652 app/src/ui/window.rs:3502
+#: app/src/ui/hide_my_email.rs:652 app/src/ui/window.rs:3505
 msgid "Add an account first"
 msgstr "Añade primero una cuenta"
 
@@ -8534,7 +8534,7 @@ msgid "This link contains hidden or direction-changing characters."
 msgstr ""
 "Este enlace contiene caracteres ocultos o que cambian la dirección del texto."
 
-#: app/src/ui/mod.rs:485
+#: app/src/ui/mod.rs:500
 msgid "Gray"
 msgstr "Gris"
 
@@ -9130,7 +9130,7 @@ msgstr "Mover {account} hacia abajo"
 #: app/src/ui/preferences/dialog.rs:27 app/src/ui/preferences/dialog.rs:33
 #: app/src/ui/preferences/dialog.rs:82 app/src/ui/preferences/dialog.rs:83
 #: app/src/ui/preferences/dialog.rs:353 app/src/ui/preferences/dialog.rs:355
-#: app/src/ui/window.rs:3300 app/src/ui/window/shortcuts.rs:616
+#: app/src/ui/window.rs:3303 app/src/ui/window/shortcuts.rs:616
 msgid "Preferences"
 msgstr "Preferencias"
 
@@ -9510,7 +9510,7 @@ msgstr "Firma…"
 msgid "Rules…"
 msgstr "Reglas…"
 
-#: app/src/ui/sidebar.rs:1840 app/src/ui/window.rs:3294
+#: app/src/ui/sidebar.rs:1840 app/src/ui/window.rs:3297
 msgid "Hide My Email…"
 msgstr "Ocultar mi correo…"
 
@@ -10232,51 +10232,51 @@ msgstr "Actualizar"
 msgid "Show Declined Events"
 msgstr "Mostrar eventos rechazados"
 
-#: app/src/ui/window.rs:3292
+#: app/src/ui/window.rs:3295
 msgid "Add Account…"
 msgstr "Añadir cuenta…"
 
-#: app/src/ui/window.rs:3293
+#: app/src/ui/window.rs:3296
 msgid "New Smart Mailbox…"
 msgstr "Buzón inteligente nuevo…"
 
-#: app/src/ui/window.rs:3301
+#: app/src/ui/window.rs:3304
 msgid "Keyboard Shortcuts"
 msgstr "Atajos de teclado"
 
-#: app/src/ui/window.rs:3310 app/src/ui/window.rs:3312
+#: app/src/ui/window.rs:3313 app/src/ui/window.rs:3315
 msgid "Main Menu"
 msgstr "Menú principal"
 
-#: app/src/ui/window.rs:3377 app/src/ui/window.rs:3378
+#: app/src/ui/window.rs:3380 app/src/ui/window.rs:3381
 msgid "Dock"
 msgstr "Acoplar"
 
-#: app/src/ui/window.rs:3503
+#: app/src/ui/window.rs:3506
 msgid "Add a mail account first"
 msgstr "Añade primero una cuenta de correo"
 
-#: app/src/ui/window.rs:3824
+#: app/src/ui/window.rs:3827
 msgid "Open a message from the person first"
 msgstr "Abre primero un mensaje de esa persona"
 
-#: app/src/ui/window.rs:3905
+#: app/src/ui/window.rs:3908
 msgid "Penguin Mail shows the new language after a restart"
 msgstr "Penguin Mail muestra el idioma nuevo tras reiniciarse"
 
-#: app/src/ui/window.rs:3907 app/src/update/mod.rs:130
+#: app/src/ui/window.rs:3910 app/src/update/mod.rs:130
 msgid "Restart"
 msgstr "Reiniciar"
 
-#: app/src/ui/window.rs:3971
+#: app/src/ui/window.rs:3974
 msgid "Show Rules"
 msgstr "Mostrar reglas"
 
-#: app/src/ui/window.rs:3997
+#: app/src/ui/window.rs:4000
 msgid "Messages That Will Not Download"
 msgstr "Mensajes que no se descargan"
 
-#: app/src/ui/window.rs:3999
+#: app/src/ui/window.rs:4002
 msgid ""
 "Penguin Mail could not download these from {address}'s server. It tries "
 "again at each check, except for a message too large to download."

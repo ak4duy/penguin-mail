@@ -13,8 +13,9 @@ the [releases page](https://github.com/c9dev/penguin-mail/releases).
 
 ### Fixed
 
+- Outlook unread counts update when older inbox messages are read in another app ([#66](https://github.com/c9dev/penguin-mail/issues/66)).
+- The Snap can access the graphics devices it needs at startup ([#62](https://github.com/c9dev/penguin-mail/issues/62)).
 - macOS notifications use temporary banners by default, offer all selected buttons, and keep mail actions in the background.
-
 - Assistant skill scripts can run with the Nix package, including on NixOS.
 - Microsoft messages with attachments open without the contentId request error.
 - IMAP Junk and Trash show messages on the server even when they have not synced to this computer.

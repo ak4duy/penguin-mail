@@ -439,7 +439,7 @@ impl GraphApi for FakeGraph {
         &self,
         folder: &str,
         link: Option<&str>,
-        received_since: &str,
+        received_since: Option<&str>,
     ) -> Answer<DeltaPage<Message>> {
         let page = self.with(|s| mail::message_delta(s, folder, link, received_since));
         if let Some((into, mail)) = self.with(|s| s.deliver_after_delta.take()) {
