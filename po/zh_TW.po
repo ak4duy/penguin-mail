@@ -96,10 +96,10 @@ msgstr "助理可使用本機模型或 Claude，選擇模型後才會啟用"
 msgid ""
 "Every control named for screen readers and reachable from the keyboard, in "
 "American English, British English, French, German, Spanish, European "
-"Portuguese, Traditional Chinese (Taiwan) and Vietnamese"
+"Portuguese, Traditional Chinese (Taiwan), Vietnamese, Russian, Greek, "
+"Romanian and Ukrainian"
 msgstr ""
-"所有控制項都有螢幕閱讀器可讀取的名稱，也能以鍵盤操作；介面提供美式英文、英式"
-"英文、法文、德文、西班牙文、歐洲葡萄牙文、正體中文（台灣）與越南文。"
+"所有控制項都有螢幕閱讀器可讀取的名稱，也能以鍵盤操作；介面提供美式英文、英式英文、法文、德文、西班牙文、歐洲葡萄牙文、正體中文（台灣）、越南文、俄文、希臘文、羅馬尼亞文與烏克蘭文。"
 
 #: app/data/io.github.c9dev.PenguinMail.metainfo.xml:35
 msgid ""

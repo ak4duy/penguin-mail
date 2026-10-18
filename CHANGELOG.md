@@ -7,6 +7,7 @@ the [releases page](https://github.com/c9dev/penguin-mail/releases).
 
 ### New
 
+- Russian, Greek, Romanian and Ukrainian translations, chosen in Preferences.
 - Build and install Penguin Mail with Nix, or enter its development environment with `nix develop`.
 
 ### Fixed
