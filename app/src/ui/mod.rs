@@ -528,6 +528,12 @@ pub(crate) mod checks {
     use super::*;
 
     pub fn run() {
+        let trigger = primary_trigger("<Primary>b")
+            .expect("the mailbox shortcut parses")
+            .downcast::<gtk::KeyvalTrigger>()
+            .expect("the mailbox shortcut is a key chord");
+        assert_eq!(trigger.keyval(), gtk::gdk::Key::b);
+        assert_eq!(trigger.modifiers(), PRIMARY);
         a_passing_popover_leaves_its_parent_once_closed();
     }
 

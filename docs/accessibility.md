@@ -108,6 +108,10 @@ runs the same action.
 
 ## The thread list from the keyboard
 
+Ctrl+B (Cmd+B on macOS) shows or hides the sidebar in the main window,
+in both Mail and Calendar. The Keyboard Shortcuts dialog lists it under
+General. In the composer, the same key formats bold text.
+
 A paged IMAP folder has a **More** button below the thread list while the
 server has another page, or while a failed page can be tried again. It is
 reachable with Tab even when grouping leaves too few rows for a scrollbar.

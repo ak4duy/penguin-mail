@@ -428,6 +428,9 @@ async fn canceling_the_first_load_does_not_leave_a_completed_follow() {
     drop(following);
     drop(release);
     writer.await.unwrap().unwrap();
+    // The canceled load may still own its rollback in the writer queue.
+    // Wait for that write too before checking that the follow was reset.
+    h.db.write(|_| Ok(())).await.unwrap();
     assert!(
         !h.is_followed(MAILBOX),
         "cancellation cannot commit the follow"
