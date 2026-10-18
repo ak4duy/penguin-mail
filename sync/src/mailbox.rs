@@ -21,6 +21,8 @@ use mailrs_store::{Db, flags, follow_ups, outbox, reminders, threads};
 
 use crate::{Accounts, MailBackend, MovedFrom, SearchQuery, SyncError};
 
+mod browse;
+
 /// Rows in one page of a stored mailbox.
 pub const PAGE: usize = 500;
 
@@ -406,6 +408,13 @@ impl Mailbox {
     }
 }
 
+fn load_notice(account: &str, err: &SyncError) -> String {
+    fill(
+        &gettext("Could not load mail for {account}: {reason}"),
+        &[("account", account), ("reason", &err.to_string())],
+    )
+}
+
 pub fn folder_name(folder: Folder) -> String {
     match folder {
         Folder::Archive => pgettext("mailbox", "Archive"),
@@ -485,7 +494,8 @@ pub struct View {
     /// The clock the rows read against, in milliseconds since the epoch.
     pub now: EpochMillis,
     /// Most rows to return. `None` asks for one page of a stored mailbox,
-    /// or as much as a Gmail search brings back.
+    /// or as much as a Gmail search brings back. For an explicit paged
+    /// server mailbox this bounds new metadata per page, not the prefix.
     pub limit: Option<usize>,
 }
 
@@ -521,6 +531,9 @@ pub struct Listing {
     pub empty: Empty,
     /// More rows follow this page.
     pub more: bool,
+    /// This page replaces the loaded prefix rather than appending rows.
+    /// Local threading can join messages across server page boundaries.
+    pub replace: bool,
     /// Lines to tell the user: an account whose search failed, or a smart
     /// mailbox nobody has given conditions yet.
     pub notices: Vec<String>,
@@ -685,6 +698,7 @@ pub struct Mailboxes<A: Accounts> {
     /// The last Gmail search, kept so a folder that reloads a second later
     /// costs nothing.
     remote: Mutex<Option<RemoteListing>>,
+    browsed: Mutex<browse::Browser>,
     unread: Arc<Mutex<HashMap<AccountId, UnreadCounts>>>,
     unread_request: AtomicU64,
     unread_changed: tokio::sync::watch::Sender<()>,
@@ -696,10 +710,17 @@ impl<A: Accounts> Mailboxes<A> {
             accounts,
             db,
             remote: Mutex::new(None),
+            browsed: Mutex::new(browse::Browser::default()),
             unread: Arc::new(Mutex::new(HashMap::new())),
             unread_request: AtomicU64::new(0),
             unread_changed: tokio::sync::watch::channel(()).0,
         }
+    }
+
+    /// A caller's own listing cursors over the same accounts and store.
+    /// A first page from the assistant must not reset a window's next page.
+    pub fn reader(&self) -> Self {
+        Self::new(Arc::clone(&self.accounts), self.db.clone())
     }
 
     /// Throws away the kept Gmail search, so the next listing asks Gmail
@@ -707,6 +728,32 @@ impl<A: Accounts> Mailboxes<A> {
     pub fn forget_remote(&self) {
         *self.remote.lock().expect("remote listing poisoned") = None;
         self.unread.lock().expect("unread counts poisoned").clear();
+    }
+
+    /// Whether this listing needs a server, including an explicit mailbox
+    /// on a service that offers paged browsing. Local mailboxes and other
+    /// providers' labels keep their existing store queries.
+    pub fn is_remote(&self, mailbox: &Mailbox) -> bool {
+        mailbox.is_remote()
+            || match mailbox {
+                Mailbox::Label { account_id, .. } => self.paged_account(*account_id),
+                Mailbox::Standard {
+                    account_id,
+                    which: Standard::Sent | Standard::Drafts,
+                } => self.paged_account(*account_id),
+                _ => false,
+            }
+    }
+
+    /// Unified Sent and Drafts need server pages when an included account
+    /// offers them. Other accounts keep their stored listings.
+    pub fn is_remote_in(&self, mailbox: &Mailbox, scope: &Scope) -> bool {
+        self.is_remote(mailbox)
+            || matches!(mailbox, Mailbox::Unified(Standard::Sent | Standard::Drafts))
+                && scope
+                    .searched(None)
+                    .iter()
+                    .any(|a| self.paged_account(a.id))
     }
 
     /// The page of `mailbox` that follows the rows the caller holds.
@@ -789,6 +836,60 @@ impl<A: Accounts> Mailboxes<A> {
             ..Listing::default()
         };
         match mailbox {
+            Mailbox::Label { account_id, .. } if self.is_remote(mailbox) => {
+                if scope.searched(Some(*account_id)).is_empty() {
+                    return Ok(base);
+                }
+                self.browse(
+                    browse::Browse {
+                        shown: mailbox,
+                        mailbox,
+                        revision: None,
+                    },
+                    scope,
+                    view,
+                    base,
+                    held,
+                    stop,
+                )
+                .await
+            }
+            Mailbox::Standard {
+                account_id,
+                which: which @ (Standard::Sent | Standard::Drafts),
+            } if self.is_remote(mailbox) => {
+                if scope.searched(Some(*account_id)).is_empty() {
+                    return Ok(base);
+                }
+                if let Some(label) = self.standard_label(*account_id, *which) {
+                    self.browse(
+                        browse::Browse {
+                            shown: mailbox,
+                            mailbox: &label,
+                            revision: None,
+                        },
+                        scope,
+                        view,
+                        base,
+                        held,
+                        stop,
+                    )
+                    .await
+                } else {
+                    self.stored(mailbox, view, base, held.last).await
+                }
+            }
+            Mailbox::Unified(Standard::Sent | Standard::Drafts)
+                if scope.searched(None).is_empty() =>
+            {
+                Ok(base)
+            }
+            Mailbox::Unified(which @ (Standard::Sent | Standard::Drafts))
+                if self.is_remote_in(mailbox, scope) =>
+            {
+                self.browse_unified(*which, scope, view, base, held, stop)
+                    .await
+            }
             Mailbox::Folder { account_id, folder } => {
                 let query = SearchQuery::Tree(folder.query());
                 self.remote(
@@ -1148,6 +1249,12 @@ impl<A: Accounts> Mailboxes<A> {
         changed: &[(AccountId, String)],
         view: &View,
     ) -> Result<Option<Changed>, SyncError> {
+        if self.is_remote(mailbox)
+            || matches!(mailbox, Mailbox::Unified(Standard::Sent | Standard::Drafts))
+                && changed.iter().any(|(id, _)| self.paged_account(*id))
+        {
+            return Ok(None);
+        }
         let Some(filter) = self.filter_of(mailbox, view) else {
             return Ok(None);
         };
@@ -1389,10 +1496,7 @@ impl<A: Accounts> Mailboxes<A> {
                 // unlisted would be asked again at once, and an account
                 // whose search keeps failing would keep the loop going.
                 Err(err) => {
-                    listing.notices.push(fill(
-                        &gettext("Could not load mail for {account}: {reason}"),
-                        &[("account", &account.email), ("reason", &err.to_string())],
-                    ));
+                    listing.notices.push(load_notice(&account.email, &err));
                     listing.pages.push(RemotePage {
                         listed: true,
                         ..RemotePage::default()
@@ -1781,11 +1885,13 @@ pub fn summarize_search(mut hits: Vec<MessageMeta>, grouped: bool) -> Vec<Thread
         return hits.into_iter().map(|hit| row_of(&hit, true)).collect();
     }
     let mut rows: Vec<(ThreadSummary, EpochMillis)> = Vec::new();
+    // A browsed mailbox has no total row cap. Find each conversation by
+    // key rather than scanning the whole loaded prefix for every reply.
+    let mut positions = HashMap::<_, usize>::new();
     for hit in hits {
-        if let Some((row, oldest)) = rows
-            .iter_mut()
-            .find(|(r, _)| r.account_id == hit.account_id && r.id == hit.thread_id)
-        {
+        let key = (hit.account_id, hit.thread_id.clone());
+        if let Some(&at) = positions.get(&key) {
+            let (row, oldest) = &mut rows[at];
             row.message_count += 1;
             row.unread |= hit.is_unread();
             row.starred |= hit.is_flagged();
@@ -1798,6 +1904,7 @@ pub fn summarize_search(mut hits: Vec<MessageMeta>, grouped: bool) -> Vec<Thread
             continue;
         }
         let date = hit.date;
+        positions.insert(key, rows.len());
         rows.push((row_of(&hit, false), date));
     }
     rows.into_iter().map(|(row, _)| row).collect()

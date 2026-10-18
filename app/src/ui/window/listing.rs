@@ -22,6 +22,7 @@ use std::collections::{HashMap, HashSet};
 use std::future::Future;
 use std::pin::Pin;
 use std::rc::Rc;
+use std::sync::{Arc, Weak};
 use std::time::Duration;
 
 use mailrs_domain::{AccountId, Category, Folder, Target, ThreadSummary};
@@ -83,6 +84,10 @@ pub(super) trait Pane {
 
 /// What the run asks of the store, the servers and the main loop.
 pub(super) trait Lists {
+    /// Whether this mailbox is listed by the server rather than the store.
+    fn is_remote(&self, mailbox: &Mailbox, _scope: &Scope) -> bool {
+        mailbox.is_remote()
+    }
     /// A page of `mailbox`, after the rows in `held`.
     fn list(
         &self,
@@ -117,8 +122,15 @@ pub(super) trait Lists {
     ) -> Answer<'_, Option<Changed>>;
     /// Which of `targets` left `folder`.
     fn gone_from(&self, folder: Folder, targets: Vec<Target>) -> Answer<'_, Vec<Target>>;
+    /// The running account, so a restarted account never inherits an old
+    /// follow or its answer. A disconnected account gives nothing.
+    fn account(&self, account_id: AccountId) -> Option<FollowAccount>;
     /// Keeps a server mailbox of an account in step from now on.
-    fn follow(&self, account_id: AccountId, server_mailbox: String);
+    fn follow(
+        &self,
+        account_id: AccountId,
+        server_mailbox: String,
+    ) -> Answer<'_, anyhow::Result<()>>;
     fn sleep(&self, time: Duration) -> Answer<'_, ()>;
     /// Runs `work` on the main loop, beside whatever else runs.
     fn spawn(&self, work: Work);
@@ -135,6 +147,37 @@ enum Waiting {
     KeepRows,
 }
 
+/// The identity of a running account, without keeping it alive after it
+/// is removed. Tests use the identity of an in-memory account instead.
+#[derive(Clone)]
+pub(super) struct FollowAccount(Weak<dyn Send + Sync>);
+
+impl FollowAccount {
+    pub(super) fn of<T: Send + Sync + 'static>(account: Arc<T>) -> Self {
+        let account: Arc<dyn Send + Sync> = account;
+        Self(Arc::downgrade(&account))
+    }
+}
+
+impl PartialEq for FollowAccount {
+    fn eq(&self, other: &Self) -> bool {
+        self.0.ptr_eq(&other.0)
+    }
+}
+
+impl Eq for FollowAccount {}
+
+#[derive(PartialEq, Eq)]
+enum FollowStatus {
+    Pending(u64),
+    Ready,
+}
+
+struct Follow {
+    account: Option<FollowAccount>,
+    status: FollowStatus,
+}
+
 struct State {
     screen: OnScreen,
     /// The search field between keys.
@@ -145,10 +188,10 @@ struct State {
     /// The server search in flight and the ticket it lists under, stopped
     /// once a key or a newer search makes its answer stale.
     stop: Option<(Ticket, Stop)>,
-    /// The server mailboxes each account was already asked to follow, so
-    /// a reload does not fetch a folder's window again: the slow poll
-    /// covers it from the first time.
-    followed: HashMap<AccountId, HashSet<String>>,
+    /// Pending follows coalesce reloads; only a successful follow stays
+    /// remembered, since a failure must allow the next visit to retry.
+    followed: HashMap<(AccountId, String), Follow>,
+    follow_attempt: u64,
 }
 
 /// The thread list's run. See the module's comment.
@@ -169,6 +212,7 @@ impl ListingRun {
                 searched: None,
                 stop: None,
                 followed: HashMap::new(),
+                follow_attempt: 0,
             }),
             pane,
             lists,
@@ -222,7 +266,7 @@ impl ListingRun {
     /// Lists a folder, a smart mailbox or a search, which the servers
     /// answer, again.
     pub(super) fn reload_remote(self: &Rc<Self>) {
-        if self.mailbox().is_remote() {
+        if self.lists.is_remote(&self.mailbox(), &self.pane.scope()) {
             self.reload();
         }
     }
@@ -274,6 +318,9 @@ impl ListingRun {
         let held = self.pane.loaded();
         let this = Rc::clone(self);
         self.lists.spawn(Box::pin(async move {
+            if !this.state.borrow_mut().screen.feed().current(ticket) {
+                return;
+            }
             let loaded = this.lists.list(mailbox, scope, view, held).await;
             if !this
                 .state
@@ -285,6 +332,7 @@ impl ListingRun {
                 return;
             }
             match loaded {
+                Ok(listing) if listing.replace => this.pane.set_rows(listing),
                 Ok(listing) => this.pane.append(listing.rows),
                 Err(err) => this.pane.failed(&err),
             }
@@ -327,7 +375,16 @@ impl ListingRun {
         self.state
             .borrow_mut()
             .followed
-            .retain(|id, _| live.contains(id));
+            .retain(|(id, _), _| live.contains(id));
+    }
+
+    /// A refreshed folder list invalidates follows whose server names no
+    /// longer exist, including an in-flight answer for a removed name.
+    pub(super) fn mailboxes_live(&self, live: &HashSet<(AccountId, String)>) {
+        self.state
+            .borrow_mut()
+            .followed
+            .retain(|key, _| live.contains(key));
     }
 
     // ---- The search field ------------------------------------------------
@@ -406,30 +463,91 @@ impl ListingRun {
     fn first_page(self: &Rc<Self>, ticket: Ticket, waiting: Waiting) {
         let mailbox = self.mailbox();
         if let Some((account_id, server_mailbox)) = self.pane.follows(&mailbox) {
-            let newly = newly_followed(
-                &mut self.state.borrow_mut().followed,
-                account_id,
-                server_mailbox.clone(),
-            );
-            if newly {
-                self.lists.follow(account_id, server_mailbox);
-            }
+            self.follow(mailbox.clone(), account_id, server_mailbox);
         }
         if let Mailbox::Search { query, account_id } = &mailbox {
             let spinner = waiting == Waiting::Spinner;
             return self.search_first_page(ticket, query.clone(), *account_id, spinner);
         }
-        if mailbox.is_remote() && waiting == Waiting::Spinner {
+        if self.lists.is_remote(&mailbox, &self.pane.scope()) && waiting == Waiting::Spinner {
             self.pane.loading();
         }
         let (scope, view) = self.asks(&mailbox);
         let this = Rc::clone(self);
         self.lists.spawn(Box::pin(async move {
+            if !this.state.borrow_mut().screen.feed().current(ticket) {
+                return;
+            }
             let loaded = this
                 .lists
                 .list(mailbox, scope, view, Loaded::nothing())
                 .await;
             this.land(ticket, loaded);
+        }));
+    }
+
+    /// Follows once per running account and mailbox. The follow can
+    /// store mail after the first local page was read, so success starts
+    /// a fresh listing and invalidates that page, even if its empty
+    /// answer is still on its way after a change event spliced new rows.
+    fn follow(self: &Rc<Self>, mailbox: Mailbox, account_id: AccountId, server_mailbox: String) {
+        let key = (account_id, server_mailbox);
+        let account = self.lists.account(account_id);
+        let attempt = {
+            let mut state = self.state.borrow_mut();
+            if state
+                .followed
+                .get(&key)
+                .is_some_and(|f| f.account == account)
+            {
+                return;
+            }
+            state.follow_attempt += 1;
+            let attempt = state.follow_attempt;
+            state.followed.insert(
+                key.clone(),
+                Follow {
+                    account: account.clone(),
+                    status: FollowStatus::Pending(attempt),
+                },
+            );
+            attempt
+        };
+        let this = Rc::clone(self);
+        self.lists.spawn(Box::pin(async move {
+            // A queued task must not start work on an account that took
+            // the original account's place before the main loop ran it.
+            let answer = if this.lists.account(account_id) == account {
+                this.lists.follow(account_id, key.1.clone()).await
+            } else {
+                Err(mailrs_sync::SyncError::UnknownAccount(account_id).into())
+            };
+            let current_account = this.lists.account(account_id);
+            {
+                let mut state = this.state.borrow_mut();
+                let Some(follow) = state.followed.get_mut(&key) else {
+                    return;
+                };
+                if follow.status != FollowStatus::Pending(attempt) {
+                    return;
+                }
+                if follow.account != current_account {
+                    state.followed.remove(&key);
+                    return;
+                }
+                if answer.is_ok() {
+                    follow.status = FollowStatus::Ready;
+                } else {
+                    state.followed.remove(&key);
+                }
+            }
+            if this.mailbox() == mailbox {
+                match answer {
+                    Ok(()) if !this.lists.is_remote(&mailbox, &this.pane.scope()) => this.reload(),
+                    Ok(()) => {}
+                    Err(err) => this.pane.failed(&err),
+                }
+            }
         }));
     }
 
@@ -562,19 +680,4 @@ impl ListingRun {
             Splice::Reload => self.reload(),
         }
     }
-}
-
-/// Whether asking to follow `server_mailbox` of `account_id` needs to
-/// reach the account at all: `false` once `followed` already holds the
-/// pair, so a reload of the folder on screen does not fetch its window
-/// again. The slow poll covers it from the first time.
-fn newly_followed(
-    followed: &mut HashMap<AccountId, HashSet<String>>,
-    account_id: AccountId,
-    server_mailbox: String,
-) -> bool {
-    followed
-        .entry(account_id)
-        .or_default()
-        .insert(server_mailbox)
 }

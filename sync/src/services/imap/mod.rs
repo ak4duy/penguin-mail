@@ -101,6 +101,10 @@ struct Known {
     /// always keeps in step. Bounded by how many mailboxes a person opens,
     /// not by their size; a restart rebuilds it from the sync state.
     followed: BTreeSet<String>,
+    /// Foreground loads started this run. A saved feed cursor follows a
+    /// mailbox without proving its headers reached the store, so restoring
+    /// that cursor never adds it here. Failed tentative loads are removed.
+    opened: BTreeSet<String>,
     /// Where a window listing last left a mailbox, for a mailbox the feed
     /// has not kept state for yet: a mailbox just followed starts from
     /// here rather than from whatever the server holds at the next look,
@@ -161,6 +165,10 @@ impl Known {
         let delimiter = self.delimiter;
         let moved = |name: &String| renamed_name(name, from, to, delimiter);
         self.followed = std::mem::take(&mut self.followed)
+            .into_iter()
+            .map(|name| moved(&name).unwrap_or(name))
+            .collect();
+        self.opened = std::mem::take(&mut self.opened)
             .into_iter()
             .map(|name| moved(&name).unwrap_or(name))
             .collect();
@@ -334,6 +342,7 @@ impl<I: ImapApi, S: Submit> MailBackend for Imap<I, S> {
             batch_limit: BATCH_LIMIT,
             keywords: self.stored_keywords("INBOX"),
             native_search: false,
+            paged_mailboxes: true,
             renames: true,
             restates: false,
             tags: false,
@@ -453,7 +462,16 @@ impl<I: ImapApi, S: Submit> MailBackend for Imap<I, S> {
     }
 
     fn follow(&self, mailbox: &str) -> bool {
-        self.known().followed.insert(mailbox.to_string())
+        let mut known = self.known();
+        known.followed.insert(mailbox.to_string());
+        known.opened.insert(mailbox.to_string())
+    }
+
+    fn reset_follow(&self, mailbox: &str) {
+        let mut known = self.known();
+        known.followed.remove(mailbox);
+        known.opened.remove(mailbox);
+        known.recent.remove(mailbox);
     }
 
     fn set_window_open(&self, open: bool) {
@@ -524,6 +542,15 @@ impl<I: ImapApi, S: Submit> MailBackend for Imap<I, S> {
         limit: usize,
     ) -> Result<Vec<RemoteRef>, BackendError> {
         self.search_server(query, limit).await
+    }
+
+    async fn mailbox_page(
+        &self,
+        mailbox: &str,
+        cursor: Option<&str>,
+        limit: usize,
+    ) -> Result<Backfill, BackendError> {
+        self.browse_page(mailbox, cursor, limit).await
     }
 
     async fn find_sent(&self, message_id: &str) -> Result<Option<String>, BackendError> {
@@ -631,7 +658,25 @@ impl<I: ImapApi, S: Submit> IdentityService for Imap<I, S> {
 
 #[cfg(test)]
 mod tests {
-    use super::renamed_name;
+    use super::{Known, renamed_name};
+
+    #[test]
+    fn a_rename_keeps_successful_nested_loads_under_their_new_names() {
+        let mut known = Known {
+            delimiter: Some('/'),
+            ..Default::default()
+        };
+        known
+            .followed
+            .extend(["Projects".into(), "Projects/Clients".into(), "Other".into()]);
+        known.opened = known.followed.clone();
+        known.rename("Projects", "Work");
+        assert_eq!(
+            known.followed,
+            ["Other".into(), "Work".into(), "Work/Clients".into()].into()
+        );
+        assert_eq!(known.opened, known.followed);
+    }
 
     #[test]
     fn a_rename_takes_the_nested_mailboxes_along_and_nothing_else() {

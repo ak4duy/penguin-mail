@@ -317,6 +317,56 @@ impl AccountSync {
         Ok(metas)
     }
 
+    /// One metadata page of an explicit server mailbox. It uses the same
+    /// missing-metadata and local-threading path as a search, but announces
+    /// no mail change: the listing itself shows these rows, and announcing
+    /// them would reload the listing that is still being built. The normal
+    /// window pruning still applies to the stored metadata.
+    pub(crate) async fn browse_mailbox(
+        &self,
+        mailbox: &str,
+        cursor: Option<&str>,
+        limit: usize,
+    ) -> Result<crate::Backfill, SyncError> {
+        let _moving = self.mail.hold_moves().await;
+        let mut page = self.mail.mailbox_page(mailbox, cursor, limit).await?;
+        let account_id = self.account_id;
+        let ids: Vec<_> = page.refs.iter().map(|r| r.id.clone()).collect();
+        let held: HashSet<String> = self
+            .db
+            .read(move |c| messages::by_ids(c, account_id, &ids))
+            .await?
+            .into_iter()
+            .map(|m| m.id)
+            .collect();
+        let wants = page
+            .refs
+            .iter()
+            .filter(|r| !held.contains(&r.id))
+            .cloned()
+            .map(Want::from)
+            .collect();
+        let mut fetched = self.fetch(wants).await?;
+        if !fetched.metas.is_empty() {
+            let mailbox = mailbox.to_string();
+            let renamed = self
+                .db
+                .write(move |c| {
+                    let renamed = fetched.remap_renumbered(c, account_id, &mailbox)?;
+                    fetched.store_missing(c, account_id)?;
+                    Ok(renamed)
+                })
+                .await?;
+            for hit in &mut page.refs {
+                if let Some(id) = renamed.get(&hit.id) {
+                    hit.id = id.clone();
+                    hit.thread_id = id.clone();
+                }
+            }
+        }
+        Ok(page)
+    }
+
     /// Opens a thread: stores the copy a search fetched whole, when it is
     /// still current, then does what [`AccountSync::ensure_thread`] does.
     /// With the copy stored, a recent history replay lets `ensure_thread`

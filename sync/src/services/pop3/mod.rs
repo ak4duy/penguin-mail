@@ -397,6 +397,7 @@ impl<S: Submit, P: Pop3Api> MailBackend for Pop3<S, P> {
             // Every keyword stays on this computer, marked local.
             keywords: &[],
             native_search: false,
+            paged_mailboxes: false,
             renames: false,
             restates: false,
             tags: false,

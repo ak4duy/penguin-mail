@@ -4,7 +4,7 @@
 use std::sync::Arc;
 use std::time::Duration;
 
-use mailrs_domain::{EpochMillis, MailSet, RemoveSetting, Role};
+use mailrs_domain::{ChangeEvent, EpochMillis, MailSet, RemoveSetting, Role};
 use mailrs_store::accounts;
 
 use super::{ImapHarness, fake_settings, harness, imap_harness_on};
@@ -232,19 +232,65 @@ fn outlook_sync(
     account_id: i64,
     days: i64,
 ) -> AccountSync {
+    outlook_sync_events(fake, db, account_id, days).0
+}
+
+fn outlook_sync_events(
+    fake: &Arc<FakeGraph>,
+    db: &mailrs_store::Db,
+    account_id: i64,
+    days: i64,
+) -> (AccountSync, async_channel::Receiver<ChangeEvent>) {
     let settings = MicrosoftSettings {
         address: "me@outlook.com".into(),
         provider_name: "Outlook".into(),
         window_days: days,
     };
-    let (sender, _) = async_channel::unbounded();
-    AccountSync::new(
+    let (sender, events) = async_channel::unbounded();
+    let sync = AccountSync::new(
         account_id,
         AccountServices::microsoft(Arc::clone(fake), settings),
         db.clone(),
         sender,
     )
-    .with_limits(days, DEFAULT_BODY_CACHE_BYTES)
+    .with_limits(days, DEFAULT_BODY_CACHE_BYTES);
+    (sync, events)
+}
+
+async fn filtered_inbox_state(h: &crate::tests::microsoft::Outlook) {
+    use crate::services::microsoft::GraphApi;
+
+    let inbox = h.fake.folder_id("inbox");
+    let since = chrono::DateTime::from_timestamp_millis(days_ago(30))
+        .unwrap()
+        .to_rfc3339();
+    let mut start = None;
+    let link = loop {
+        let page = h
+            .fake
+            .message_delta(&inbox, start.as_deref(), Some(&since))
+            .await
+            .unwrap();
+        if let Some(link) = page.delta_link {
+            break link;
+        }
+        start = Some(page.next_link.unwrap());
+    };
+    let state = serde_json::json!({"folders": {inbox: link}, "days": 30}).to_string();
+    let account = h.account_id;
+    h.db.write(move |c| accounts::set_sync_state(c, account, &state))
+        .await
+        .unwrap();
+}
+
+fn new_mail(events: &async_channel::Receiver<ChangeEvent>) -> Vec<String> {
+    std::iter::from_fn(|| events.try_recv().ok())
+        .filter_map(|event| match event {
+            ChangeEvent::NewMail { message_ids, .. } => Some(message_ids),
+            _ => None,
+        })
+        .flatten()
+        .collect()
 }
 
 #[tokio::test]
@@ -429,6 +475,171 @@ async fn microsoft_inbox_repair_keeps_its_next_page_when_the_window_changes() {
         counts.account(account, &MailSet::Role(Role::Inbox)).unread,
         0
     );
+}
+
+#[tokio::test]
+async fn microsoft_inbox_repair_keeps_pending_deletions() {
+    let h = outlook().await;
+    let id = h.fake.deliver(
+        &h.fake.folder_id("inbox"),
+        FakeMail {
+            at: now_millis(),
+            ..FakeMail::default()
+        },
+    );
+    let sync = outlook_sync(&h.fake, &h.db, h.account_id, 30);
+    load(&sync, &h.db).await;
+    assert!(h.stored(&id).await);
+    filtered_inbox_state(&h).await;
+    h.fake.delete(&id);
+
+    sync.incremental().await.unwrap();
+
+    assert!(!h.stored(&id).await);
+}
+
+#[tokio::test]
+async fn microsoft_inbox_repair_keeps_pending_moves() {
+    let h = outlook().await;
+    let id = h.fake.deliver(
+        &h.fake.folder_id("inbox"),
+        FakeMail {
+            at: now_millis(),
+            ..FakeMail::default()
+        },
+    );
+    let sync = outlook_sync(&h.fake, &h.db, h.account_id, 30);
+    load(&sync, &h.db).await;
+    filtered_inbox_state(&h).await;
+    let archive = h.fake.folder_id("archive");
+    h.fake.move_message(&id, &archive);
+
+    sync.incremental().await.unwrap();
+
+    assert!(
+        !h.held(&id)
+            .await
+            .mailboxes
+            .contains(&h.fake.folder_id("inbox"))
+    );
+}
+
+#[tokio::test]
+async fn microsoft_inbox_repair_does_not_announce_historical_mail() {
+    let h = outlook().await;
+    h.fake.deliver(
+        &h.fake.folder_id("inbox"),
+        FakeMail {
+            at: days_ago(400),
+            ..FakeMail::default()
+        },
+    );
+    let (sync, events) = outlook_sync_events(&h.fake, &h.db, h.account_id, 30);
+    load(&sync, &h.db).await;
+    filtered_inbox_state(&h).await;
+    new_mail(&events);
+
+    sync.incremental().await.unwrap();
+
+    assert_eq!(new_mail(&events), Vec::<String>::new());
+}
+
+#[tokio::test]
+async fn microsoft_inbox_repair_announces_arrivals_between_pages_after_restart() {
+    let h = outlook().await;
+    for _ in 0..1100 {
+        h.fake.deliver(
+            &h.fake.folder_id("inbox"),
+            FakeMail {
+                at: days_ago(400),
+                ..FakeMail::default()
+            },
+        );
+    }
+    let sync = outlook_sync(&h.fake, &h.db, h.account_id, 30);
+    load(&sync, &h.db).await;
+    filtered_inbox_state(&h).await;
+    sync.incremental().await.unwrap();
+    let id = h.fake.deliver(
+        &h.fake.folder_id("inbox"),
+        FakeMail {
+            at: now_millis(),
+            ..FakeMail::default()
+        },
+    );
+    let (resumed, events) = outlook_sync_events(&h.fake, &h.db, h.account_id, 14);
+
+    resumed.incremental().await.unwrap();
+    resumed.incremental().await.unwrap();
+
+    assert_eq!(new_mail(&events), [id]);
+}
+
+#[tokio::test]
+async fn microsoft_inbox_repair_waits_for_all_pending_deletions() {
+    let h = outlook().await;
+    let inbox = h.fake.folder_id("inbox");
+    let ids: Vec<_> = (0..1100)
+        .map(|_| {
+            h.fake.deliver(
+                &inbox,
+                FakeMail {
+                    at: now_millis(),
+                    ..FakeMail::default()
+                },
+            )
+        })
+        .collect();
+    let sync = outlook_sync(&h.fake, &h.db, h.account_id, 30);
+    load(&sync, &h.db).await;
+    filtered_inbox_state(&h).await;
+    for id in &ids {
+        h.fake.delete(id);
+    }
+
+    sync.incremental().await.unwrap();
+    let resumed = outlook_sync(&h.fake, &h.db, h.account_id, 30);
+    resumed.incremental().await.unwrap();
+
+    let account = h.account_id;
+    let remaining =
+        h.db.read(move |c| mailrs_store::messages::existing_ids(c, account, &ids))
+            .await
+            .unwrap();
+    assert!(remaining.is_empty());
+}
+
+#[tokio::test]
+async fn microsoft_inbox_repair_announces_mail_arriving_during_the_snapshot() {
+    let h = outlook().await;
+    h.fake.deliver(
+        &h.fake.folder_id("inbox"),
+        FakeMail {
+            at: days_ago(400),
+            ..FakeMail::default()
+        },
+    );
+    let (sync, events) = outlook_sync_events(&h.fake, &h.db, h.account_id, 30);
+    load(&sync, &h.db).await;
+    filtered_inbox_state(&h).await;
+    new_mail(&events);
+    let inbox = h.fake.folder_id("inbox");
+    h.fake.with(|s| {
+        s.deliver_after_delta = Some((
+            inbox,
+            FakeMail {
+                at: now_millis(),
+                subject: "During repair",
+                ..FakeMail::default()
+            },
+        ))
+    });
+
+    sync.incremental().await.unwrap();
+
+    let announced = new_mail(&events);
+    assert_eq!(announced.len(), 1);
+    assert!(h.stored(&announced[0]).await);
 }
 
 /// A window change restarts the windowed folders' deltas. Inbox mail

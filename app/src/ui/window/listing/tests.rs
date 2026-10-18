@@ -1,13 +1,14 @@
 //! The listing run, headless. Each test drives `ListingRun` the way the
 //! window does and checks what the list shows and what was asked for.
 
-use std::collections::HashMap;
+use std::collections::HashSet;
+use std::sync::Arc;
 
+use futures::{pin_mut, poll};
 use mailrs_domain::{Folder, Target};
-use mailrs_sync::PAGE;
+use mailrs_sync::{BackendError, Listing, PAGE, SyncError};
 
 use super::fake::{Call, Fake, row};
-use super::newly_followed;
 use crate::ui::window::Reveal;
 use crate::ui::window::on_screen::OnScreen;
 use crate::ui::{Mailbox, Standard};
@@ -195,29 +196,504 @@ async fn a_reload_keeps_the_rows_where_a_new_mailbox_spins() {
     assert_eq!(fake.calls(Call::List), 2);
 }
 
-/// A label on a folder account is followed the first time it is listed,
-/// and not again on a reload.
+/// A successful follow supersedes its queued first read. Later reloads
+/// and visits reuse the completed follow.
 #[tokio::test]
 async fn a_label_is_followed_once() {
     let (fake, run) = Fake::new();
     run.change(show(label("Work")));
     fake.settle().await;
-    run.reload();
+    assert_eq!(
+        fake.calls(Call::List),
+        1,
+        "the superseded first read never starts"
+    );
+    for _ in 0..3 {
+        run.reload();
+        fake.settle().await;
+    }
+    run.change(show(inbox()));
+    fake.settle().await;
+    run.change(show(label("Work")));
     fake.settle().await;
     assert_eq!(fake.with(|s| s.followed.clone()), [(1, "Work".to_string())]);
+    assert_eq!(fake.calls(Call::List), 6);
 }
 
-#[test]
-fn a_mailbox_followed_once_is_not_followed_again() {
-    let mut followed = HashMap::new();
-    assert!(newly_followed(&mut followed, 1, "Work".to_string()));
-    assert!(!newly_followed(&mut followed, 1, "Work".to_string()));
-    assert!(
-        newly_followed(&mut followed, 1, "Travel".to_string()),
-        "another mailbox of the same account is new"
+#[tokio::test]
+async fn a_removed_folder_name_can_be_followed_again_in_the_same_account() {
+    let (fake, run) = Fake::new();
+    run.change(show(label("Work")));
+    fake.settle().await;
+    // A refreshed label list observes deletion or rename before that
+    // server name is created again under the same running account.
+    run.mailboxes_live(&HashSet::from([(1, "Renamed".to_string())]));
+    run.change(show(inbox()));
+    fake.settle().await;
+    run.change(show(label("Work")));
+    fake.settle().await;
+    assert_eq!(
+        fake.with(|s| s.followed.clone()),
+        [(1, "Work".to_string()), (1, "Work".to_string())]
     );
-    assert!(
-        newly_followed(&mut followed, 2, "Work".to_string()),
-        "the same name in another account is new"
+}
+
+#[tokio::test]
+async fn follows_are_separate_for_each_mailbox_and_account() {
+    let (fake, run) = Fake::new();
+    for mailbox in [
+        label("Work"),
+        label("Travel"),
+        Mailbox::Label {
+            account_id: 2,
+            label_id: "Work".into(),
+            name: "Work".into(),
+        },
+    ] {
+        run.change(show(mailbox));
+        fake.settle().await;
+    }
+    assert_eq!(
+        fake.with(|s| s.followed.clone()),
+        [(1, "Work".into()), (1, "Travel".into()), (2, "Work".into()),]
     );
+}
+
+#[tokio::test]
+async fn reloads_and_revisits_join_a_pending_follow() {
+    let (fake, run) = Fake::new();
+    let followed = fake.hold(Call::Follow);
+    run.change(show(label("Work")));
+    let settled = fake.settle();
+    pin_mut!(settled);
+    assert!(poll!(&mut settled).is_pending());
+    run.reload();
+    run.change(show(inbox()));
+    run.change(show(label("Work")));
+    assert!(poll!(&mut settled).is_pending());
+    assert_eq!(fake.calls(Call::Follow), 1);
+    followed.send(()).unwrap();
+    settled.await;
+    assert_eq!(fake.ids(), ["Work-1"]);
+    assert_eq!(fake.calls(Call::Follow), 1);
+    assert_eq!(fake.calls(Call::List), 3, "queued stale pages never start");
+}
+
+#[tokio::test]
+async fn an_offline_follow_reports_failure_and_a_local_reload_retries() {
+    let (fake, run) = Fake::new();
+    fake.with(|s| {
+        s.labels.insert("Work".into(), Vec::new());
+        s.follow_answers
+            .push_back(Err(SyncError::Backend(BackendError::Offline(
+                "test offline".into(),
+            ))
+            .into()));
+    });
+    let followed = fake.hold(Call::Follow);
+    run.change(show(label("Work")));
+    let settled = fake.settle();
+    pin_mut!(settled);
+    assert!(poll!(&mut settled).is_pending());
+    assert!(fake.ids().is_empty(), "the first local page was empty");
+    followed.send(()).unwrap();
+    settled.await;
+    assert_eq!(fake.calls(Call::Failed), 1, "not silently No Mail");
+    assert!(fake.with(|s| s.failures[0].contains("test offline")));
+    assert_eq!(fake.calls(Call::Follow), 1, "failure does not loop");
+    assert_eq!(fake.calls(Call::List), 1, "failure does not reload itself");
+
+    fake.with(|s| {
+        s.labels.insert("Work".into(), vec![row("arrived", 0)]);
+    });
+    // Check for Mail now uses this same reload for local mailboxes too.
+    assert!(!run.mailbox().is_remote());
+    run.reload();
+    fake.settle().await;
+    assert_eq!(fake.calls(Call::Follow), 2);
+    assert_eq!(fake.ids(), ["arrived"]);
+    run.reload();
+    fake.settle().await;
+    assert_eq!(fake.calls(Call::Follow), 2, "success is remembered");
+}
+
+#[tokio::test]
+async fn a_failed_follow_can_retry_on_a_later_visit() {
+    let (fake, run) = Fake::new();
+    fake.with(|s| {
+        s.follow_answers
+            .push_back(Err(anyhow::anyhow!("test failure")))
+    });
+    run.change(show(label("Work")));
+    fake.settle().await;
+    run.change(show(inbox()));
+    fake.settle().await;
+    run.change(show(label("Work")));
+    fake.settle().await;
+    assert_eq!(fake.calls(Call::Failed), 1);
+    assert_eq!(fake.calls(Call::Follow), 2);
+}
+
+#[tokio::test]
+async fn a_late_successful_follow_does_not_reload_another_mailbox() {
+    let (fake, run) = Fake::new();
+    fake.with(|s| s.store = vec![row("inbox", 0)]);
+    let followed = fake.hold(Call::Follow);
+    run.change(show(label("Work")));
+    let settled = fake.settle();
+    pin_mut!(settled);
+    assert!(poll!(&mut settled).is_pending());
+    run.change(show(inbox()));
+    assert!(poll!(&mut settled).is_pending());
+    let listed = fake.calls(Call::List);
+    followed.send(()).unwrap();
+    settled.await;
+    assert_eq!(
+        fake.calls(Call::List),
+        listed,
+        "no reload of the new mailbox"
+    );
+    assert_eq!(fake.ids(), ["inbox"]);
+    run.change(show(label("Work")));
+    fake.settle().await;
+    assert_eq!(
+        fake.calls(Call::Follow),
+        1,
+        "off-screen success is remembered"
+    );
+}
+
+#[tokio::test]
+async fn a_late_failed_follow_does_not_report_against_another_mailbox() {
+    let (fake, run) = Fake::new();
+    fake.with(|s| {
+        s.follow_answers
+            .push_back(Err(anyhow::anyhow!("test failure")))
+    });
+    let followed = fake.hold(Call::Follow);
+    run.change(show(label("Work")));
+    let settled = fake.settle();
+    pin_mut!(settled);
+    assert!(poll!(&mut settled).is_pending());
+    run.change(show(inbox()));
+    assert!(poll!(&mut settled).is_pending());
+    followed.send(()).unwrap();
+    settled.await;
+    assert_eq!(fake.calls(Call::Failed), 0);
+    assert_eq!(fake.calls(Call::List), 2);
+    run.change(show(label("Work")));
+    fake.settle().await;
+    assert_eq!(
+        fake.calls(Call::Follow),
+        2,
+        "off-screen failure permits retry"
+    );
+}
+
+/// The first page captured an empty store. A change event splices the
+/// fetched row before that page returns; follow success invalidates it.
+#[tokio::test]
+async fn follow_success_keeps_a_late_empty_first_page_from_wiping_fetched_rows() {
+    let (fake, run) = Fake::new();
+    fake.with(|s| {
+        s.labels.insert("Work".into(), Vec::new());
+    });
+    let first = fake.hold(Call::List);
+    let followed = fake.hold(Call::Follow);
+    run.change(show(label("Work")));
+    let settled = fake.settle();
+    pin_mut!(settled);
+    assert!(poll!(&mut settled).is_pending());
+    fake.with(|s| {
+        let arrived = row("arrived", 0);
+        s.store = vec![arrived.clone()];
+        s.labels.insert("Work".into(), vec![arrived]);
+    });
+    run.changed(vec![(1, "arrived".into())]);
+    assert!(poll!(&mut settled).is_pending());
+    assert_eq!(fake.calls(Call::Replace), 1);
+    assert_eq!(fake.ids(), ["arrived"]);
+    followed.send(()).unwrap();
+    assert!(poll!(&mut settled).is_pending());
+    assert_eq!(fake.with(|s| s.pages.clone()), [["arrived"]]);
+    first.send(()).unwrap();
+    settled.await;
+    assert_eq!(fake.ids(), ["arrived"]);
+    assert_eq!(
+        fake.calls(Call::SetRows),
+        1,
+        "the late empty page was stale"
+    );
+    assert_eq!(fake.calls(Call::Follow), 1);
+}
+
+#[tokio::test]
+async fn a_missing_account_fails_and_can_retry_after_it_connects() {
+    let (fake, run) = Fake::new();
+    fake.with(|s| {
+        s.accounts.remove(&1);
+    });
+    run.change(show(label("Work")));
+    fake.settle().await;
+    assert_eq!(fake.calls(Call::Failed), 1);
+    assert_eq!(fake.calls(Call::List), 1, "missing is not success");
+    fake.with(|s| {
+        s.accounts.insert(1, Arc::new(()));
+    });
+    run.reload();
+    fake.settle().await;
+    assert_eq!(fake.calls(Call::Follow), 2);
+    assert_eq!(fake.calls(Call::List), 2);
+    assert_eq!(fake.ids(), ["Work-1"]);
+}
+
+#[tokio::test]
+async fn removing_an_account_discards_its_pending_follow() {
+    let (fake, run) = Fake::new();
+    let followed = fake.hold(Call::Follow);
+    run.change(show(label("Work")));
+    let settled = fake.settle();
+    pin_mut!(settled);
+    assert!(poll!(&mut settled).is_pending());
+    fake.with(|s| {
+        s.accounts.remove(&1);
+    });
+    run.accounts_live(&HashSet::new());
+    run.change(|screen| screen.accounts_read(false));
+    assert!(poll!(&mut settled).is_pending());
+    followed.send(()).unwrap();
+    settled.await;
+    assert_eq!(run.mailbox(), inbox());
+    assert_eq!(fake.calls(Call::List), 2);
+    assert_eq!(fake.calls(Call::Failed), 0);
+    fake.with(|s| {
+        s.accounts.insert(1, Arc::new(()));
+    });
+    run.change(show(label("Work")));
+    fake.settle().await;
+    assert_eq!(fake.calls(Call::Follow), 2);
+}
+
+#[tokio::test]
+async fn a_reconnected_account_does_not_inherit_a_successful_follow() {
+    let (fake, run) = Fake::new();
+    run.change(show(label("Work")));
+    fake.settle().await;
+    fake.with(|s| {
+        s.accounts.insert(1, Arc::new(()));
+    });
+    run.accounts_live(&HashSet::from([1]));
+    run.reload();
+    fake.settle().await;
+    assert_eq!(fake.calls(Call::Follow), 2);
+    run.reload();
+    fake.settle().await;
+    assert_eq!(fake.calls(Call::Follow), 2);
+}
+
+#[tokio::test]
+async fn reconnecting_while_a_follow_is_pending_discards_its_success() {
+    let (fake, run) = Fake::new();
+    let followed = fake.hold(Call::Follow);
+    run.change(show(label("Work")));
+    let settled = fake.settle();
+    pin_mut!(settled);
+    assert!(poll!(&mut settled).is_pending());
+    fake.with(|s| {
+        s.accounts.insert(1, Arc::new(()));
+    });
+    followed.send(()).unwrap();
+    settled.await;
+    assert_eq!(
+        fake.calls(Call::List),
+        1,
+        "old account cannot reload the screen"
+    );
+    assert_eq!(fake.calls(Call::Failed), 0);
+    run.reload();
+    fake.settle().await;
+    assert_eq!(
+        fake.calls(Call::Follow),
+        2,
+        "old success was not remembered"
+    );
+}
+
+#[tokio::test]
+async fn an_old_follow_cannot_clear_a_reconnected_accounts_pending_follow() {
+    let (fake, run) = Fake::new();
+    let old = fake.hold(Call::Follow);
+    run.change(show(label("Work")));
+    let settled = fake.settle();
+    pin_mut!(settled);
+    assert!(poll!(&mut settled).is_pending());
+    fake.with(|s| {
+        s.accounts.insert(1, Arc::new(()));
+    });
+    let new = fake.hold(Call::Follow);
+    run.reload();
+    assert!(poll!(&mut settled).is_pending());
+    old.send(()).unwrap();
+    assert!(poll!(&mut settled).is_pending());
+    run.reload();
+    assert!(poll!(&mut settled).is_pending());
+    assert_eq!(
+        fake.calls(Call::Follow),
+        2,
+        "the new pending follow still coalesces"
+    );
+    new.send(()).unwrap();
+    settled.await;
+    assert_eq!(fake.calls(Call::Follow), 2);
+    assert_eq!(fake.calls(Call::List), 4);
+}
+
+#[tokio::test]
+async fn a_queued_follow_does_not_start_on_a_replacement_account() {
+    let (fake, run) = Fake::new();
+    run.change(show(label("Work")));
+    fake.with(|s| {
+        s.accounts.insert(1, Arc::new(()));
+    });
+    fake.settle().await;
+    assert_eq!(fake.calls(Call::Follow), 0);
+    assert_eq!(fake.calls(Call::List), 1);
+    assert_eq!(fake.calls(Call::Failed), 0);
+    run.reload();
+    fake.settle().await;
+    assert_eq!(fake.calls(Call::Follow), 1);
+}
+
+fn prefix(rows: Vec<mailrs_domain::ThreadSummary>, more: bool) -> anyhow::Result<Listing> {
+    Ok(Listing {
+        rows,
+        more,
+        replace: true,
+        ..Listing::default()
+    })
+}
+
+#[tokio::test]
+async fn a_server_page_updates_earlier_conversations_instead_of_appending_duplicates() {
+    let (fake, run) = Fake::new();
+    fake.with(|s| s.remote_labels = true);
+    let mut joined = row("thread", 1);
+    joined.message_count = 2;
+    fake.with(|s| {
+        s.remote_labels = true;
+        s.answers.extend([
+            prefix(vec![row("thread", 1)], true),
+            prefix(vec![joined.clone(), row("older", 2)], false),
+        ]);
+    });
+    run.change(show(label("Work/Clients")));
+    fake.settle().await;
+    run.scrolled_to_end();
+    fake.settle().await;
+    assert_eq!(fake.ids(), ["thread", "older"]);
+    assert_eq!(fake.with(|s| s.rows[0].message_count), 2);
+    assert_eq!(fake.calls(Call::Append), 0);
+    assert_eq!(fake.calls(Call::SetRows), 2);
+    run.scrolled_to_end();
+    fake.settle().await;
+    assert_eq!(fake.calls(Call::List), 2, "the server cursor ended");
+}
+
+#[tokio::test]
+async fn a_late_server_prefix_cannot_replace_another_mailbox() {
+    let (fake, run) = Fake::new();
+    fake.with(|s| s.remote_labels = true);
+    fake.with(|s| {
+        s.answers.extend([
+            prefix(vec![row("first", 1)], true),
+            prefix(vec![row("stale", 2)], false),
+        ])
+    });
+    run.change(show(label("Work/Clients")));
+    fake.settle().await;
+    fake.during(Call::List, |run| run.change(show(label("Work"))));
+    run.scrolled_to_end();
+    fake.settle().await;
+    assert_eq!(fake.ids(), ["Work-1"]);
+    assert!(!fake.with(|s| s.pages.iter().flatten().any(|id| id == "stale")));
+}
+
+#[tokio::test]
+async fn a_failed_server_page_keeps_rows_and_allows_the_same_scroll_to_retry() {
+    let (fake, run) = Fake::new();
+    fake.with(|s| s.remote_labels = true);
+    fake.with(|s| {
+        s.answers.extend([
+            prefix(vec![row("first", 1)], true),
+            Err(anyhow::anyhow!("offline")),
+            prefix(vec![row("first", 1), row("older", 2)], false),
+        ])
+    });
+    run.change(show(label("Work/Clients")));
+    fake.settle().await;
+    run.scrolled_to_end();
+    fake.settle().await;
+    assert_eq!(fake.ids(), ["first"]);
+    assert_eq!(fake.calls(Call::Failed), 1);
+    run.scrolled_to_end();
+    fake.settle().await;
+    assert_eq!(fake.ids(), ["first", "older"]);
+    assert_eq!(fake.with(|s| s.held.clone()), [1, 1]);
+}
+
+#[tokio::test]
+async fn server_mailbox_changes_reload_while_other_labels_still_splice_locally() {
+    for remote in [true, false] {
+        let (fake, run) = Fake::new();
+        fake.with(|s| s.remote_labels = true);
+        fake.with(|s| s.remote_labels = remote);
+        run.change(show(label("Work/Clients")));
+        fake.settle().await;
+        let before = fake.calls(Call::List);
+        run.changed(vec![(1, "thread".into())]);
+        fake.settle().await;
+        assert_eq!(fake.calls(Call::List), before + usize::from(remote));
+        assert_eq!(fake.calls(Call::Replace), usize::from(!remote));
+        run.reload_remote();
+        fake.settle().await;
+        assert_eq!(fake.calls(Call::List), before + 2 * usize::from(remote));
+    }
+}
+
+#[tokio::test]
+async fn a_queued_first_page_for_a_previous_mailbox_never_starts() {
+    let (fake, run) = Fake::new();
+    run.change(show(Mailbox::Folder {
+        account_id: Some(1),
+        folder: Folder::Archive,
+    }));
+    run.change(show(Mailbox::Folder {
+        account_id: Some(1),
+        folder: Folder::Junk,
+    }));
+    fake.settle().await;
+    assert_eq!(fake.calls(Call::List), 1);
+}
+
+#[tokio::test]
+async fn a_queued_append_for_a_previous_mailbox_never_starts() {
+    let (fake, run) = Fake::new();
+    fake.with(|s| {
+        s.store = (0..PAGE + 2)
+            .map(|n| row(&format!("row{n}"), n as i64))
+            .collect()
+    });
+    run.change(show(Mailbox::Folder {
+        account_id: Some(1),
+        folder: Folder::Archive,
+    }));
+    fake.settle().await;
+    run.scrolled_to_end();
+    run.change(show(Mailbox::Folder {
+        account_id: Some(1),
+        folder: Folder::Junk,
+    }));
+    fake.settle().await;
+    assert_eq!(fake.calls(Call::List), 2);
+    assert_eq!(fake.calls(Call::Append), 0);
 }

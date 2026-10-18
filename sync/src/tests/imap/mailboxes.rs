@@ -27,6 +27,7 @@ fn an_imap_account_files_mail_in_folders_and_threads_it_here() {
             // stored.
             keywords: &["$seen", "$flagged", "$answered", "$draft"],
             native_search: false,
+            paged_mailboxes: true,
             renames: true,
             restates: false,
             tags: false,

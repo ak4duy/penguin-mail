@@ -813,7 +813,7 @@ pub(super) static MAIN_ACTIONS: &[(&str, WindowRun)] = &[
     ("hide-my-email", |win| win.show_hide_my_email(None)),
     ("check", |win| {
         win.core.poke_all();
-        win.listing.reload_remote();
+        win.listing.reload();
         win.toast(&gettext("Checking for mail"));
     }),
     // The menu's Refresh under the calendar section; disabled outside
