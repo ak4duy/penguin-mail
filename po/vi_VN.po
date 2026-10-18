@@ -3907,7 +3907,7 @@ msgid "Claude Subscription"
 msgstr "Gói đăng ký Claude"
 
 #: app/src/settings/mod.rs:227 app/src/ui/window.rs:3288
-#: app/src/ui/window.rs:3365
+#: app/src/ui/window.rs:3368
 msgid "Assistant"
 msgstr "Trợ lý"
 
@@ -4264,7 +4264,7 @@ msgstr "Mở Penguin Mail"
 msgid "New Message"
 msgstr "Thư mới"
 
-#: app/src/tray.rs:238 app/src/ui/sidebar.rs:1929 app/src/ui/window.rs:3291
+#: app/src/tray.rs:238 app/src/ui/sidebar.rs:1929 app/src/ui/window.rs:3294
 msgid "Check for Mail"
 msgstr "Kiểm tra thư"
 
@@ -4282,7 +4282,7 @@ msgstr "Điểm mới trong {version}"
 msgid "Check for Updates"
 msgstr "Kiểm tra bản cập nhật"
 
-#: app/src/tray.rs:254 app/src/ui/window.rs:3304
+#: app/src/tray.rs:254 app/src/ui/window.rs:3307
 #: app/src/ui/window/shortcuts.rs:639
 msgid "Quit"
 msgstr "Thoát"
@@ -4303,7 +4303,7 @@ msgstr "Điểm mới"
 msgid "Website"
 msgstr "Trang web"
 
-#: app/src/ui/about.rs:179 app/src/ui/window.rs:3303
+#: app/src/ui/about.rs:179 app/src/ui/window.rs:3306
 msgid "Donate"
 msgstr "Quyên góp"
 
@@ -4311,7 +4311,7 @@ msgstr "Quyên góp"
 msgid "License"
 msgstr "Giấy phép"
 
-#: app/src/ui/about.rs:203 app/src/ui/window.rs:3302
+#: app/src/ui/about.rs:203 app/src/ui/window.rs:3305
 msgid "About Penguin Mail"
 msgstr "Giới thiệu Penguin Mail"
 
@@ -4810,7 +4810,7 @@ msgstr ""
 "Máy chủ này không phân biệt được các thư nên Penguin Mail không thể tải thư "
 "an toàn."
 
-#: app/src/ui/assistant.rs:35 app/src/ui/window.rs:3451
+#: app/src/ui/assistant.rs:35 app/src/ui/window.rs:3454
 msgid "Summarize this conversation"
 msgstr "Tóm tắt cuộc hội thoại này"
 
@@ -4835,13 +4835,13 @@ msgstr "Soạn thư trả lời cho cuộc hội thoại đang mở"
 msgid "Choose a Model"
 msgstr "Chọn mô hình"
 
-#: app/src/ui/assistant.rs:123 app/src/ui/window.rs:3412
-#: app/src/ui/window.rs:3413
+#: app/src/ui/assistant.rs:123 app/src/ui/window.rs:3415
+#: app/src/ui/window.rs:3416
 msgid "Detach"
 msgstr "Tách cửa sổ"
 
 #: app/src/ui/assistant.rs:124 app/src/ui/key_import.rs:213
-#: app/src/ui/key_import.rs:217 app/src/ui/window.rs:4022
+#: app/src/ui/key_import.rs:217 app/src/ui/window.rs:4025
 msgid "Close"
 msgstr "Đóng"
 
@@ -7849,7 +7849,7 @@ msgstr ""
 msgid "Allow Hide My Email"
 msgstr "Cho phép Ẩn email của tôi"
 
-#: app/src/ui/hide_my_email.rs:652 app/src/ui/window.rs:3502
+#: app/src/ui/hide_my_email.rs:652 app/src/ui/window.rs:3505
 msgid "Add an account first"
 msgstr "Thêm tài khoản trước"
 
@@ -8271,7 +8271,7 @@ msgstr "Địa chỉ này chứa tên người dùng có thể che giấu địa
 msgid "This link contains hidden or direction-changing characters."
 msgstr "Liên kết này chứa ký tự ẩn hoặc ký tự thay đổi hướng văn bản."
 
-#: app/src/ui/mod.rs:485
+#: app/src/ui/mod.rs:500
 msgid "Gray"
 msgstr "Xám"
 
@@ -8849,7 +8849,7 @@ msgstr "Di chuyển {account} xuống"
 #: app/src/ui/preferences/dialog.rs:27 app/src/ui/preferences/dialog.rs:33
 #: app/src/ui/preferences/dialog.rs:82 app/src/ui/preferences/dialog.rs:83
 #: app/src/ui/preferences/dialog.rs:353 app/src/ui/preferences/dialog.rs:355
-#: app/src/ui/window.rs:3300 app/src/ui/window/shortcuts.rs:616
+#: app/src/ui/window.rs:3303 app/src/ui/window/shortcuts.rs:616
 msgid "Preferences"
 msgstr "Tùy chọn"
 
@@ -9219,7 +9219,7 @@ msgstr "Chữ ký…"
 msgid "Rules…"
 msgstr "Quy tắc…"
 
-#: app/src/ui/sidebar.rs:1840 app/src/ui/window.rs:3294
+#: app/src/ui/sidebar.rs:1840 app/src/ui/window.rs:3297
 msgid "Hide My Email…"
 msgstr "Ẩn email của tôi…"
 
@@ -9915,51 +9915,51 @@ msgstr "Làm mới"
 msgid "Show Declined Events"
 msgstr "Hiện sự kiện đã từ chối"
 
-#: app/src/ui/window.rs:3292
+#: app/src/ui/window.rs:3295
 msgid "Add Account…"
 msgstr "Thêm tài khoản…"
 
-#: app/src/ui/window.rs:3293
+#: app/src/ui/window.rs:3296
 msgid "New Smart Mailbox…"
 msgstr "Hộp thư thông minh mới…"
 
-#: app/src/ui/window.rs:3301
+#: app/src/ui/window.rs:3304
 msgid "Keyboard Shortcuts"
 msgstr "Phím tắt"
 
-#: app/src/ui/window.rs:3310 app/src/ui/window.rs:3312
+#: app/src/ui/window.rs:3313 app/src/ui/window.rs:3315
 msgid "Main Menu"
 msgstr "Trình đơn chính"
 
-#: app/src/ui/window.rs:3377 app/src/ui/window.rs:3378
+#: app/src/ui/window.rs:3380 app/src/ui/window.rs:3381
 msgid "Dock"
 msgstr "Gắn lại"
 
-#: app/src/ui/window.rs:3503
+#: app/src/ui/window.rs:3506
 msgid "Add a mail account first"
 msgstr "Thêm tài khoản thư trước"
 
-#: app/src/ui/window.rs:3824
+#: app/src/ui/window.rs:3827
 msgid "Open a message from the person first"
 msgstr "Mở thư từ người đó trước"
 
-#: app/src/ui/window.rs:3905
+#: app/src/ui/window.rs:3908
 msgid "Penguin Mail shows the new language after a restart"
 msgstr "Penguin Mail hiển thị ngôn ngữ mới sau khi khởi động lại"
 
-#: app/src/ui/window.rs:3907 app/src/update/mod.rs:130
+#: app/src/ui/window.rs:3910 app/src/update/mod.rs:130
 msgid "Restart"
 msgstr "Khởi động lại"
 
-#: app/src/ui/window.rs:3971
+#: app/src/ui/window.rs:3974
 msgid "Show Rules"
 msgstr "Hiện quy tắc"
 
-#: app/src/ui/window.rs:3997
+#: app/src/ui/window.rs:4000
 msgid "Messages That Will Not Download"
 msgstr "Thư không thể tải"
 
-#: app/src/ui/window.rs:3999
+#: app/src/ui/window.rs:4002
 msgid ""
 "Penguin Mail could not download these from {address}'s server. It tries "
 "again at each check, except for a message too large to download."
