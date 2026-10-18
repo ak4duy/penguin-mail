@@ -4458,20 +4458,20 @@ msgstr "Chinesisch"
 msgid "English"
 msgstr "Englisch"
 
-#: app/src/translation.rs:920
+#: app/src/translation.rs:965
 msgid "The message goes to {host}, for {model} to read."
 msgstr "Die Nachricht geht an {host}, damit {model} sie liest."
 
-#: app/src/translation.rs:924
+#: app/src/translation.rs:969
 msgid "The message goes to {model} on this computer and no further."
 msgstr ""
 "Die Nachricht geht an {model} auf diesem Rechner und nirgendwo sonst hin."
 
-#: app/src/translation.rs:929
+#: app/src/translation.rs:974
 msgid "The message goes to Anthropic, for {model} to read."
 msgstr "Die Nachricht geht an Anthropic, damit {model} sie liest."
 
-#: app/src/translation.rs:933
+#: app/src/translation.rs:978
 msgid ""
 "The message goes to Anthropic, for Claude to read through your subscription."
 msgstr ""

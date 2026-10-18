@@ -7,6 +7,8 @@ the [releases page](https://github.com/c9dev/penguin-mail/releases).
 
 ### New
 
+- Russian and Czech can be selected in Never Translate.
+
 - An AppImage bundles the current runtime for Ubuntu 22.04 and newer, and Debian 13.
 - Build and install Penguin Mail with Nix, or enter its development environment with `nix develop`.
 

@@ -4399,19 +4399,19 @@ msgstr "chino"
 msgid "English"
 msgstr "inglés"
 
-#: app/src/translation.rs:920
+#: app/src/translation.rs:965
 msgid "The message goes to {host}, for {model} to read."
 msgstr "El mensaje va a {host} para que lo lea {model}."
 
-#: app/src/translation.rs:924
+#: app/src/translation.rs:969
 msgid "The message goes to {model} on this computer and no further."
 msgstr "El mensaje va a {model} en este equipo y a ningún otro sitio."
 
-#: app/src/translation.rs:929
+#: app/src/translation.rs:974
 msgid "The message goes to Anthropic, for {model} to read."
 msgstr "El mensaje va a Anthropic para que lo lea {model}."
 
-#: app/src/translation.rs:933
+#: app/src/translation.rs:978
 msgid ""
 "The message goes to Anthropic, for Claude to read through your subscription."
 msgstr ""

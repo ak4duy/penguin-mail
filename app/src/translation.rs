@@ -238,9 +238,9 @@ pub fn named_languages() -> impl Iterator<Item = Language> {
     KNOWN.into_iter().chain(BY_SCRIPT)
 }
 
-/// AI targets can include languages the source detector does not name.
+/// The named languages offered as AI targets.
 pub fn target_languages() -> impl Iterator<Item = Language> {
-    named_languages().chain([RUSSIAN, CZECH])
+    named_languages()
 }
 
 /// The language with `code`, when the app can name it.
@@ -250,7 +250,9 @@ pub fn named(code: &str) -> Option<Language> {
 
 /// The languages whose words the app counts. A language outside this list
 /// is named by its script or not at all.
-const KNOWN: [Language; 7] = [ENGLISH, PORTUGUESE, SPANISH, FRENCH, GERMAN, ITALIAN, DUTCH];
+const KNOWN: [Language; 9] = [
+    ENGLISH, PORTUGUESE, SPANISH, FRENCH, GERMAN, ITALIAN, DUTCH, RUSSIAN, CZECH,
+];
 
 /// Languages a script names on its own. Cyrillic and Arabic are not among
 /// them, because either one covers languages the app would get wrong.
@@ -336,7 +338,20 @@ pub fn read_language(text: &str, interface: Language) -> Reading {
     if let Some(script) = dominant_script(&sample)
         && script != interface.script
     {
-        return Reading::Other(BY_SCRIPT.iter().copied().find(|l| l.script == script));
+        let from = BY_SCRIPT.iter().copied().find(|l| l.script == script);
+        if from.is_some() {
+            return Reading::Other(from);
+        }
+        // A shared alphabet needs evidence from words before naming a language.
+        let words = words(&sample);
+        let count = Count::of(&words, interface);
+        let named =
+            count.best_hits >= NAMED_WORDS && count.best_hits * 100 >= words.len() * NAMED_PERCENT;
+        return Reading::Other(
+            count
+                .named()
+                .filter(|language| named && language.script == script),
+        );
     }
     if interface.words.is_empty() {
         return Reading::Unsure;
@@ -401,6 +416,36 @@ impl Count {
     fn of(words: &[String], interface: Language) -> Count {
         let counted: Vec<(Language, usize)> = KNOWN
             .iter()
+            .filter(|language| {
+                // These languages share many common words with unnamed neighbors.
+                // Require a characteristic word before counting them as foreign.
+                let characteristic: &[&str] = match language.code {
+                    "ru" => &[
+                        "что",
+                        "это",
+                        "мы",
+                        "вы",
+                        "для",
+                        "как",
+                        "он",
+                        "они",
+                        "из",
+                        "если",
+                        "будет",
+                        "пожалуйста",
+                        "спасибо",
+                        "уже",
+                    ],
+                    "cs" => &[
+                        "děkuji", "ještě", "jsme", "jste", "jsou", "které", "který", "máme",
+                        "nebo", "není", "prosím", "před", "při",
+                    ],
+                    _ => return true,
+                };
+                words
+                    .iter()
+                    .any(|word| characteristic.contains(&word.as_str()))
+            })
             .map(|language| (*language, hits(words, language)))
             .collect();
         let mine = hits(words, &interface);
@@ -993,6 +1038,13 @@ mod tests {
         }
         let russian = "Спасибо за ваше письмо. Мы уже получили все документы и будем рады ответить на ваши вопросы. Если вы хотите, мы можем обсудить это завтра.";
         let czech = "Děkuji za váš e-mail. Jsme rádi, že jste nám napsali. Prosím, pošlete nám dokumenty, které máme pro vás připravit, a můžeme se na to podívat.";
+        assert_eq!(
+            read_for(russian, "", "English"),
+            Reading::Other(Some(RUSSIAN))
+        );
+        assert_eq!(read_for(czech, "", "English"), Reading::Other(Some(CZECH)));
+        assert_eq!(named("ru"), Some(RUSSIAN));
+        assert_eq!(named("cs"), Some(CZECH));
         assert_eq!(read_for(russian, "", "Russian"), Reading::Same);
         assert_eq!(read_for(czech, "", "Czech"), Reading::Same);
         assert_eq!(read_for(russian, "", "Русский"), Reading::Same);
@@ -1197,6 +1249,24 @@ mod tests {
         );
         let russian = "Здравствуйте, отправляю вам счёт за прошлый месяц и квитанцию.";
         assert_eq!(read_language(russian, ENGLISH), Reading::Other(None));
+    }
+
+    #[test]
+    fn common_words_still_recognize_the_readers_own_language() {
+        let russian = "Здравствуйте, Анна! Направляю договор на согласование и приложение с условиями оплаты. В документах указаны сроки поставки, стоимость оборудования и порядок приемки. После проверки пришлите замечания до пятницы. С уважением, Сергей.";
+        let czech = "Dobrý den, v příloze posílám dokumenty a fakturu za dopravu. Po kontrole mi napište na tento kontakt. Děkujeme za spolupráci a za pomoc s organizací dopravy.";
+        assert_eq!(read_for(russian, "", "Russian"), Reading::Same);
+        assert_eq!(read_for(czech, "", "Czech"), Reading::Same);
+    }
+
+    #[test]
+    fn shared_cyrillic_words_do_not_name_russian() {
+        for text in [
+            "Благодарим ви за писмото. Документите са в офиса и ще бъдат готови до петък. Моля, изпратете ни отговор на този адрес.",
+            "Дякуємо за ваш лист. Документи вже готові, і ви можете отримати їх у нашому офісі. Будь ласка, надішліть відповідь до п'ятниці.",
+        ] {
+            assert_eq!(read_language(text, ENGLISH), Reading::Other(None));
+        }
     }
 
     #[test]

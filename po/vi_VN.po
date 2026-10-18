@@ -4219,19 +4219,19 @@ msgstr "Tiếng Trung"
 msgid "English"
 msgstr "Tiếng Anh"
 
-#: app/src/translation.rs:920
+#: app/src/translation.rs:965
 msgid "The message goes to {host}, for {model} to read."
 msgstr "Thư được gửi tới {host} để {model} đọc."
 
-#: app/src/translation.rs:924
+#: app/src/translation.rs:969
 msgid "The message goes to {model} on this computer and no further."
 msgstr "Thư chỉ được gửi tới {model} trên máy tính này."
 
-#: app/src/translation.rs:929
+#: app/src/translation.rs:974
 msgid "The message goes to Anthropic, for {model} to read."
 msgstr "Thư được gửi tới Anthropic để {model} đọc."
 
-#: app/src/translation.rs:933
+#: app/src/translation.rs:978
 msgid ""
 "The message goes to Anthropic, for Claude to read through your subscription."
 msgstr "Thư được gửi tới Anthropic để Claude đọc qua gói đăng ký của bạn."

@@ -614,6 +614,36 @@ async fn a_language_the_reader_never_translates_gets_no_card() {
 }
 
 #[tokio::test]
+async fn russian_and_czech_can_be_excluded_from_translation() {
+    for (code, text) in [
+        (
+            "ru",
+            "Спасибо за ваше письмо. Мы уже получили все документы и будем рады ответить на ваши вопросы. Если вы хотите, мы можем обсудить это завтра.",
+        ),
+        (
+            "cs",
+            "Děkuji za váš e-mail. Jsme rádi, že jste nám napsali. Prosím, pošlete nám dokumenty, které máme pro vás připravit, a můžeme se na to podívat.",
+        ),
+    ] {
+        let window = FakeWindow::with_body(body(text));
+        window.with(|screen| screen.never = vec![code.to_string()]);
+        window.run().open(row(THREAD)).await;
+        assert_eq!(
+            window.0.borrow().cards.last(),
+            Some(&Card::Hidden),
+            "{code}"
+        );
+        window.with(|screen| screen.never.clear());
+        window.run().offer_translation_again();
+        let last = window.0.borrow().cards.last().cloned();
+        assert!(
+            matches!(last, Some(Card::Offered { from: Some(from), .. }) if from.code == code),
+            "{code}: {last:?}"
+        );
+    }
+}
+
+#[tokio::test]
 async fn taking_a_language_off_the_list_offers_its_card_again() {
     let window = FakeWindow::with_body(portuguese());
     window.with(|screen| screen.never = vec!["pt".to_string()]);
