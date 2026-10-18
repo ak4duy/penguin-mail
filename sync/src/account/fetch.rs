@@ -50,6 +50,65 @@ impl Fetched {
         }
     }
 
+    /// Matches a renumbered mailbox's messages without replacing their
+    /// stored ids, cached bodies or flags. The location from the fetch,
+    /// not the stored id, supplies the current UIDVALIDITY.
+    pub(super) fn remap_renumbered(
+        &mut self,
+        c: &Connection,
+        account_id: AccountId,
+        mailbox: &str,
+    ) -> mailrs_store::Result<HashMap<String, String>> {
+        let mut generations = HashMap::<u32, Vec<String>>::new();
+        for meta in &self.metas {
+            if let Some(at) = self
+                .placing
+                .located
+                .get(&meta.id)
+                .filter(|at| at.mailbox == mailbox)
+                && let Some(msgid) = &meta.rfc822_msgid
+            {
+                generations
+                    .entry(at.uidvalidity)
+                    .or_default()
+                    .push(msgid.clone());
+            }
+        }
+        let mut by_key = HashMap::<_, Vec<String>>::new();
+        for (validity, msgids) in generations {
+            for (msgid, date, id) in
+                remote_refs::renumbered_by_message_id(c, account_id, mailbox, validity, &msgids)?
+            {
+                by_key.entry((validity, msgid, date)).or_default().push(id);
+            }
+        }
+        let mut renamed = HashMap::new();
+        for meta in &mut self.metas {
+            let Some(at) = self
+                .placing
+                .located
+                .get(&meta.id)
+                .filter(|at| at.mailbox == mailbox)
+                .cloned()
+            else {
+                continue;
+            };
+            let Some(msgid) = &meta.rfc822_msgid else {
+                continue;
+            };
+            if let Some(old) = by_key
+                .get_mut(&(at.uidvalidity, msgid.clone(), meta.date))
+                .and_then(Vec::pop)
+            {
+                remote_refs::locate(c, account_id, &old, &at)?;
+                renamed.insert(meta.id.clone(), old.clone());
+                self.placing.rename(&meta.id, &old);
+                meta.id = old;
+            }
+        }
+        Ok(renamed)
+    }
+
     /// Gives search hits stable local threads before a listing names them.
     /// A copy that arrived while the fetch ran keeps its metadata and ref.
     pub(super) fn store_missing(

@@ -291,6 +291,15 @@ impl MailBackend for AnyMail {
         forward_all!(AnyMail, self, search(query, limit))
     }
 
+    async fn mailbox_page(
+        &self,
+        mailbox: &str,
+        cursor: Option<&str>,
+        limit: usize,
+    ) -> Result<Backfill, BackendError> {
+        forward_all!(AnyMail, self, mailbox_page(mailbox, cursor, limit))
+    }
+
     async fn find_sent(&self, message_id: &str) -> Result<Option<String>, BackendError> {
         forward_all!(AnyMail, self, find_sent(message_id))
     }
@@ -426,6 +435,10 @@ impl MailBackend for AnyMail {
 
     fn follow(&self, mailbox: &str) -> bool {
         forward_all_now!(AnyMail, self, follow(mailbox))
+    }
+
+    fn reset_follow(&self, mailbox: &str) {
+        forward_all_now!(AnyMail, self, reset_follow(mailbox))
     }
 
     fn set_window_open(&self, open: bool) {

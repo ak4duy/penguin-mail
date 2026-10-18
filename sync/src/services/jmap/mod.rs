@@ -71,6 +71,7 @@ pub(super) fn capabilities_of(labels: bool) -> MailCapabilities {
         batch_limit: 500,
         keywords: KEYWORDS,
         native_search: false,
+        paged_mailboxes: false,
         renames: false,
         restates: true,
         tags: false,

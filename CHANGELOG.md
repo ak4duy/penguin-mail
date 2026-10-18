@@ -12,6 +12,7 @@ the [releases page](https://github.com/c9dev/penguin-mail/releases).
 
 ### Fixed
 
+- IMAP folders, including nested folders, Sent, and Drafts, show older server mail as you scroll. Failed first loads can be retried without restarting ([#60](https://github.com/c9dev/penguin-mail/issues/60)). Thanks to [zwnk](https://github.com/zwnk) for the reproductions and patches.
 - Upgrading an Outlook account keeps pending deletions and moves, without notifications for old mail found during repair ([#66](https://github.com/c9dev/penguin-mail/issues/66)).
 - Outlook unread counts update when older inbox messages are read in another app ([#66](https://github.com/c9dev/penguin-mail/issues/66)).
 - The Snap can access the graphics devices it needs at startup ([#62](https://github.com/c9dev/penguin-mail/issues/62)).

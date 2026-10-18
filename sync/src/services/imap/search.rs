@@ -12,7 +12,7 @@ use super::mailboxes::display_name;
 use super::syntax::{imap_date, string};
 use super::{Imap, ImapApi, Submit, window};
 use crate::BackendError;
-use crate::services::{MailBackend, RemoteRef, SearchQuery};
+use crate::services::{Backfill, MailBackend, RemoteRef, SearchQuery};
 
 /// A query IMAP has no words for.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -167,6 +167,66 @@ fn keyword_key(keyword: &str) -> Result<String, Unsayable> {
 }
 
 impl<I: ImapApi, S: Submit> Imap<I, S> {
+    /// An explicit mailbox, newest UIDs first, without a date condition.
+    /// One extra id tells whether another page follows. The cursor holds
+    /// UIDVALIDITY as well as the last UID, so a reset cannot splice new
+    /// messages into a listing made under the old names.
+    pub(super) async fn browse_page(
+        &self,
+        mailbox: &str,
+        cursor: Option<&str>,
+        limit: usize,
+    ) -> Result<Backfill, BackendError> {
+        self.ensure_listed().await?;
+        if self
+            .known()
+            .folders
+            .iter()
+            .any(|f| f.id == mailbox && f.parent_only)
+        {
+            return Ok(Backfill {
+                refs: Vec::new(),
+                next: None,
+            });
+        }
+        let selected = self.select(mailbox, None).await?;
+        let top = match cursor {
+            Some(cursor) => {
+                let at = Location::parse(cursor).ok_or(BackendError::StateLost)?;
+                if at.mailbox != mailbox || at.uidvalidity != selected.uidvalidity {
+                    return Err(BackendError::StateLost);
+                }
+                at.uid.saturating_sub(1)
+            }
+            None => self.top_uid(mailbox, &selected).await?,
+        };
+        let limit = limit.max(1);
+        let uids = self
+            .newest_matching(mailbox, "ALL UNDELETED", top, limit.saturating_add(1))
+            .await?;
+        let more = uids.len() > limit;
+        let refs: Vec<_> = uids
+            .into_iter()
+            .take(limit)
+            .map(|uid| {
+                let id = Location {
+                    mailbox: mailbox.to_string(),
+                    uidvalidity: selected.uidvalidity,
+                    uid,
+                }
+                .to_string();
+                RemoteRef {
+                    thread_id: id.clone(),
+                    id,
+                }
+            })
+            .collect();
+        let next = more
+            .then(|| refs.last().map(|hit| hit.id.clone()))
+            .flatten();
+        Ok(Backfill { refs, next })
+    }
+
     /// At most `limit` messages the query tree matches on the server, the
     /// newest UIDs of each mailbox first. A search typed in Gmail's syntax
     /// never reaches an IMAP server, and a tree IMAP cannot say answers
@@ -214,11 +274,10 @@ impl<I: ImapApi, S: Submit> Imap<I, S> {
     }
 
     /// At most `room` of the newest UIDs at or below `top` in `mailbox`
-    /// that match `keys`, searched a [`window::WINDOW`] at a time from the
-    /// top down: a search most mail answers from recent messages stops
-    /// after the first window, and only one that matches nothing recent
-    /// goes further down. Never one SEARCH over the whole mailbox, which a
-    /// long-lived account could answer past the client's guard budget.
+    /// that match `keys`. Start near the top and widen through gaps, up
+    /// to [`window::WINDOW`] UIDs per SEARCH. A dense mailbox answers only
+    /// a few pages' worth of ids rather than fifty thousand at each scroll,
+    /// and a sparse one stays within the client's answer budget.
     async fn newest_matching(
         &self,
         mailbox: &str,
@@ -227,24 +286,27 @@ impl<I: ImapApi, S: Submit> Imap<I, S> {
         room: usize,
     ) -> Result<Vec<u32>, BackendError> {
         let mut matched = Vec::new();
-        for window in window::windows(1, top)
-            .collect::<Vec<_>>()
-            .into_iter()
-            .rev()
-        {
-            if matched.len() >= room {
-                break;
-            }
-            let (start, end) = (*window.start(), *window.end());
+        let mut high = top;
+        let mut span = u32::try_from(room)
+            .unwrap_or(u32::MAX)
+            .saturating_mul(4)
+            .clamp(1, window::WINDOW);
+        while high >= 1 && matched.len() < room {
+            let low = high.saturating_sub(span - 1).max(1);
             let mut uids = self
                 .api
-                .search(mailbox, &format!("UID {start}:{end} {keys}"))
+                .search(mailbox, &format!("UID {low}:{high} {keys}"))
                 .await?;
-            uids.retain(|uid| window.contains(uid));
+            uids.retain(|uid| (low..=high).contains(uid));
             uids.sort_unstable_by(|a, b| b.cmp(a));
-            matched.extend(uids);
+            uids.dedup();
+            matched.extend(uids.into_iter().take(room - matched.len()));
+            if low == 1 {
+                break;
+            }
+            high = low - 1;
+            span = span.saturating_mul(2).min(window::WINDOW);
         }
-        matched.truncate(room);
         Ok(matched)
     }
 

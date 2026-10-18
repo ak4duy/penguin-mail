@@ -111,6 +111,9 @@ pub struct MailCapabilities {
     /// The server reads a search in its own syntax, as the person typed
     /// it, so `SearchQuery::Native` reaches it untouched.
     pub native_search: bool,
+    /// Explicit server mailboxes can be browsed in metadata pages outside
+    /// the background sync window, through `MailBackend::mailbox_page`.
+    pub paged_mailboxes: bool,
     /// A message takes a new name on the server when it moves, as an IMAP
     /// message's mailbox and UID do. The engine then keeps remote refs.
     pub renames: bool,
@@ -1115,6 +1118,11 @@ pub trait MailBackend: Send + Sync + 'static {
     /// asked once does no work a second time.
     fn follow(&self, mailbox: &str) -> bool;
 
+    /// Forgets a first follow whose initial load failed or was canceled,
+    /// including the listing's starting point for the feed. The caller
+    /// keeps polls out until that load commits or this reset runs.
+    fn reset_follow(&self, _mailbox: &str) {}
+
     /// Tells the backend whether the main window is open, which sets how
     /// often it looks at mail nobody is watching.
     fn set_window_open(&self, open: bool);
@@ -1201,6 +1209,19 @@ pub trait MailBackend: Send + Sync + 'static {
         query: &SearchQuery,
         limit: usize,
     ) -> impl Future<Output = Result<Vec<RemoteRef>, BackendError>> + Send;
+
+    /// One page of an explicit server mailbox, outside the sync window.
+    /// The cursor belongs only to this mailbox and becomes `StateLost`
+    /// when its message names no longer hold. Only services advertising
+    /// `paged_mailboxes` are asked; other services keep their local listing.
+    fn mailbox_page(
+        &self,
+        _mailbox: &str,
+        _cursor: Option<&str>,
+        _limit: usize,
+    ) -> impl Future<Output = Result<Backfill, BackendError>> + Send {
+        async { Err(BackendError::Unsupported) }
+    }
 
     /// The sent message carrying the `Message-ID` header `message_id`, when
     /// the server holds one.
@@ -1689,6 +1710,7 @@ mod tests {
                 delete_forever: true,
                 keywords: &["$seen", "$flagged", "$muted"],
                 native_search: true,
+                paged_mailboxes: false,
                 batch_limit: 1000,
                 renames: false,
                 restates: false,

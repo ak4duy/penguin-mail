@@ -898,7 +898,7 @@ impl MainWindow {
                 listing: Rc::new(ListingRun::new(
                     app.settings_with(|s| s.default_category),
                     Rc::new(searching::ListPane(weak.clone())),
-                    Rc::new(searching::CoreLists(Rc::clone(&app.core))),
+                    Rc::new(searching::CoreLists::new(Rc::clone(&app.core))),
                 )),
                 accounts_read: RefCell::new(None),
                 authorizing: Cell::new(false),
@@ -1256,6 +1256,15 @@ impl MainWindow {
             .into_iter()
             .partition(|(a, _)| a.provider.serves_mail());
         self.listing.accounts_live(&live);
+        let mailboxes = data
+            .iter()
+            .flat_map(|(account, labels)| {
+                labels
+                    .iter()
+                    .map(move |label| (account.id, label.id.clone()))
+            })
+            .collect();
+        self.listing.mailboxes_live(&mailboxes);
         // A label deleted elsewhere, by the assistant or in the browser,
         // leaves the window on a mailbox that is no longer there, so the
         // inbox takes over as it does for a signed-out account.

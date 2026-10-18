@@ -107,7 +107,8 @@ impl SyncEngine {
         let sync = Arc::new(
             AccountSync::new(account_id, services, self.db.clone(), self.events.clone())
                 .with_limits(self.config.window_days, self.config.body_cache_bytes)
-                .with_raw_cache(Arc::clone(&self.raw)),
+                .with_raw_cache(Arc::clone(&self.raw))
+                .with_network(Arc::clone(&self.network)),
         );
         let poke = Arc::new(Notify::new());
         let mut running = self.lock();

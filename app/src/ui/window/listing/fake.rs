@@ -4,8 +4,9 @@
 //! it, the way the main loop runs it after the event that started it.
 
 use std::cell::RefCell;
-use std::collections::HashMap;
+use std::collections::{HashMap, VecDeque};
 use std::rc::{Rc, Weak};
+use std::sync::Arc;
 use std::task::Poll;
 use std::time::Duration;
 
@@ -14,7 +15,7 @@ use futures::stream::FuturesUnordered;
 use mailrs_domain::{AccountId, Category, Folder, Target, ThreadSummary};
 use mailrs_sync::{Changed, Listing, Loaded, PAGE, Scope, Stop, View};
 
-use super::{Answer, ListingRun, Lists, Pane, Work};
+use super::{Answer, FollowAccount, ListingRun, Lists, Pane, Work};
 use crate::ui::Mailbox;
 use crate::ui::list_feed::{Named, Refresh, order};
 use crate::ui::window::on_screen::{Redraw, Revealed};
@@ -46,6 +47,8 @@ type During = Box<dyn FnOnce(&Rc<ListingRun>)>;
 pub struct Shown {
     /// What the store lists for a stored mailbox, newest first.
     pub store: Vec<ThreadSummary>,
+    pub answers: VecDeque<anyhow::Result<Listing>>,
+    pub remote_labels: bool,
     /// The rows of the threads that left the folder on screen.
     pub gone: Vec<Target>,
     /// The rows on screen.
@@ -60,9 +63,14 @@ pub struct Shown {
     /// The stop each server search went out with.
     pub stops: Vec<Stop>,
     pub followed: Vec<(AccountId, String)>,
+    pub follow_answers: VecDeque<anyhow::Result<()>>,
+    pub accounts: HashMap<AccountId, Arc<()>>,
+    pub labels: HashMap<String, Vec<ThreadSummary>>,
+    pub failures: Vec<String>,
     /// What the run asked for, oldest first.
     pub calls: Vec<Call>,
     during: HashMap<Call, During>,
+    waiting: HashMap<Call, tokio::sync::oneshot::Receiver<()>>,
     spawned: Vec<Work>,
 }
 
@@ -75,7 +83,10 @@ impl Fake {
     /// A window with nothing listed yet, and its run.
     pub fn new() -> (Rc<Fake>, Rc<ListingRun>) {
         let fake = Rc::new(Fake {
-            shown: RefCell::new(Shown::default()),
+            shown: RefCell::new(Shown {
+                accounts: [(1, Arc::new(())), (2, Arc::new(()))].into(),
+                ..Shown::default()
+            }),
             run: RefCell::new(Weak::new()),
         });
         let run = Rc::new(ListingRun::new(
@@ -94,6 +105,14 @@ impl Fake {
     /// Runs `during` while the next `call` is out, before it answers.
     pub fn during(&self, call: Call, during: impl FnOnce(&Rc<ListingRun>) + 'static) {
         self.with(|s| s.during.insert(call, Box::new(during)));
+    }
+
+    /// Holds the next answer to `call` until the test releases it. The
+    /// answer captures its rows before it waits, as an old store read can.
+    pub fn hold(&self, call: Call) -> tokio::sync::oneshot::Sender<()> {
+        let (send, receive) = tokio::sync::oneshot::channel();
+        self.with(|s| assert!(s.waiting.insert(call, receive).is_none()));
+        send
     }
 
     /// The ids of the rows on screen.
@@ -142,8 +161,14 @@ impl Fake {
     }
 
     fn answer<T: 'static>(&self, call: Call, value: T) -> Answer<'_, T> {
+        let waiting = self.with(|s| s.waiting.remove(&call));
         self.call(call);
-        Box::pin(async move { value })
+        Box::pin(async move {
+            if let Some(waiting) = waiting {
+                waiting.await.expect("the test released the answer");
+            }
+            value
+        })
     }
 }
 
@@ -256,12 +281,18 @@ impl Pane for Fake {
         self.with(|s| s.selected.push(revealed));
     }
 
-    fn failed(&self, _err: &anyhow::Error) {
+    fn failed(&self, err: &anyhow::Error) {
         self.call(Call::Failed);
+        self.with(|s| s.failures.push(err.to_string()));
     }
 }
 
 impl Lists for Fake {
+    fn is_remote(&self, mailbox: &Mailbox, _scope: &Scope) -> bool {
+        mailbox.is_remote()
+            || matches!(mailbox, Mailbox::Label { .. }) && self.with(|s| s.remote_labels)
+    }
+
     fn list(
         &self,
         mailbox: Mailbox,
@@ -272,11 +303,18 @@ impl Lists for Fake {
         if held.count > 0 {
             self.with(|s| s.held.push(held.count));
         }
+        if let Some(answer) = self.with(|s| s.answers.pop_front()) {
+            return self.answer(Call::List, answer);
+        }
         let listing = match &mailbox {
-            Mailbox::Label { label_id, .. } => Listing {
-                rows: vec![row(&format!("{label_id}-1"), 0)],
-                ..Listing::default()
-            },
+            Mailbox::Label { label_id, .. } => self.with(|s| {
+                let rows = s
+                    .labels
+                    .get(label_id)
+                    .cloned()
+                    .unwrap_or_else(|| vec![row(&format!("{label_id}-1"), 0)]);
+                page_after(&rows, &held)
+            }),
             _ => self.with(|s| page_after(&s.store, &held)),
         };
         self.answer(Call::List, Ok(listing))
@@ -312,7 +350,7 @@ impl Lists for Fake {
         named: Vec<Named>,
         _view: View,
     ) -> Answer<'_, Option<Changed>> {
-        let changed = (!mailbox.is_remote()).then(|| Changed {
+        let changed = (!self.is_remote(&mailbox, &Scope::of_mail_accounts(&[]))).then(|| Changed {
             rows: self.with(|s| {
                 s.store
                     .iter()
@@ -334,9 +372,24 @@ impl Lists for Fake {
         self.answer(Call::GoneFrom, gone)
     }
 
-    fn follow(&self, account_id: AccountId, server_mailbox: String) {
-        self.call(Call::Follow);
-        self.with(|s| s.followed.push((account_id, server_mailbox)));
+    fn account(&self, account_id: AccountId) -> Option<FollowAccount> {
+        self.with(|s| s.accounts.get(&account_id).cloned().map(FollowAccount::of))
+    }
+
+    fn follow(
+        &self,
+        account_id: AccountId,
+        server_mailbox: String,
+    ) -> Answer<'_, anyhow::Result<()>> {
+        let answer = self.with(|s| {
+            s.followed.push((account_id, server_mailbox));
+            if s.accounts.contains_key(&account_id) {
+                s.follow_answers.pop_front().unwrap_or(Ok(()))
+            } else {
+                Err(mailrs_sync::SyncError::UnknownAccount(account_id).into())
+            }
+        });
+        self.answer(Call::Follow, answer)
     }
 
     fn sleep(&self, _time: Duration) -> Answer<'_, ()> {

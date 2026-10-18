@@ -54,6 +54,7 @@ const MICROSOFT: MailCapabilities = MailCapabilities {
     batch_limit: mailrs_graph::BATCH_LIMIT,
     keywords: &[SEEN, FLAGGED],
     native_search: false,
+    paged_mailboxes: false,
     renames: false,
     restates: true,
     tags: true,
