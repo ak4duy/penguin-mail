@@ -1,7 +1,9 @@
 //! The IMAP adapter against `FakeImap`, through the engine.
 
 mod bodies;
+mod browse;
 mod feed;
+mod follow;
 mod mailboxes;
 mod moves;
 mod search;

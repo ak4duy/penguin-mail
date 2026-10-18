@@ -24,7 +24,7 @@ use super::state::{ImapState, Kept};
 use super::window::{window_keys, windows};
 use super::{Imap, ImapApi, Submit};
 use crate::BackendError;
-use crate::services::{Changes, KeywordsOf, KeywordsPage, RemoteChange, SyncState};
+use crate::services::{Changes, KeywordsOf, KeywordsPage, MailBackend, RemoteChange, SyncState};
 
 impl<I: ImapApi, S: Submit> Imap<I, S> {
     /// With no state, where every synced mailbox stands now. With one,
@@ -74,7 +74,7 @@ impl<I: ImapApi, S: Submit> Imap<I, S> {
                 Err(BackendError::NotFound) if !mailbox.eq_ignore_ascii_case("INBOX") => {
                     tracing::warn!(%mailbox, "the server has no such synced mailbox; no longer following it");
                     state.mailboxes.remove(&mailbox);
-                    self.known().followed.remove(&mailbox);
+                    self.reset_follow(&mailbox);
                     self.list_mailboxes().await?;
                 }
                 Err(err) => return Err(err),

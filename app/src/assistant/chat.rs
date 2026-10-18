@@ -66,10 +66,10 @@ impl Chat {
             }
             None => {
                 self.sources = sources::for_settings(&settings);
-                let conversation = Arc::new(tokio::sync::Mutex::new(
-                    Conversation::new(config.clone(), super::SYSTEM_PROMPT.to_string())
-                        .with_thinking(),
-                ));
+                let conversation = Arc::new(tokio::sync::Mutex::new(Conversation::new(
+                    config.clone(),
+                    super::SYSTEM_PROMPT.to_string(),
+                )));
                 self.conversation = Some(Arc::clone(&conversation));
                 conversation
             }
@@ -82,6 +82,7 @@ impl Chat {
         );
         let (prompt, sources) = sources::for_turn(&base, &self.sources, tools.mcp, tools.skills);
         let web = settings.ai.web_search != WebSearch::Off;
+        let reasoning = settings.ai.assistant_reasoning;
         let host = Arc::new(Toolbox::new(
             Host::new(super::run::specs(), self.requests.clone()).with_picked_files(picked),
             sources,
@@ -93,6 +94,7 @@ impl Chat {
         let answer = Box::pin(async move {
             let mut conversation = conversation.lock().await;
             conversation.set_provider(config);
+            conversation.set_thinking(reasoning);
             conversation.set_system_prompt(prompt);
             conversation.set_web(web);
             tokio::select! {

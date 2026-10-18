@@ -1003,8 +1003,10 @@ pub async fn ask(
     config: ProviderConfig,
     into: &str,
     pieces: &[&str],
+    reasoning: bool,
 ) -> Result<Vec<Option<String>>, String> {
     let mut chat = Conversation::new(config, SYSTEM.to_string());
+    chat.set_thinking(reasoning);
     // Nobody watches a translation go by, and a closed channel is a
     // channel the agent loop carries on past.
     let (events, watching) = async_channel::unbounded::<AgentEvent>();
@@ -1021,6 +1023,34 @@ mod tests {
 
     use super::*;
     use crate::settings::AiProvider;
+
+    #[tokio::test]
+    async fn translation_requests_honor_their_reasoning_preference() {
+        use wiremock::matchers::method;
+        use wiremock::{Mock, MockServer, ResponseTemplate};
+        let server = MockServer::start().await;
+        Mock::given(method("POST"))
+            .respond_with(ResponseTemplate::new(200)
+                .insert_header("content-type", "text/event-stream")
+                .set_body_string("data: {\"choices\":[{\"delta\":{\"content\":\"[[1]] Hola\"}}]}\n\ndata: [DONE]\n\n"))
+            .mount(&server).await;
+        for enabled in [false, true] {
+            let config = ProviderConfig::OpenAiCompatible {
+                base_url: server.uri(),
+                api_key: None,
+                model: "test".into(),
+            };
+            assert_eq!(
+                ask(config, "Spanish", &["Hello"], enabled).await.unwrap(),
+                [Some("Hola".to_string())]
+            );
+        }
+        let requests = server.received_requests().await.unwrap();
+        let quick: serde_json::Value = requests[0].body_json().unwrap();
+        let reasoning: serde_json::Value = requests[1].body_json().unwrap();
+        assert_eq!(quick["reasoning_effort"], "none");
+        assert!(reasoning.get("reasoning_effort").is_none());
+    }
 
     const ENGLISH_NOTE: &str = "Hello Ana, I have attached the invoice for last month and \
          the receipt that goes with it. Let me know if you need anything else before Friday.";

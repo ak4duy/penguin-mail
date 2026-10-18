@@ -233,6 +233,9 @@ impl<I: ImapApi, S: Submit> Imap<I, S> {
         let (folders, remote) = read_listing(&listed);
         let delimiter = listed.iter().find_map(|l| l.delimiter);
         let mut known = self.known();
+        known
+            .opened
+            .retain(|id| folders.iter().any(|f| &f.id == id && !f.parent_only));
         known.folders = folders;
         known.delimiter = delimiter;
         Ok(remote)

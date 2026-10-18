@@ -152,6 +152,19 @@ calendar sidebar's Grant Access button asks Google again. If the Google Cloud
 project Penguin Mail signs in with has the Calendar API switched off, a
 dialog says so and opens the page that turns it on.
 
+## Reasoning
+
+Preferences → AI has separate reasoning switches for assistant chats and
+email translations. Chats allow reasoning by default; translations request
+faster answers without it. Changes apply to the next request and keep the
+chat history. Show Details Expanded controls how reasoning and tool rows
+are displayed, independently of whether reasoning is requested.
+
+OpenAI-compatible servers are asked to skip reasoning when it is off.
+A server that rejects the control falls back to its default. Anthropic
+models use their supported thinking controls; models that always reason
+use lower effort instead. Claude Code follows its own settings.
+
 ## What it did
 
 Under your question, the assistant's answer shows what the model did, in

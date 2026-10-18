@@ -119,12 +119,12 @@ impl State {
         }
     }
 
-    /// The assistant keeps the local server's thinking default. Short
-    /// tasks ask to skip it. Claude Code follows its own settings.
-    pub(crate) fn ask_for_thinking(&mut self) {
+    /// Reasoning on an OpenAI-compatible server follows its default when
+    /// allowed, and asks to skip it otherwise. Claude Code has its own settings.
+    pub(crate) fn set_thinking(&mut self, on: bool) {
         match self {
-            State::Anthropic(chat) => chat.think = true,
-            State::OpenAi(chat) => chat.think = true,
+            State::Anthropic(chat) => chat.think = on,
+            State::OpenAi(chat) => chat.think = on,
             State::ClaudeCode(_) => {}
         }
     }

@@ -73,6 +73,7 @@ const GMAIL: MailCapabilities = MailCapabilities {
     // Gmail keeps these three as its UNREAD, STARRED and MUTE labels.
     keywords: &[keyword::SEEN, keyword::FLAGGED, keyword::MUTED],
     native_search: true,
+    paged_mailboxes: false,
     batch_limit: mailrs_gmail::BATCH_LIMIT,
     renames: false,
     restates: false,
@@ -853,6 +854,7 @@ mod tests {
                 delete_forever: true,
                 keywords: &["$seen", "$flagged", "$muted"],
                 native_search: true,
+                paged_mailboxes: false,
                 batch_limit: 1000,
                 renames: false,
                 restates: false,

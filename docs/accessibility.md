@@ -108,6 +108,12 @@ runs the same action.
 
 ## The thread list from the keyboard
 
+A paged IMAP folder has a **More** button below the thread list while the
+server has another page, or while a failed page can be tried again. It is
+reachable with Tab even when grouping leaves too few rows for a scrollbar.
+Loading another page keeps selected conversations selected when they remain
+in the list.
+
 The thread list is one Tab stop, like the mailbox list. Its list view
 uses GTK's `ListTabBehavior::Item`, so Tab and Shift+Tab leave it, and
 Up, Down, Home, End, Page Up and Page Down move between rows. Moving

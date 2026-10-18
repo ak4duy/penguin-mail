@@ -310,25 +310,29 @@ impl AccountSync {
     /// window is listed and stored now, and the slow poll looks at it from
     /// then on. A label server keeps every label in step already and is
     /// asked nothing; a mailbox already followed is asked nothing either,
-    /// since the slow poll covers it from the first time.
+    /// since the slow poll covers it after its first successful load.
     pub async fn follow_mailbox(&self, mailbox: &str) -> Result<(), SyncError> {
-        if !self.renames() || !self.mail.follow(mailbox) {
+        if !self.renames() {
             return Ok(());
         }
-        // What the server lists while a move is on its way would put the
-        // mail back where the move took it from.
-        let _moves = self.mail.hold_moves().await;
+        if !self.network_available() {
+            return Err(BackendError::Offline(String::new()).into());
+        }
+        let Some(following) = self.mail.follow(mailbox).await else {
+            return Ok(());
+        };
         let listed = self
             .mail
             .window_ids(self.window_days, Some(mailbox))
             .await?;
-        let fetched = self
+        let mut fetched = self
             .fetch(listed.into_iter().map(Want::from).collect())
             .await?;
         let account_id = self.account_id;
-        let touched = self
-            .db
-            .write(move |c| {
+        let mailbox = mailbox.to_string();
+        let touched = following
+            .store(&self.db, move |c| {
+                fetched.remap_renumbered(c, account_id, &mailbox)?;
                 let generation = accounts::sync_cursor(c, account_id)?.sync_gen;
                 store_fetched(
                     c,

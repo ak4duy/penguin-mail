@@ -226,6 +226,8 @@ pub enum Change {
 /// through here.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum AiChange {
+    AssistantReasoning(bool),
+    TranslationReasoning(bool),
     Language(String),
     /// Which model one feature uses.
     Use {
@@ -496,6 +498,8 @@ fn forget_mcp_tools(settings: &mut Settings, server: &str) {
 impl AiChange {
     fn apply_to(self, ai: &mut super::AiSettings) {
         match self {
+            AiChange::AssistantReasoning(on) => ai.assistant_reasoning = on,
+            AiChange::TranslationReasoning(on) => ai.translation_reasoning = on,
             AiChange::Use { feature, choice } => ai.set_use(feature, choice),
             AiChange::Language(name) => {
                 if let Some(name) = crate::assistant::language::normalize(&name)
@@ -997,6 +1001,19 @@ mod tests {
 
     fn effects(change: Change) -> Effects {
         change.apply(&mut Settings::default())
+    }
+
+    #[test]
+    fn reasoning_switches_change_only_the_next_requests_preference() {
+        let mut settings = Settings::default();
+        let effects = Change::Ai(AiChange::AssistantReasoning(false)).apply(&mut settings);
+        assert!(effects.is_empty());
+        assert!(!settings.ai.assistant_reasoning);
+        assert!(!settings.ai.translation_reasoning);
+        let effects = Change::Ai(AiChange::TranslationReasoning(true)).apply(&mut settings);
+        assert!(effects.is_empty());
+        assert!(!settings.ai.assistant_reasoning);
+        assert!(settings.ai.translation_reasoning);
     }
 
     #[test]
