@@ -240,3 +240,42 @@ async fn a_question_carries_picker_grants_to_mail_tools_separately_from_model_in
         .unwrap();
     assert_eq!(answer.await.unwrap().unwrap(), "Draft ready.");
 }
+
+#[tokio::test]
+async fn reasoning_preferences_apply_to_each_question_without_losing_history() {
+    let server = MockServer::start().await;
+    reply(&server).await;
+    let mut chat = chat();
+    for (at, enabled) in [false, true, false].into_iter().enumerate() {
+        let mut saved = serde_json::to_value(settings(&server)).unwrap();
+        saved["ai"]["assistant_reasoning"] = enabled.into();
+        let settings = serde_json::from_value(saved).unwrap();
+        chat.ask(
+            settings,
+            Tools {
+                mcp: false,
+                skills: false,
+            },
+            format!("Question {at}"),
+            Arc::default(),
+        )
+        .unwrap()
+        .answer
+        .await
+        .unwrap();
+        let requests = server.received_requests().await.unwrap();
+        let body: Value = requests[at].body_json().unwrap();
+        if enabled {
+            assert!(body.get("reasoning_effort").is_none());
+        } else {
+            assert_eq!(body["reasoning_effort"], "none");
+        }
+        assert!(
+            body["messages"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .any(|message| message["content"] == "Question 0")
+        );
+    }
+}

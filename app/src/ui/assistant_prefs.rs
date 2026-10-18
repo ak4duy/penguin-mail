@@ -174,6 +174,36 @@ pub fn page(app: &Rc<App>, dialog: &adw::ToastOverlay) -> adw::PreferencesPage {
     page.add(&used_for);
     page.add(&language_group(app, dialog, &ai));
 
+    let reasoning = adw::PreferencesGroup::builder()
+        .title(gettext("Reasoning"))
+        .description(gettext(
+            "Ask supported models to think before answering. Turning this off can make \
+             replies faster. Claude Code uses its own settings.",
+        ))
+        .build();
+    for (title, on, change) in [
+        (
+            gettext("Assistant Chats"),
+            ai.assistant_reasoning,
+            AiChange::AssistantReasoning as fn(bool) -> AiChange,
+        ),
+        (
+            gettext("Email Translations"),
+            ai.translation_reasoning,
+            AiChange::TranslationReasoning,
+        ),
+    ] {
+        let row = adw::SwitchRow::builder().title(title).active(on).build();
+        let weak = Rc::downgrade(app);
+        row.connect_active_notify(move |row| {
+            if let Some(app) = weak.upgrade() {
+                app.change_settings(Change::Ai(change(row.is_active())));
+            }
+        });
+        reasoning.add(&row);
+    }
+    page.add(&reasoning);
+
     let details = adw::PreferencesGroup::builder()
         .title(gettext("Conversation"))
         .build();

@@ -7,12 +7,15 @@ the [releases page](https://github.com/c9dev/penguin-mail/releases).
 
 ### New
 
+- Choose reasoning separately for assistant chats and email translations in Preferences → AI.
+- Russian and Czech can be selected in Never Translate.
 - Show or hide the mailbox sidebar with Ctrl+B, or Cmd+B on macOS.
 - An AppImage bundles the current runtime for Ubuntu 22.04 and newer, and Debian 13.
 - Build and install Penguin Mail with Nix, or enter its development environment with `nix develop`.
 
 ### Fixed
 
+- Mail translations ask compatible local models to skip reasoning by default for faster replies.
 - IMAP folders, including nested folders, Sent, and Drafts, show older server mail as you scroll. Failed first loads can be retried without restarting ([#60](https://github.com/c9dev/penguin-mail/issues/60)). Thanks to [zwnk](https://github.com/zwnk) for the reproductions and patches.
 - Upgrading an Outlook account keeps pending deletions and moves, without notifications for old mail found during repair ([#66](https://github.com/c9dev/penguin-mail/issues/66)).
 - Outlook unread counts update when older inbox messages are read in another app ([#66](https://github.com/c9dev/penguin-mail/issues/66)).

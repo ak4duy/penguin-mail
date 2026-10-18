@@ -3455,7 +3455,7 @@ msgstr "Smaller than {size}"
 msgid "Larger than {size}"
 msgstr "Larger than {size}"
 
-#: app/src/rules.rs:251 app/src/settings/mod.rs:785
+#: app/src/rules.rs:251 app/src/settings/mod.rs:791
 msgid "All mail"
 msgstr "All mail"
 
@@ -3551,8 +3551,8 @@ msgstr "On this computer, while Penguin Mail is open"
 msgid "On the server"
 msgstr "On the server"
 
-#: app/src/settings/mod.rs:199 app/src/settings/mod.rs:381
-#: app/src/settings/mod.rs:697 app/src/ui/assistant_mcp_prefs.rs:202
+#: app/src/settings/mod.rs:199 app/src/settings/mod.rs:387
+#: app/src/settings/mod.rs:703 app/src/ui/assistant_mcp_prefs.rs:202
 msgid "Off"
 msgstr "Off"
 
@@ -3601,159 +3601,159 @@ msgstr "Reads a newsletter's unsubscribe page when the rules cannot"
 msgid "Same as the Assistant"
 msgstr "Same as the Assistant"
 
-#: app/src/settings/mod.rs:382
+#: app/src/settings/mod.rs:388
 msgid "Claude's own only"
 msgstr "Claude's own only"
 
-#: app/src/settings/mod.rs:383
+#: app/src/settings/mod.rs:389
 msgid "Brave Search"
 msgstr "Brave Search"
 
-#: app/src/settings/mod.rs:384
+#: app/src/settings/mod.rs:390
 msgid "SearXNG"
 msgstr "SearXNG"
 
-#: app/src/settings/mod.rs:526
+#: app/src/settings/mod.rs:532
 msgid "Rich text"
 msgstr "Rich text"
 
-#: app/src/settings/mod.rs:527
+#: app/src/settings/mod.rs:533
 msgid "Markdown"
 msgstr "Markdown"
 
-#: app/src/settings/mod.rs:546 app/src/ui/preferences/accounts.rs:150
+#: app/src/settings/mod.rs:552 app/src/ui/preferences/accounts.rs:150
 msgid "Automatic"
 msgstr "Automatic"
 
-#: app/src/settings/mod.rs:547 app/src/ui/calendar/editor.rs:2163
+#: app/src/settings/mod.rs:553 app/src/ui/calendar/editor.rs:2163
 msgid "Monday"
 msgstr "Monday"
 
-#: app/src/settings/mod.rs:548 app/src/ui/calendar/editor.rs:2169
+#: app/src/settings/mod.rs:554 app/src/ui/calendar/editor.rs:2169
 msgid "Sunday"
 msgstr "Sunday"
 
-#: app/src/settings/mod.rs:586
+#: app/src/settings/mod.rs:592
 msgid "When opened"
 msgstr "When opened"
 
-#: app/src/settings/mod.rs:587
+#: app/src/settings/mod.rs:593
 msgid "After 2 seconds"
 msgstr "After 2 seconds"
 
-#: app/src/settings/mod.rs:588
+#: app/src/settings/mod.rs:594
 msgid "Only when I choose"
 msgstr "Only when I choose"
 
-#: app/src/settings/mod.rs:604 app/src/settings/mod.rs:622
+#: app/src/settings/mod.rs:610 app/src/settings/mod.rs:628
 msgid "Ask each time"
 msgstr "Ask each time"
 
-#: app/src/settings/mod.rs:605
+#: app/src/settings/mod.rs:611
 msgid "Always load"
 msgstr "Always load"
 
-#: app/src/settings/mod.rs:623
+#: app/src/settings/mod.rs:629
 msgid "Never ask"
 msgstr "Never ask"
 
-#: app/src/settings/mod.rs:657
+#: app/src/settings/mod.rs:663
 msgid "Small"
 msgstr "Small"
 
-#: app/src/settings/mod.rs:658
+#: app/src/settings/mod.rs:664
 msgid "Default"
 msgstr "Default"
 
-#: app/src/settings/mod.rs:659
+#: app/src/settings/mod.rs:665
 msgid "Large"
 msgstr "Large"
 
-#: app/src/settings/mod.rs:660
+#: app/src/settings/mod.rs:666
 msgid "Larger"
 msgstr "Larger"
 
-#: app/src/settings/mod.rs:698
+#: app/src/settings/mod.rs:704
 msgid "5 seconds"
 msgstr "5 seconds"
 
-#: app/src/settings/mod.rs:699
+#: app/src/settings/mod.rs:705
 msgid "10 seconds"
 msgstr "10 seconds"
 
-#: app/src/settings/mod.rs:700
+#: app/src/settings/mod.rs:706
 msgid "20 seconds"
 msgstr "20 seconds"
 
-#: app/src/settings/mod.rs:701
+#: app/src/settings/mod.rs:707
 msgid "30 seconds"
 msgstr "30 seconds"
 
-#: app/src/settings/mod.rs:718
+#: app/src/settings/mod.rs:724
 msgid "Follow system"
 msgstr "Follow system"
 
-#: app/src/settings/mod.rs:719
+#: app/src/settings/mod.rs:725
 msgid "Light"
 msgstr "Light"
 
-#: app/src/settings/mod.rs:720
+#: app/src/settings/mod.rs:726
 msgid "Dark"
 msgstr "Dark"
 
-#: app/src/settings/mod.rs:754
+#: app/src/settings/mod.rs:760
 msgid "Every second"
 msgid_plural "Every {count} seconds"
 msgstr[0] "Every second"
 msgstr[1] "Every {count} seconds"
 
-#: app/src/settings/mod.rs:762
+#: app/src/settings/mod.rs:768
 msgid "Every minute"
 msgid_plural "Every {count} minutes"
 msgstr[0] "Every minute"
 msgstr[1] "Every {count} minutes"
 
-#: app/src/settings/mod.rs:779
+#: app/src/settings/mod.rs:785
 msgid "2 weeks"
 msgstr "2 weeks"
 
-#: app/src/settings/mod.rs:780
+#: app/src/settings/mod.rs:786
 msgid "30 days"
 msgstr "30 days"
 
-#: app/src/settings/mod.rs:781
+#: app/src/settings/mod.rs:787
 msgid "90 days"
 msgstr "90 days"
 
-#: app/src/settings/mod.rs:782
+#: app/src/settings/mod.rs:788
 msgid "1 year"
 msgstr "1 year"
 
-#: app/src/settings/mod.rs:783
+#: app/src/settings/mod.rs:789
 msgid "2 years"
 msgstr "2 years"
 
-#: app/src/settings/mod.rs:784
+#: app/src/settings/mod.rs:790
 msgid "5 years"
 msgstr "5 years"
 
-#: app/src/settings/mod.rs:806
+#: app/src/settings/mod.rs:812
 msgid "Every message stays on this computer. A large account takes a lot of disk space and memory, and its older mail downloads in the background."
 msgstr "Every message stays on this computer. A large account takes a lot of disk space and memory, and its older mail downloads in the background."
 
-#: app/src/settings/mod.rs:808
+#: app/src/settings/mod.rs:814
 msgid "Everything in your inbox stays too, and older mail remains searchable"
 msgstr "Everything in your inbox stays too, and older mail remains searchable"
 
-#: app/src/settings/mod.rs:815
+#: app/src/settings/mod.rs:821
 msgid "256 MB"
 msgstr "256 MB"
 
-#: app/src/settings/mod.rs:816
+#: app/src/settings/mod.rs:822
 msgid "1 GB"
 msgstr "1 GB"
 
-#: app/src/settings/mod.rs:817
+#: app/src/settings/mod.rs:823
 msgid "4 GB"
 msgstr "4 GB"
 
@@ -3873,19 +3873,19 @@ msgstr "Chinese"
 msgid "English"
 msgstr "English"
 
-#: app/src/translation.rs:920
+#: app/src/translation.rs:965
 msgid "The message goes to {host}, for {model} to read."
 msgstr "The message goes to {host}, for {model} to read."
 
-#: app/src/translation.rs:924
+#: app/src/translation.rs:969
 msgid "The message goes to {model} on this computer and no further."
 msgstr "The message goes to {model} on this computer and no further."
 
-#: app/src/translation.rs:929
+#: app/src/translation.rs:974
 msgid "The message goes to Anthropic, for {model} to read."
 msgstr "The message goes to Anthropic, for {model} to read."
 
-#: app/src/translation.rs:933
+#: app/src/translation.rs:978
 msgid "The message goes to Anthropic, for Claude to read through your subscription."
 msgstr "The message goes to Anthropic, for Claude to read through your subscription."
 
@@ -4591,15 +4591,15 @@ msgid "Manage in Preferences"
 msgstr "Manage in Preferences"
 
 #: app/src/ui/assistant/controls.rs:179 app/src/ui/assistant/controls.rs:181
-#: app/src/ui/assistant_prefs.rs:635
+#: app/src/ui/assistant_prefs.rs:665
 msgid "Search models"
 msgstr "Search models"
 
-#: app/src/ui/assistant/controls.rs:230 app/src/ui/assistant_prefs.rs:652
+#: app/src/ui/assistant/controls.rs:230 app/src/ui/assistant_prefs.rs:682
 msgid "Asking for the model list…"
 msgstr "Asking for the model list…"
 
-#: app/src/ui/assistant/controls.rs:292 app/src/ui/assistant_prefs.rs:583
+#: app/src/ui/assistant/controls.rs:292 app/src/ui/assistant_prefs.rs:613
 msgid "Claude Code's own default"
 msgstr "Claude Code's own default"
 
@@ -4714,7 +4714,7 @@ msgstr "Bearer Token (Optional)"
 msgid "Test the Server"
 msgstr "Test the Server"
 
-#: app/src/ui/assistant_mcp_prefs.rs:290 app/src/ui/assistant_prefs.rs:343
+#: app/src/ui/assistant_mcp_prefs.rs:290 app/src/ui/assistant_prefs.rs:373
 #: app/src/ui/assistant_web_prefs.rs:59
 msgid "Test"
 msgstr "Test"
@@ -4825,114 +4825,130 @@ msgstr "Used For"
 msgid "Each feature sends what it reads to the model chosen for it."
 msgstr "Each feature sends what it reads to the model chosen for it."
 
-#: app/src/ui/assistant_prefs.rs:178 app/src/ui/conversation.rs:698
+#: app/src/ui/assistant_prefs.rs:178
+msgid "Reasoning"
+msgstr "Reasoning"
+
+#: app/src/ui/assistant_prefs.rs:180
+msgid "Ask supported models to think before answering. Turning this off can make replies faster. Claude Code uses its own settings."
+msgstr "Ask supported models to think before answering. Turning this off can make replies faster. Claude Code uses its own settings."
+
+#: app/src/ui/assistant_prefs.rs:186
+msgid "Assistant Chats"
+msgstr "Assistant Chats"
+
+#: app/src/ui/assistant_prefs.rs:191
+msgid "Email Translations"
+msgstr "Email Translations"
+
+#: app/src/ui/assistant_prefs.rs:208 app/src/ui/conversation.rs:698
 #: app/src/ui/window/detached.rs:65
 msgid "Conversation"
 msgstr "Conversation"
 
-#: app/src/ui/assistant_prefs.rs:181
+#: app/src/ui/assistant_prefs.rs:211
 msgid "Show Details Expanded"
 msgstr "Show Details Expanded"
 
-#: app/src/ui/assistant_prefs.rs:183
+#: app/src/ui/assistant_prefs.rs:213
 msgid "Open the model's thinking and each tool it runs as they appear"
 msgstr "Open the model's thinking and each tool it runs as they appear"
 
-#: app/src/ui/assistant_prefs.rs:211 app/src/ui/assistant_prefs.rs:232
+#: app/src/ui/assistant_prefs.rs:241 app/src/ui/assistant_prefs.rs:262
 msgid "AI Language"
 msgstr "AI Language"
 
-#: app/src/ui/assistant_prefs.rs:213
+#: app/src/ui/assistant_prefs.rs:243
 msgid "Language for assistant responses, summaries, and translations. Email replies and drafts follow the language of the correspondence unless you ask otherwise."
 msgstr "Language for assistant responses, summaries, and translations. Email replies and drafts follow the language of the correspondence unless you ask otherwise."
 
-#: app/src/ui/assistant_prefs.rs:218
+#: app/src/ui/assistant_prefs.rs:248
 msgid "Same as Interface"
 msgstr "Same as Interface"
 
-#: app/src/ui/assistant_prefs.rs:220
+#: app/src/ui/assistant_prefs.rs:250
 msgid "Other…"
 msgstr "Other…"
 
-#: app/src/ui/assistant_prefs.rs:237
+#: app/src/ui/assistant_prefs.rs:267
 msgid "Language Name"
 msgstr "Language Name"
 
-#: app/src/ui/assistant_prefs.rs:266
+#: app/src/ui/assistant_prefs.rs:296
 msgid "Enter a language name of up to 80 characters, using letters, spaces, hyphens, apostrophes, or parentheses."
 msgstr "Enter a language name of up to 80 characters, using letters, spaces, hyphens, apostrophes, or parentheses."
 
-#: app/src/ui/assistant_prefs.rs:284
+#: app/src/ui/assistant_prefs.rs:314
 msgid "Always Allowed"
 msgstr "Always Allowed"
 
-#: app/src/ui/assistant_prefs.rs:286
+#: app/src/ui/assistant_prefs.rs:316
 msgid "Tools from outside sources that run without asking. Remove one to be asked again next time."
 msgstr "Tools from outside sources that run without asking. Remove one to be asked again next time."
 
-#: app/src/ui/assistant_prefs.rs:302
+#: app/src/ui/assistant_prefs.rs:332
 msgid "Ask Again"
 msgstr "Ask Again"
 
-#: app/src/ui/assistant_prefs.rs:306
+#: app/src/ui/assistant_prefs.rs:336
 msgid "Ask again before {tool}"
 msgstr "Ask again before {tool}"
 
-#: app/src/ui/assistant_prefs.rs:347
+#: app/src/ui/assistant_prefs.rs:377
 msgid "Test the Connection"
 msgstr "Test the Connection"
 
-#: app/src/ui/assistant_prefs.rs:374 app/src/ui/assistant_web_prefs.rs:90
+#: app/src/ui/assistant_prefs.rs:404 app/src/ui/assistant_web_prefs.rs:90
 msgid "No answer: {reason}"
 msgstr "No answer: {reason}"
 
-#: app/src/ui/assistant_prefs.rs:437
+#: app/src/ui/assistant_prefs.rs:467
 msgid "Connection"
 msgstr "Connection"
 
-#: app/src/ui/assistant_prefs.rs:591
+#: app/src/ui/assistant_prefs.rs:621
 msgid "Model"
 msgstr "Model"
 
-#: app/src/ui/assistant_prefs.rs:610 app/src/ui/assistant_prefs.rs:614
+#: app/src/ui/assistant_prefs.rs:640 app/src/ui/assistant_prefs.rs:644
 msgid "Models You Can Use"
 msgstr "Models You Can Use"
 
-#: app/src/ui/assistant_prefs.rs:768
+#: app/src/ui/assistant_prefs.rs:798
 msgid "This provider lists no models. Type a name in the field instead."
 msgstr "This provider lists no models. Type a name in the field instead."
 
-#: app/src/ui/assistant_prefs.rs:803
+#: app/src/ui/assistant_prefs.rs:833
 msgid "alias"
 msgstr "alias"
 
-#: app/src/ui/assistant_prefs.rs:843
+#: app/src/ui/assistant_prefs.rs:873
 msgid "Found on This Computer"
 msgstr "Found on This Computer"
 
-#: app/src/ui/assistant_prefs.rs:847
+#: app/src/ui/assistant_prefs.rs:877
 msgid "Looking for LM Studio, Ollama, Unsloth, and Claude Code…"
 msgstr "Looking for LM Studio, Ollama, Unsloth, and Claude Code…"
 
-#: app/src/ui/assistant_prefs.rs:863
+#: app/src/ui/assistant_prefs.rs:893
 msgid "Nothing found"
 msgstr "Nothing found"
 
-#: app/src/ui/assistant_prefs.rs:865
+#: app/src/ui/assistant_prefs.rs:895
 msgid "Start LM Studio's server or Ollama, or install Claude Code, then open Preferences again."
 msgstr "Start LM Studio's server or Ollama, or install Claude Code, then open Preferences again."
 
-#: app/src/ui/assistant_prefs.rs:877
+#: app/src/ui/assistant_prefs.rs:907
 msgid "{model} and {count} more"
 msgid_plural "{model} and {count} more"
 msgstr[0] "{model} and {count} more"
 msgstr[1] "{model} and {count} more"
 
-#: app/src/ui/assistant_prefs.rs:889
+#: app/src/ui/assistant_prefs.rs:919
 msgid "Use"
 msgstr "Use"
 
-#: app/src/ui/assistant_prefs.rs:894
+#: app/src/ui/assistant_prefs.rs:924
 msgid "Use {provider}"
 msgstr "Use {provider}"
 
@@ -10132,7 +10148,7 @@ msgstr "Review Storage"
 msgid "Hide Storage Warning Until Next Launch"
 msgstr "Hide Storage Warning Until Next Launch"
 
-#: app/src/ui/window/thread.rs:611
+#: app/src/ui/window/thread.rs:614
 msgid "The account is not connected yet."
 msgstr "The account is not connected yet."
 

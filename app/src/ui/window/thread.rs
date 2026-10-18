@@ -559,11 +559,14 @@ impl Effects for Ports {
             let window = self
                 .window()
                 .ok_or_else(|| "the window has closed".to_string())?;
-            let (config, _) = window.settings_with(|s| translation::destination(&s.ai))?;
+            let (config, reasoning) = window.settings_with(|s| {
+                translation::destination(&s.ai)
+                    .map(|(config, _)| (config, s.ai.translation_reasoning))
+            })?;
             self.core
                 .call(async move {
                     let pieces: Vec<&str> = pieces.iter().map(String::as_str).collect();
-                    translation::ask(config, &into, &pieces)
+                    translation::ask(config, &into, &pieces, reasoning)
                         .await
                         .map_err(anyhow::Error::msg)
                 })

@@ -3712,7 +3712,7 @@ msgstr "小於 {size}"
 msgid "Larger than {size}"
 msgstr "大於 {size}"
 
-#: app/src/rules.rs:251 app/src/settings/mod.rs:785
+#: app/src/rules.rs:251 app/src/settings/mod.rs:791
 msgid "All mail"
 msgstr "所有郵件"
 
@@ -3808,8 +3808,8 @@ msgstr "在此電腦上，Penguin Mail 開啟時"
 msgid "On the server"
 msgstr "在伺服器上"
 
-#: app/src/settings/mod.rs:199 app/src/settings/mod.rs:381
-#: app/src/settings/mod.rs:697 app/src/ui/assistant_mcp_prefs.rs:202
+#: app/src/settings/mod.rs:199 app/src/settings/mod.rs:387
+#: app/src/settings/mod.rs:703 app/src/ui/assistant_mcp_prefs.rs:202
 msgid "Off"
 msgstr "關閉"
 
@@ -3858,141 +3858,141 @@ msgstr "規則無法處理時，讀取電子報的取消訂閱頁面"
 msgid "Same as the Assistant"
 msgstr "與助理相同"
 
-#: app/src/settings/mod.rs:382
+#: app/src/settings/mod.rs:388
 msgid "Claude's own only"
 msgstr "僅限 Claude 內建搜尋"
 
-#: app/src/settings/mod.rs:383
+#: app/src/settings/mod.rs:389
 msgid "Brave Search"
 msgstr "Brave Search"
 
-#: app/src/settings/mod.rs:384
+#: app/src/settings/mod.rs:390
 msgid "SearXNG"
 msgstr "SearXNG"
 
-#: app/src/settings/mod.rs:526
+#: app/src/settings/mod.rs:532
 msgid "Rich text"
 msgstr "富文字"
 
-#: app/src/settings/mod.rs:527
+#: app/src/settings/mod.rs:533
 msgid "Markdown"
 msgstr "Markdown"
 
-#: app/src/settings/mod.rs:546 app/src/ui/preferences/accounts.rs:150
+#: app/src/settings/mod.rs:552 app/src/ui/preferences/accounts.rs:150
 msgid "Automatic"
 msgstr "自動"
 
-#: app/src/settings/mod.rs:547 app/src/ui/calendar/editor.rs:2163
+#: app/src/settings/mod.rs:553 app/src/ui/calendar/editor.rs:2163
 msgid "Monday"
 msgstr "星期一"
 
-#: app/src/settings/mod.rs:548 app/src/ui/calendar/editor.rs:2169
+#: app/src/settings/mod.rs:554 app/src/ui/calendar/editor.rs:2169
 msgid "Sunday"
 msgstr "星期日"
 
-#: app/src/settings/mod.rs:586
+#: app/src/settings/mod.rs:592
 msgid "When opened"
 msgstr "開啟時"
 
-#: app/src/settings/mod.rs:587
+#: app/src/settings/mod.rs:593
 msgid "After 2 seconds"
 msgstr "2 秒後"
 
-#: app/src/settings/mod.rs:588
+#: app/src/settings/mod.rs:594
 msgid "Only when I choose"
 msgstr "僅在手動選擇時"
 
-#: app/src/settings/mod.rs:604 app/src/settings/mod.rs:622
+#: app/src/settings/mod.rs:610 app/src/settings/mod.rs:628
 msgid "Ask each time"
 msgstr "每次詢問"
 
-#: app/src/settings/mod.rs:605
+#: app/src/settings/mod.rs:611
 msgid "Always load"
 msgstr "一律載入"
 
-#: app/src/settings/mod.rs:623
+#: app/src/settings/mod.rs:629
 msgid "Never ask"
 msgstr "永不詢問"
 
-#: app/src/settings/mod.rs:657
+#: app/src/settings/mod.rs:663
 msgid "Small"
 msgstr "小"
 
-#: app/src/settings/mod.rs:658
+#: app/src/settings/mod.rs:664
 msgid "Default"
 msgstr "預設"
 
-#: app/src/settings/mod.rs:659
+#: app/src/settings/mod.rs:665
 msgid "Large"
 msgstr "大"
 
-#: app/src/settings/mod.rs:660
+#: app/src/settings/mod.rs:666
 msgid "Larger"
 msgstr "更大"
 
-#: app/src/settings/mod.rs:698
+#: app/src/settings/mod.rs:704
 msgid "5 seconds"
 msgstr "5 秒"
 
-#: app/src/settings/mod.rs:699
+#: app/src/settings/mod.rs:705
 msgid "10 seconds"
 msgstr "10 秒"
 
-#: app/src/settings/mod.rs:700
+#: app/src/settings/mod.rs:706
 msgid "20 seconds"
 msgstr "20 秒"
 
-#: app/src/settings/mod.rs:701
+#: app/src/settings/mod.rs:707
 msgid "30 seconds"
 msgstr "30 秒"
 
-#: app/src/settings/mod.rs:718
+#: app/src/settings/mod.rs:724
 msgid "Follow system"
 msgstr "跟隨系統"
 
-#: app/src/settings/mod.rs:719
+#: app/src/settings/mod.rs:725
 msgid "Light"
 msgstr "淺色"
 
-#: app/src/settings/mod.rs:720
+#: app/src/settings/mod.rs:726
 msgid "Dark"
 msgstr "深色"
 
-#: app/src/settings/mod.rs:754
+#: app/src/settings/mod.rs:760
 msgid "Every second"
 msgid_plural "Every {count} seconds"
 msgstr[0] "每 {count} 秒"
 
-#: app/src/settings/mod.rs:762
+#: app/src/settings/mod.rs:768
 msgid "Every minute"
 msgid_plural "Every {count} minutes"
 msgstr[0] "每 {count} 分鐘"
 
-#: app/src/settings/mod.rs:779
+#: app/src/settings/mod.rs:785
 msgid "2 weeks"
 msgstr "2 週"
 
-#: app/src/settings/mod.rs:780
+#: app/src/settings/mod.rs:786
 msgid "30 days"
 msgstr "30 天"
 
-#: app/src/settings/mod.rs:781
+#: app/src/settings/mod.rs:787
 msgid "90 days"
 msgstr "90 天"
 
-#: app/src/settings/mod.rs:782
+#: app/src/settings/mod.rs:788
 msgid "1 year"
 msgstr "1 年"
 
-#: app/src/settings/mod.rs:783
+#: app/src/settings/mod.rs:789
 msgid "2 years"
 msgstr "2 年"
 
-#: app/src/settings/mod.rs:784
+#: app/src/settings/mod.rs:790
 msgid "5 years"
 msgstr "5 年"
 
-#: app/src/settings/mod.rs:806
+#: app/src/settings/mod.rs:812
 msgid ""
 "Every message stays on this computer. A large account takes a lot of disk "
 "space and memory, and its older mail downloads in the background."
@@ -4000,19 +4000,19 @@ msgstr ""
 "每封郵件都會保留在此電腦上。大型帳號會占用大量磁碟空間和記憶體，較舊的郵件會"
 "在背景下載。"
 
-#: app/src/settings/mod.rs:808
+#: app/src/settings/mod.rs:814
 msgid "Everything in your inbox stays too, and older mail remains searchable"
 msgstr "收件匣中的所有郵件也會保留，較舊的郵件仍可搜尋"
 
-#: app/src/settings/mod.rs:815
+#: app/src/settings/mod.rs:821
 msgid "256 MB"
 msgstr "256 MB"
 
-#: app/src/settings/mod.rs:816
+#: app/src/settings/mod.rs:822
 msgid "1 GB"
 msgstr "1 GB"
 
-#: app/src/settings/mod.rs:817
+#: app/src/settings/mod.rs:823
 msgid "4 GB"
 msgstr "4 GB"
 
@@ -4135,19 +4135,19 @@ msgstr "中文"
 msgid "English"
 msgstr "英文"
 
-#: app/src/translation.rs:920
+#: app/src/translation.rs:965
 msgid "The message goes to {host}, for {model} to read."
 msgstr "郵件會傳送至 {host}，供 {model} 讀取。"
 
-#: app/src/translation.rs:924
+#: app/src/translation.rs:969
 msgid "The message goes to {model} on this computer and no further."
 msgstr "郵件僅供此電腦上的 {model} 讀取，不會傳送至其他地方。"
 
-#: app/src/translation.rs:929
+#: app/src/translation.rs:974
 msgid "The message goes to Anthropic, for {model} to read."
 msgstr "郵件會傳送至 Anthropic，供 {model} 讀取。"
 
-#: app/src/translation.rs:933
+#: app/src/translation.rs:978
 msgid ""
 "The message goes to Anthropic, for Claude to read through your subscription."
 msgstr "郵件會傳送至 Anthropic，透過 Claude 訂閱供 Claude 讀取。"
@@ -4891,15 +4891,15 @@ msgid "Manage in Preferences"
 msgstr "在偏好設定中管理"
 
 #: app/src/ui/assistant/controls.rs:179 app/src/ui/assistant/controls.rs:181
-#: app/src/ui/assistant_prefs.rs:635
+#: app/src/ui/assistant_prefs.rs:665
 msgid "Search models"
 msgstr "搜尋模型"
 
-#: app/src/ui/assistant/controls.rs:230 app/src/ui/assistant_prefs.rs:652
+#: app/src/ui/assistant/controls.rs:230 app/src/ui/assistant_prefs.rs:682
 msgid "Asking for the model list…"
 msgstr "正在查詢模型清單…"
 
-#: app/src/ui/assistant/controls.rs:292 app/src/ui/assistant_prefs.rs:583
+#: app/src/ui/assistant/controls.rs:292 app/src/ui/assistant_prefs.rs:613
 msgid "Claude Code's own default"
 msgstr "Claude Code 內建預設模型"
 
@@ -5022,7 +5022,7 @@ msgstr "持有者權杖（選填）"
 msgid "Test the Server"
 msgstr "測試伺服器"
 
-#: app/src/ui/assistant_mcp_prefs.rs:290 app/src/ui/assistant_prefs.rs:343
+#: app/src/ui/assistant_mcp_prefs.rs:290 app/src/ui/assistant_prefs.rs:373
 #: app/src/ui/assistant_web_prefs.rs:59
 msgid "Test"
 msgstr "測試"
@@ -5141,24 +5141,48 @@ msgstr "用途"
 msgid "Each feature sends what it reads to the model chosen for it."
 msgstr "每項功能會將讀取的內容傳送至為該功能選擇的模型。"
 
-#: app/src/ui/assistant_prefs.rs:178 app/src/ui/conversation.rs:698
+#: app/src/ui/assistant_prefs.rs:178
+#, fuzzy
+#| msgid "Running"
+msgid "Reasoning"
+msgstr "執行中"
+
+#: app/src/ui/assistant_prefs.rs:180
+msgid ""
+"Ask supported models to think before answering. Turning this off can make "
+"replies faster. Claude Code uses its own settings."
+msgstr ""
+
+#: app/src/ui/assistant_prefs.rs:186
+#, fuzzy
+#| msgid "Assistant Actions"
+msgid "Assistant Chats"
+msgstr "助理操作"
+
+#: app/src/ui/assistant_prefs.rs:191
+#, fuzzy
+#| msgid "Translation"
+msgid "Email Translations"
+msgstr "翻譯"
+
+#: app/src/ui/assistant_prefs.rs:208 app/src/ui/conversation.rs:698
 #: app/src/ui/window/detached.rs:65
 msgid "Conversation"
 msgstr "對話"
 
-#: app/src/ui/assistant_prefs.rs:181
+#: app/src/ui/assistant_prefs.rs:211
 msgid "Show Details Expanded"
 msgstr "展開詳細資料"
 
-#: app/src/ui/assistant_prefs.rs:183
+#: app/src/ui/assistant_prefs.rs:213
 msgid "Open the model's thinking and each tool it runs as they appear"
 msgstr "顯示模型的思考過程及執行的每個工具時，自動展開內容"
 
-#: app/src/ui/assistant_prefs.rs:211 app/src/ui/assistant_prefs.rs:232
+#: app/src/ui/assistant_prefs.rs:241 app/src/ui/assistant_prefs.rs:262
 msgid "AI Language"
 msgstr "AI 語言"
 
-#: app/src/ui/assistant_prefs.rs:213
+#: app/src/ui/assistant_prefs.rs:243
 msgid ""
 "Language for assistant responses, summaries, and translations. Email replies "
 "and drafts follow the language of the correspondence unless you ask "
@@ -5167,99 +5191,99 @@ msgstr ""
 "助理回答、摘要及翻譯使用的語言。除非另有要求，郵件回覆與草稿會沿用往來郵件的"
 "語言。"
 
-#: app/src/ui/assistant_prefs.rs:218
+#: app/src/ui/assistant_prefs.rs:248
 msgid "Same as Interface"
 msgstr "與介面相同"
 
-#: app/src/ui/assistant_prefs.rs:220
+#: app/src/ui/assistant_prefs.rs:250
 msgid "Other…"
 msgstr "其他…"
 
-#: app/src/ui/assistant_prefs.rs:237
+#: app/src/ui/assistant_prefs.rs:267
 msgid "Language Name"
 msgstr "語言名稱"
 
-#: app/src/ui/assistant_prefs.rs:266
+#: app/src/ui/assistant_prefs.rs:296
 msgid ""
 "Enter a language name of up to 80 characters, using letters, spaces, "
 "hyphens, apostrophes, or parentheses."
 msgstr "請輸入最多 80 個字元的語言名稱，可使用字母、空格、連字號、撇號或括號。"
 
-#: app/src/ui/assistant_prefs.rs:284
+#: app/src/ui/assistant_prefs.rs:314
 msgid "Always Allowed"
 msgstr "一律允許"
 
-#: app/src/ui/assistant_prefs.rs:286
+#: app/src/ui/assistant_prefs.rs:316
 msgid ""
 "Tools from outside sources that run without asking. Remove one to be asked "
 "again next time."
 msgstr "無須詢問即可執行的外部工具。移除工具後，下次執行前會再次詢問。"
 
-#: app/src/ui/assistant_prefs.rs:302
+#: app/src/ui/assistant_prefs.rs:332
 msgid "Ask Again"
 msgstr "再次詢問"
 
-#: app/src/ui/assistant_prefs.rs:306
+#: app/src/ui/assistant_prefs.rs:336
 msgid "Ask again before {tool}"
 msgstr "執行 {tool} 前再次詢問"
 
-#: app/src/ui/assistant_prefs.rs:347
+#: app/src/ui/assistant_prefs.rs:377
 msgid "Test the Connection"
 msgstr "測試連線"
 
-#: app/src/ui/assistant_prefs.rs:374 app/src/ui/assistant_web_prefs.rs:90
+#: app/src/ui/assistant_prefs.rs:404 app/src/ui/assistant_web_prefs.rs:90
 msgid "No answer: {reason}"
 msgstr "未回應：{reason}"
 
-#: app/src/ui/assistant_prefs.rs:437
+#: app/src/ui/assistant_prefs.rs:467
 msgid "Connection"
 msgstr "連線"
 
-#: app/src/ui/assistant_prefs.rs:591
+#: app/src/ui/assistant_prefs.rs:621
 msgid "Model"
 msgstr "模型"
 
-#: app/src/ui/assistant_prefs.rs:610 app/src/ui/assistant_prefs.rs:614
+#: app/src/ui/assistant_prefs.rs:640 app/src/ui/assistant_prefs.rs:644
 msgid "Models You Can Use"
 msgstr "可用的模型"
 
-#: app/src/ui/assistant_prefs.rs:768
+#: app/src/ui/assistant_prefs.rs:798
 msgid "This provider lists no models. Type a name in the field instead."
 msgstr "此服務提供者未列出模型。請改在欄位中輸入名稱。"
 
-#: app/src/ui/assistant_prefs.rs:803
+#: app/src/ui/assistant_prefs.rs:833
 msgid "alias"
 msgstr "別名"
 
-#: app/src/ui/assistant_prefs.rs:843
+#: app/src/ui/assistant_prefs.rs:873
 msgid "Found on This Computer"
 msgstr "在此電腦上找到"
 
-#: app/src/ui/assistant_prefs.rs:847
+#: app/src/ui/assistant_prefs.rs:877
 msgid "Looking for LM Studio, Ollama, Unsloth, and Claude Code…"
 msgstr "正在尋找 LM Studio、Ollama、Unsloth 和 Claude Code…"
 
-#: app/src/ui/assistant_prefs.rs:863
+#: app/src/ui/assistant_prefs.rs:893
 msgid "Nothing found"
 msgstr "未找到"
 
-#: app/src/ui/assistant_prefs.rs:865
+#: app/src/ui/assistant_prefs.rs:895
 msgid ""
 "Start LM Studio's server or Ollama, or install Claude Code, then open "
 "Preferences again."
 msgstr ""
 "請啟動 LM Studio 伺服器或 Ollama，或安裝 Claude Code，再重新開啟 [偏好設定]。"
 
-#: app/src/ui/assistant_prefs.rs:877
+#: app/src/ui/assistant_prefs.rs:907
 msgid "{model} and {count} more"
 msgid_plural "{model} and {count} more"
 msgstr[0] "{model} 與其他 {count} 個模型"
 
-#: app/src/ui/assistant_prefs.rs:889
+#: app/src/ui/assistant_prefs.rs:919
 msgid "Use"
 msgstr "使用"
 
-#: app/src/ui/assistant_prefs.rs:894
+#: app/src/ui/assistant_prefs.rs:924
 msgid "Use {provider}"
 msgstr "使用 {provider}"
 
@@ -10592,7 +10616,7 @@ msgstr "檢視儲存空間"
 msgid "Hide Storage Warning Until Next Launch"
 msgstr "隱藏空間警告至下次啟動"
 
-#: app/src/ui/window/thread.rs:611
+#: app/src/ui/window/thread.rs:614
 msgid "The account is not connected yet."
 msgstr "帳號尚未連線。"
 
