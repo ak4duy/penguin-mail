@@ -36,6 +36,8 @@ pub mod preferences;
 pub mod queued;
 pub mod roving;
 pub mod rules;
+#[cfg(feature = "packaging-appimage")]
+pub mod sandbox_setup;
 pub mod search_suggest;
 pub mod sender_prefs;
 pub mod sidebar;
@@ -64,7 +66,39 @@ use mailrs_domain::Folder;
 use mailrs_domain::translate::gettext;
 pub use mailrs_sync::Mailbox;
 pub use mailrs_sync::mailbox::Standard;
+
 use mailrs_sync::mailbox::{folder_icon, folder_name};
+
+/// The modifier the app's shortcuts use: Command on macOS and Control
+/// elsewhere. GTK reads `<Primary>` as Control everywhere, so see
+/// [`primary_accelerator`].
+pub const PRIMARY: gtk::gdk::ModifierType = if cfg!(target_os = "macos") {
+    gtk::gdk::ModifierType::META_MASK
+} else {
+    gtk::gdk::ModifierType::CONTROL_MASK
+};
+
+/// Control where it is not [`PRIMARY`]: on macOS, where no shortcut here
+/// uses it. Empty elsewhere.
+pub const SPARE_CONTROL: gtk::gdk::ModifierType = if cfg!(target_os = "macos") {
+    gtk::gdk::ModifierType::CONTROL_MASK
+} else {
+    gtk::gdk::ModifierType::empty()
+};
+
+/// A shortcut trigger for `accelerator`, read by [`primary_accelerator`].
+pub fn primary_trigger(accelerator: &str) -> Option<gtk::ShortcutTrigger> {
+    gtk::ShortcutTrigger::parse_string(&primary_accelerator(accelerator))
+}
+
+/// `accelerator` with `<Primary>` as [`PRIMARY`]: `<Meta>`, GDK's name
+/// for Command, on macOS.
+pub fn primary_accelerator(accelerator: &str) -> String {
+    match cfg!(target_os = "macos") {
+        true => accelerator.replace("<Primary>", "<Meta>"),
+        false => accelerator.to_string(),
+    }
+}
 
 /// The toolbar container above `header`, including its search bar and spacing.
 pub(crate) fn top_bar(header: &adw::HeaderBar) -> Option<gtk::Widget> {
@@ -494,6 +528,12 @@ pub(crate) mod checks {
     use super::*;
 
     pub fn run() {
+        let trigger = primary_trigger("<Primary>b")
+            .expect("the mailbox shortcut parses")
+            .downcast::<gtk::KeyvalTrigger>()
+            .expect("the mailbox shortcut is a key chord");
+        assert_eq!(trigger.keyval(), gtk::gdk::Key::b);
+        assert_eq!(trigger.modifiers(), PRIMARY);
         a_passing_popover_leaves_its_parent_once_closed();
     }
 

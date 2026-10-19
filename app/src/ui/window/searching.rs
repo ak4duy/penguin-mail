@@ -5,7 +5,9 @@
 //! to the run: a pause in typing runs the search over the mail on this
 //! computer, and from three letters on over the servers too.
 
+use std::cell::RefCell;
 use std::rc::{Rc, Weak};
+use std::sync::Arc;
 use std::time::Duration;
 
 use adw::prelude::*;
@@ -13,7 +15,7 @@ use gtk::glib;
 use mailrs_domain::{AccountId, Category, Folder, Target, ThreadSummary};
 use mailrs_sync::{Changed, Listing, Loaded, Scope, Stop, View};
 
-use super::listing::{Answer, Lists, Pane, Work};
+use super::listing::{Answer, FollowAccount, Lists, Pane, Work};
 use super::on_screen::{Redraw, Revealed};
 use super::{MainWindow, follows, load_failed};
 use crate::core::Core;
@@ -95,7 +97,13 @@ impl Pane for ListPane {
         for notice in &listing.notices {
             win.toast(notice);
         }
-        let rows = listing.rows.into_iter().map(Rc::new).collect();
+        win.list.show_more(listing.replace && listing.more);
+        let rows = win
+            .in_flight
+            .keep_out(listing.rows)
+            .into_iter()
+            .map(Rc::new)
+            .collect();
         win.list.set_empty_description(&listing.empty.description);
         win.list
             .set_rows(rows, &listing.empty.title, listing.empty.icon);
@@ -105,13 +113,15 @@ impl Pane for ListPane {
 
     fn append(&self, rows: Vec<ThreadSummary>) {
         if let Some(win) = self.window() {
+            let rows = win.in_flight.keep_out(rows);
             win.list.append(rows.into_iter().map(Rc::new).collect());
         }
     }
 
     fn replace(&self, changed: &[Named], rows: Vec<ThreadSummary>, title: &str, subtitle: &str) {
         let Some(win) = self.window() else { return };
-        win.list.replace_threads(changed, rows);
+        win.list
+            .replace_threads(changed, win.in_flight.keep_out(rows));
         win.follow_selection();
         win.list.set_title(title, subtitle);
     }
@@ -145,9 +155,39 @@ impl Pane for ListPane {
 }
 
 /// The store, the servers and the main loop, as the listing run asks them.
-pub(super) struct CoreLists(pub(super) Rc<Core>);
+pub(super) struct CoreLists(
+    Rc<Core>,
+    RefCell<Option<(Mailbox, Arc<crate::core::Lists>)>>,
+);
+
+impl CoreLists {
+    pub(super) fn new(core: Rc<Core>) -> Self {
+        Self(core, RefCell::new(None))
+    }
+
+    /// Give each first page its own cursors before work reaches the
+    /// runtime. An older task can start later without resetting this view.
+    fn reader(&self, mailbox: &Mailbox, held: &Loaded) -> Arc<crate::core::Lists> {
+        let mut current = self.1.borrow_mut();
+        if held.count > 0 {
+            if let Some((shown, reader)) = current.as_ref()
+                && shown == mailbox
+            {
+                return Arc::clone(reader);
+            }
+            return Arc::new(self.0.lists().reader());
+        }
+        let reader = Arc::new(self.0.lists().reader());
+        *current = Some((mailbox.clone(), Arc::clone(&reader)));
+        reader
+    }
+}
 
 impl Lists for CoreLists {
+    fn is_remote(&self, mailbox: &Mailbox, scope: &Scope) -> bool {
+        self.0.lists().is_remote_in(mailbox, scope)
+    }
+
     fn list(
         &self,
         mailbox: Mailbox,
@@ -155,7 +195,15 @@ impl Lists for CoreLists {
         view: View,
         held: Loaded,
     ) -> Answer<'_, anyhow::Result<Listing>> {
-        let lists = self.0.lists();
+        let lists = if matches!(
+            &mailbox,
+            Mailbox::Label { .. } | Mailbox::Standard { .. } | Mailbox::Unified(_)
+        ) && self.0.lists().is_remote_in(&mailbox, &scope)
+        {
+            self.reader(&mailbox, &held)
+        } else {
+            self.0.lists()
+        };
         Box::pin(
             self.0
                 .call(async move { lists.list(&mailbox, &scope, &view, held).await }),
@@ -212,23 +260,22 @@ impl Lists for CoreLists {
         Box::pin(async move { call.await.unwrap_or_default() })
     }
 
-    /// This never touches the window: a failure only logs, and the
-    /// listing on screen, which came from the store already, stays as it
-    /// is.
-    fn follow(&self, account_id: AccountId, server_mailbox: String) {
-        let Some(account) = self.0.account(account_id) else {
-            return;
-        };
-        self.0.spawn(async move {
-            if let Err(err) = account.follow_mailbox(&server_mailbox).await {
-                tracing::warn!(
-                    account = account_id,
-                    mailbox = %server_mailbox,
-                    error = %err,
-                    "could not follow the folder opened on screen"
-                );
-            }
-        });
+    fn account(&self, account_id: AccountId) -> Option<FollowAccount> {
+        self.0.account(account_id).map(FollowAccount::of)
+    }
+
+    fn follow(
+        &self,
+        account_id: AccountId,
+        server_mailbox: String,
+    ) -> Answer<'_, anyhow::Result<()>> {
+        let account = self.0.account(account_id);
+        Box::pin(async move {
+            let account = account.ok_or(mailrs_sync::SyncError::UnknownAccount(account_id))?;
+            self.0
+                .call(async move { account.follow_mailbox(&server_mailbox).await })
+                .await
+        })
     }
 
     fn sleep(&self, time: Duration) -> Answer<'_, ()> {

@@ -103,6 +103,9 @@ impl AccountSync {
     /// answer overtaken by history still adds the messages the store does
     /// not hold, and leaves the stored ones as history left them.
     async fn fetch_thread(&self, thread_id: &str, last: bool) -> Result<Written, SyncError> {
+        // An answer read while a write is on its way would put the mail
+        // back where the write took it from.
+        let _moves = self.mail.hold_moves().await;
         let account_id = self.account_id;
         let mut answer = match self.local_threads() {
             true => self.fetch_stored_thread(thread_id).await?,

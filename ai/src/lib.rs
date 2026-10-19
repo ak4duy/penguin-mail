@@ -145,9 +145,7 @@ impl Conversation {
     /// Changes the provider or model while retaining the conversation.
     pub fn set_provider(&mut self, config: ProviderConfig) {
         self.inner.set_provider(config);
-        if self.thinking {
-            self.inner.ask_for_thinking();
-        }
+        self.inner.set_thinking(self.thinking);
         if let Some(schema) = &self.format {
             self.inner.set_format(schema.clone());
         }
@@ -160,12 +158,17 @@ impl Conversation {
     }
 
     /// Asks the model to think before it answers, where the provider lets
-    /// a request ask. The assistant wants this; a translation does not,
-    /// because thinking makes a short job slow and costs tokens.
+    /// a request ask. Otherwise requests less reasoning where supported.
     pub fn with_thinking(mut self) -> Conversation {
-        self.thinking = true;
-        self.inner.ask_for_thinking();
+        self.set_thinking(true);
         self
+    }
+
+    /// Changes the next turn's reasoning preference without clearing history.
+    /// Claude Code follows its own settings; other providers may only reduce it.
+    pub fn set_thinking(&mut self, on: bool) {
+        self.thinking = on;
+        self.inner.set_thinking(on);
     }
 
     /// Asks for a reply that follows the JSON schema `schema`, where the

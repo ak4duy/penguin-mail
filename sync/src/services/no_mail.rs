@@ -40,6 +40,7 @@ impl MailBackend for NoMail {
             batch_limit: 1,
             keywords: &[],
             native_search: false,
+            paged_mailboxes: false,
             renames: false,
             restates: false,
             tags: false,

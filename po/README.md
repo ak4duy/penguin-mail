@@ -85,3 +85,7 @@ with `%-d de %B`. Leave the names to the codes: `%A`, `%a`, `%B` and `%b`
 come out in the language of your catalogue, taken from its `Language`
 header, whatever `LC_TIME` says. Check that header names your locale, such
 as `pt_PT`; a bare `de` gets the names of `de_DE`.
+
+Use the full locale for Japanese (`ja_JP.po`, `Language: ja_JP`) and Korean
+(`ko_KR.po`, `Language: ko_KR`). Their country codes differ from their
+language codes, so the date formatter cannot infer them from `ja` or `ko`.

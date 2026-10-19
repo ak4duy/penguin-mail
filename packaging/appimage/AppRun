@@ -1,0 +1,16 @@
+#!/bin/sh
+set -eu
+APPDIR=$(CDPATH= cd -- "$(dirname -- "$(readlink -f -- "$0")")" && pwd)
+export APPDIR
+# An explicit loader keeps the bundle's library search path out of the
+# environment inherited by GnuPG, browsers and assistant commands.
+command="$APPDIR/usr/bin/penguin-mail"
+preload='$ORIGIN/../lib/penguin-mail/appimage-runtime.so'
+case "${1:-}" in
+    --runtime-probe) command="$APPDIR/usr/lib/penguin-mail/probe"; preload='$ORIGIN/appimage-runtime.so'; shift ;;
+    --runtime-cli) command="$APPDIR/usr/bin/penguin-mail-cli"; shift ;;
+esac
+exec "$APPDIR/lib64/ld-linux-x86-64.so.2" \
+    --library-path "$APPDIR/usr/lib/x86_64-linux-gnu:$APPDIR/lib/x86_64-linux-gnu" \
+    --preload "$preload" \
+    "$command" "$@"

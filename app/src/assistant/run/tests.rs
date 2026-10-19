@@ -1188,13 +1188,29 @@ async fn dismiss_follow_up_takes_the_thread_off_the_list() {
         )
         .await;
     assert_eq!(done, json!({"dismissed": "t1"}));
+    let changed: Vec<(MailAction, Outcome)> = h
+        .asked()
+        .mail_changed
+        .clone()
+        .into_iter()
+        .map(|(action, outcome)| {
+            (
+                action,
+                Outcome {
+                    recorded: None,
+                    ..outcome
+                },
+            )
+        })
+        .collect();
     assert_eq!(
-        h.asked().mail_changed,
+        changed,
         [(
             MailAction::DismissFollowUp,
             Outcome {
                 done: vec![mailrs_domain::Target::thread(h.account_id, "t1")],
                 failed: vec![],
+                recorded: None,
             }
         )],
         "the window redraws what the action changed"

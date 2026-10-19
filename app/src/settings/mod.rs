@@ -303,6 +303,10 @@ impl Use {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(default)]
 pub struct AiSettings {
+    /// Allow reasoning in assistant requests where the provider supports it.
+    pub assistant_reasoning: bool,
+    /// Allow reasoning in email translation requests independently of chats.
+    pub translation_reasoning: bool,
     /// Language of answers, summaries and translations. Empty follows the interface.
     pub language: String,
     /// Invalidates in-flight translations without persisting a request lifetime.
@@ -336,6 +340,8 @@ pub struct AiSettings {
 impl Default for AiSettings {
     fn default() -> Self {
         AiSettings {
+            assistant_reasoning: true,
+            translation_reasoning: false,
             language: String::new(),
             language_revision: 0,
             provider: AiProvider::Off,
@@ -1292,6 +1298,19 @@ mod tests {
             Settings::open(&path).settings.assistant_allowed_tools,
             ["mcp:files/files__read"]
         );
+    }
+
+    #[test]
+    fn reasoning_preferences_survive_saving_independently() {
+        let settings: Settings = serde_json::from_value(serde_json::json!({
+            "ai": {"assistant_reasoning": false, "translation_reasoning": true}
+        }))
+        .unwrap();
+        let saved = toml::to_string(&settings).unwrap();
+        let restored: Settings = toml::from_str(&saved).unwrap();
+        let restored = serde_json::to_value(restored).unwrap();
+        assert_eq!(restored["ai"]["assistant_reasoning"], false);
+        assert_eq!(restored["ai"]["translation_reasoning"], true);
     }
 
     #[test]

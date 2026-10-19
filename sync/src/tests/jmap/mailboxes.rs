@@ -66,6 +66,7 @@ async fn the_capabilities_are_jmap_s() {
                 "$mdnsent"
             ],
             native_search: false,
+            paged_mailboxes: false,
             renames: false,
             restates: true,
             tags: false,

@@ -2028,3 +2028,10 @@ row.expander:checked > box > list > row.header image.expander-row-arrow {
 }
 
 .assistant-stop { background: transparent; border: 1px solid alpha(currentColor, 0.22); }
+
+/* The command an AppImage shows when the sandbox is blocked. */
+.sandbox-command {
+  padding: 12px 14px;
+  font-family: "DejaVu Sans Mono", monospace;
+  font-size: 0.9em;
+}

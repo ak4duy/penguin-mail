@@ -1207,6 +1207,10 @@ export GNUPGHOME="$sandbox/gnupg"
 mkdir -m 700 "$GNUPGHOME"
 export GSETTINGS_BACKEND=memory
 export PENGUIN_MAIL_LOCALE_DIR="$PWD/target/locale"
+# Run from a Wayland desktop, GDK_BACKEND=wayland would keep GTK off the
+# hidden X display, and the demo would end before it reached the bus.
+export GDK_BACKEND=x11
+unset WAYLAND_DISPLAY
 
 app=$PWD/target/debug/penguin-mail
 

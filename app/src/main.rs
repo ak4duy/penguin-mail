@@ -4,6 +4,8 @@
 mod accent_contrast;
 mod add_account;
 mod app;
+#[cfg(any(feature = "packaging-appimage", test))]
+mod appimage;
 mod assistant;
 mod attachcheck;
 mod autostart;
@@ -107,6 +109,8 @@ fn usage() -> String {
 }
 
 fn main() -> glib::ExitCode {
+    #[cfg(feature = "packaging-appimage")]
+    appimage::prepare().expect("could not prepare the AppImage");
     #[cfg(target_os = "macos")]
     bundle::prepare().expect("could not prepare the application bundle");
     // On macOS this has to come before GTK starts; see `web`.
@@ -232,6 +236,13 @@ fn main() -> glib::ExitCode {
     gio_app.connect_startup(move |gio_app| {
         gio::resources_register_include!("penguin-mail.gresource")
             .expect("the resources are built into the binary");
+        #[cfg(feature = "packaging-appimage")]
+        if let sandbox @ (appimage::Sandbox::Missing | appimage::Sandbox::Blocked { .. }) =
+            appimage::sandbox()
+        {
+            ui::sandbox_setup::present(gio_app, &sandbox);
+            return;
+        }
         match core::Core::open(demo) {
             Ok(core) => {
                 *started.borrow_mut() = Some(app::App::new(
@@ -264,7 +275,13 @@ fn main() -> glib::ExitCode {
     // The MCP servers live in a static, which nothing drops, and a stdio
     // server would outlive the app without this.
     match finished.borrow().as_ref() {
-        Some(app) => app.before_leaving(),
+        Some(app) => {
+            app.before_leaving();
+            // Only the copy that ran the app; one that handed its launch to
+            // it leaves the files that copy runs from.
+            #[cfg(feature = "packaging-appimage")]
+            appimage::leave();
+        }
         None => assistant::sources::mcp::registry().stop_all(),
     }
     code
@@ -328,6 +345,10 @@ pub fn ensure_gtk() {
     }
     gtk::init().expect("GTK starts on this display");
     adw::init().expect("libadwaita starts");
+    #[cfg(feature = "packaging-appimage")]
+    if let Some(context) = webkit::WebContext::default() {
+        context.add_path_to_sandbox(appimage::root().expect("AppImage root is configured"), true);
+    }
     if let Some(display) = gdk::Display::default() {
         let icons = gtk::IconTheme::for_display(&display);
         icons.add_resource_path("/io/github/c9dev/PenguinMail/icons");

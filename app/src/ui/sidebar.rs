@@ -314,7 +314,11 @@ pub struct Sidebar {
     unread: Cell<i64>,
     /// Invitations waiting for an answer, for the Calendar toggle's.
     waiting: Cell<i64>,
-    title: adw::WindowTitle,
+    /// "Mailboxes" or "Calendars" while the switch hides. A label that
+    /// never shortens, unlike `adw::WindowTitle`: the header gives its
+    /// start what that asks for, and on macOS the window buttons share
+    /// the row, which left a shortening title at "Mail…".
+    title: gtk::Label,
     /// The mailbox list, or the calendar's own sidebar.
     content: gtk::Stack,
     list: gtk::ListBox,
@@ -371,7 +375,10 @@ impl Sidebar {
             .vexpand(true)
             .child(&list)
             .build();
-        let title = adw::WindowTitle::new(&gettext("Mailboxes"), "");
+        let title = gtk::Label::builder()
+            .label(gettext("Mailboxes"))
+            .css_classes(["title"])
+            .build();
         let switch = adw::ToggleGroup::builder()
             .css_classes(["round", "space-switch"])
             .valign(gtk::Align::Center)
@@ -706,7 +713,7 @@ impl Sidebar {
         }
         self.content.set_visible_child_name("calendar");
         self.mail_showing.set(false);
-        self.title.set_title(&gettext("Calendars"));
+        self.title.set_label(&gettext("Calendars"));
         self.sync_foot();
         self.sync_badges();
     }
@@ -715,7 +722,7 @@ impl Sidebar {
     pub fn show_mail(&self) {
         self.content.set_visible_child_name("mail");
         self.mail_showing.set(true);
-        self.title.set_title(&gettext("Mailboxes"));
+        self.title.set_label(&gettext("Mailboxes"));
         self.sync_foot();
         self.sync_badges();
     }

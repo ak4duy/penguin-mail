@@ -1144,6 +1144,7 @@ impl<A: Accounts> Tools<A> {
                         error: err.clone(),
                     })
                     .collect(),
+                recorded: None,
             });
         self.effects.mail_changed(&action, &outcome);
         outcome

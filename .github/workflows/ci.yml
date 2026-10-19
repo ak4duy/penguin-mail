@@ -32,6 +32,7 @@ jobs:
       imap: ${{ steps.paths.outputs.imap }}
       jmap: ${{ steps.paths.outputs.jmap }}
       packaging: ${{ steps.paths.outputs.packaging }}
+      appimage: ${{ steps.paths.outputs.appimage }}
       macos: ${{ steps.paths.outputs.macos }}
       full: ${{ steps.paths.outputs.full }}
     steps:
@@ -79,6 +80,8 @@ jobs:
           imap=$(any '^(imap|sync|testmail|pop3|sieve|dav|discover|mime|store|domain)/|^(Cargo\.lock|Cargo\.toml|scripts/test-images\.sh|\.github/workflows/ci\.yml)$')
           jmap=$(any '^(jmap|sync|testmail|discover)/|^(Cargo\.lock|Cargo\.toml|scripts/test-images\.sh|\.github/workflows/ci\.yml)$')
           packaging=$(any '^(packaging|snap|app/data)/|^(Cargo\.lock|Cargo\.toml)$|^scripts/flatpak|^scripts/[^/]*macos|^\.github/workflows/|(^|/)build\.rs$')
+          # The AppImage bundles the app itself, so any change to it counts.
+          appimage=$(any '^(app|packaging/appimage)/|^scripts/(appimage|test-appimage|stage)\.sh$|^(Cargo\.lock|Cargo\.toml)$|^\.github/workflows/(appimage|ci)\.yml$')
           # macOS-only sources: files under macos paths, and Rust files that
           # name target_os = "macos" (find them with a grep over *.rs).
           macos=true
@@ -99,6 +102,7 @@ jobs:
             echo "imap=$imap"
             echo "jmap=$jmap"
             echo "packaging=$packaging"
+            echo "appimage=$appimage"
             echo "macos=$macos"
             echo "full=$full"
           } >> "$GITHUB_OUTPUT"
@@ -115,6 +119,18 @@ jobs:
       # Apple silicon app only.
       arches: ${{ needs.changes.outputs.full == 'true' && '["arm64","x86_64"]' || '["arm64"]' }}
     # Pull requests exercise packaging without the release credentials.
+
+  nix:
+    name: Nix package and development shell
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
+    uses: ./.github/workflows/nix.yml # zizmor: ignore[self-repository]
+
+  appimage:
+    name: AppImage builds and runs
+    needs: changes
+    if: needs.changes.outputs.appimage == 'true' || needs.changes.outputs.full == 'true'
+    uses: ./.github/workflows/appimage.yml # zizmor: ignore[self-repository]
 
   gate:
     name: Tests, clippy, translations, accessibility

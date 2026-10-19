@@ -1049,7 +1049,7 @@ impl<'a> Run<'a> {
             )
             .await
             .expect("a delete");
-        self.a_moved_series_takes_its_changed_occurrence(&calendar, &home.id, start)
+        self.a_moved_series_takes_its_changed_occurrence(&calendar, &home.id)
             .await;
     }
 
@@ -1060,12 +1060,15 @@ impl<'a> Run<'a> {
         &self,
         calendar: &AnyCalendar,
         home: &str,
-        start: i64,
     ) {
         use mailrs_domain::calendar::{Event, Notify, occurrence_id};
         const HOUR: i64 = 3_600_000;
         const WEEK: i64 = 7 * 86_400_000;
-        let start = start - start % HOUR;
+        // Cross Lisbon's fall clock change, away from the repeated hour.
+        // The next weekly occurrence is 169 hours later, not 168.
+        let start = chrono::DateTime::parse_from_rfc3339("2026-10-18T12:00:00Z")
+            .expect("the fixed series date")
+            .timestamp_millis();
         let series = Event {
             calendar: home.to_string(),
             uid: self.id("weekly"),
@@ -1081,11 +1084,17 @@ impl<'a> Run<'a> {
             .put_event(&series, None, true, Notify::Nobody)
             .await
             .unwrap_or_else(|err| panic!("{:?}: {err}", self.kind()));
-        let original = start + WEEK;
+        let (original, _) = mailrs_domain::calendar::expand(&made, start, start + 2 * WEEK)
+            .into_iter()
+            .find(|(at, _)| *at > start)
+            .expect("the next weekly occurrence");
+        assert_eq!(original - start, WEEK + HOUR);
         let late = Event {
             id: occurrence_id(&made, original),
             series: Some(made.id.clone()),
             original_start: Some(original),
+            start: original,
+            end: original + HOUR,
             etag: String::new(),
             rules: Vec::new(),
             title: "Watering, late".into(),
@@ -1130,6 +1139,7 @@ impl<'a> Run<'a> {
             "{:?}",
             self.kind()
         );
+        assert_eq!(changed[0].start, original + HOUR, "{:?}", self.kind());
         let series = read
             .events
             .iter()

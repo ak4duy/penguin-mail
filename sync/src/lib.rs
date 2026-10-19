@@ -58,8 +58,8 @@ pub use account::{
     Searched, window_longer, window_reach,
 };
 pub use actions::{
-    Accounts, Categorized, Failure, History, MailAction, MailActions, NewLabels, Outcome, Returned,
-    Undone,
+    Accounts, Categorized, Failure, History, MailAction, MailActions, NewLabels, Outcome, Recorded,
+    Returned, Undone,
 };
 pub use api::{AccountClient, DraftRef, GmailApi, SavedDraft};
 pub use backoff::{MOST_TRIES, backoff_delay, poll_offset, retry_delay, with_jitter};

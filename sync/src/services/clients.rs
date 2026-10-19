@@ -188,7 +188,7 @@ either_client! {
         fn well_known(names: &[&str]) -> Graphed<Vec<Option<MailFolder>>>;
         fn folders(parent: Option<&str>, next: Option<&str>) -> Graphed<Page<MailFolder>>;
         fn categories() -> Graphed<Vec<MasterCategory>>;
-        fn message_delta(folder: &str, link: Option<&str>, received_since: &str) -> Graphed<DeltaPage<mailrs_graph::Message>>;
+        fn message_delta(folder: &str, link: Option<&str>, received_since: Option<&str>) -> Graphed<DeltaPage<mailrs_graph::Message>>;
         fn list_messages(listing: &Listing, next: Option<&str>) -> Graphed<Page<mailrs_graph::Message>>;
         fn messages(ids: &[String]) -> Graphed<Vec<Graphed<mailrs_graph::Message>>>;
         fn raw(id: &str, limit: usize) -> Graphed<Vec<u8>>;

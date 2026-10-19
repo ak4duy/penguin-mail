@@ -1,5 +1,6 @@
 //! Where the running program lives on disk.
 
+#[cfg(any(not(feature = "packaging-appimage"), test))]
 use std::ffi::OsStr;
 use std::io;
 use std::path::PathBuf;
@@ -10,13 +11,25 @@ use std::path::PathBuf;
 /// executable as `<path> (deleted)`. Starting that path fails, so this
 /// answers with the new file that took its place.
 pub fn path() -> io::Result<PathBuf> {
-    std::env::current_exe().map(replaced)
+    #[cfg(feature = "packaging-appimage")]
+    {
+        crate::appimage::binary()
+    }
+    #[cfg(not(feature = "packaging-appimage"))]
+    {
+        std::env::current_exe().map(replaced)
+    }
 }
 
 /// The command that starts Penguin Mail again: what a restart runs and
 /// what the login item names. Every relaunch goes through here, so a
 /// package that starts the app some other way changes this one function.
 pub fn launcher() -> io::Result<PathBuf> {
+    #[cfg(feature = "packaging-appimage")]
+    {
+        crate::appimage::launcher()
+    }
+    #[cfg(not(feature = "packaging-appimage"))]
     path().map(|exe| {
         launcher_path(
             exe,
@@ -26,6 +39,25 @@ pub fn launcher() -> io::Result<PathBuf> {
     })
 }
 
+/// The command and flags the login item runs. Only an AppImage started
+/// without FUSE needs a flag, to unpack itself again at login.
+pub fn login() -> io::Result<(PathBuf, &'static [&'static str])> {
+    #[cfg(feature = "packaging-appimage")]
+    {
+        crate::appimage::login()
+    }
+    #[cfg(not(feature = "packaging-appimage"))]
+    launcher().map(|exe| (exe, &[][..]))
+}
+
+/// Whether a restart must replace this process rather than start a copy
+/// beside it and quit. An AppImage's files go away once this process
+/// exits; see `appimage::launcher`.
+pub fn restarts_in_place() -> bool {
+    cfg!(feature = "packaging-appimage")
+}
+
+#[cfg(any(not(feature = "packaging-appimage"), test))]
 fn launcher_path(
     exe: PathBuf,
     packaging: crate::packaging::Packaging,
@@ -54,6 +86,7 @@ fn launcher_path(
     }
 }
 
+#[cfg(any(not(feature = "packaging-appimage"), test))]
 fn replaced(exe: PathBuf) -> PathBuf {
     match exe.to_str().and_then(|s| s.strip_suffix(" (deleted)")) {
         Some(installed) => PathBuf::from(installed),

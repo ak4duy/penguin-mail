@@ -243,7 +243,7 @@ fn lists_muted(mailbox: &Mailbox) -> bool {
 
 /// Whether `row` is mail `target` names: the thread, or its one message
 /// when the target names one.
-fn covers(target: &Target, row: &ThreadSummary) -> bool {
+pub(super) fn covers(target: &Target, row: &ThreadSummary) -> bool {
     target.account_id == row.account_id
         && target.thread_id == row.id
         && (target.message_id.is_none() || target.message_id == row.message_id)
@@ -359,6 +359,7 @@ mod tests {
         Outcome {
             done: vec![Target::thread(1, "t1")],
             failed: vec![],
+            recorded: None,
         }
     }
 
@@ -374,6 +375,7 @@ mod tests {
                 target: Target::thread(1, "t1"),
                 error: "gone".into(),
             }],
+            recorded: None,
         };
         let archive = MailAction::Triage(TriageAction::Archive);
         for cause in [

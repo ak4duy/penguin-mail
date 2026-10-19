@@ -15,6 +15,7 @@
 
 use std::collections::HashMap;
 use std::ops::RangeInclusive;
+use std::sync::Arc;
 use std::time::Duration;
 
 use mailrs_domain::{
@@ -24,7 +25,7 @@ use mailrs_gmail::LabelColor;
 use mailrs_mime::Parts;
 use mailrs_store::remote_refs::{self, Resolved};
 use mailrs_store::{Db, messages};
-use tokio::sync::{Mutex, MutexGuard};
+use tokio::sync::{Mutex, MutexGuard, OwnedMutexGuard};
 
 use crate::api::{DraftRef, SavedDraft};
 use crate::{
@@ -41,18 +42,47 @@ pub(crate) struct StoreMail {
     /// Whether the server gives a message a new name when it moves; read
     /// once, since a service's capabilities never change.
     renames: bool,
-    /// Taken on a folder server by a write from its first server command
-    /// to the moment its moved messages' refs are recorded, and by every
-    /// look that can delete mail. A look in between would read a moved
-    /// message's old place as expunged and delete it.
-    moving: Mutex<()>,
+    /// Taken by a write from its change to the store to the moment the
+    /// server has it and its moved messages' refs are recorded, and by
+    /// every sync pass that writes what the server says. A pass in between
+    /// would put the mail back where the write took it from, and on a
+    /// folder server read a moved message's old place as expunged and
+    /// delete it.
+    moving: Arc<Mutex<()>>,
 }
 
-/// The move lock, held: what a write that moves mail and a look that can
-/// delete it do while holding it. On a label server it holds nothing.
+/// The move lock, held: what a write and a sync pass do while holding it.
 pub(crate) struct Moves<'a> {
     mail: &'a StoreMail,
-    _held: Option<MutexGuard<'a, ()>>,
+    _held: MutexGuard<'a, ()>,
+}
+
+/// A tentative first load. Its lock and rollback live through a queued
+/// store write even if the caller stops waiting for that write.
+pub(crate) struct Following {
+    mail: AnyMail,
+    mailbox: Option<String>,
+    _moving: OwnedMutexGuard<()>,
+}
+
+impl Following {
+    pub(crate) async fn store<F, R>(self, db: &Db, write: F) -> mailrs_store::Result<R>
+    where
+        F: FnOnce(&rusqlite::Connection) -> mailrs_store::Result<R> + Send + 'static,
+        R: Send + 'static,
+    {
+        let (value, mut following) = db.write(move |c| Ok((write(c)?, self))).await?;
+        following.mailbox = None;
+        Ok(value)
+    }
+}
+
+impl Drop for Following {
+    fn drop(&mut self) {
+        if let Some(mailbox) = &self.mailbox {
+            self.mail.reset_follow(mailbox);
+        }
+    }
 }
 
 /// A message by its store id, with the name the server knows it by, for
@@ -87,7 +117,7 @@ impl StoreMail {
             db,
             account_id,
             renames,
-            moving: Mutex::new(()),
+            moving: Arc::new(Mutex::new(())),
         }
     }
 
@@ -104,17 +134,15 @@ impl StoreMail {
         &self.mail
     }
 
-    /// Waits for any write still moving mail and keeps others out until
-    /// the answer drops. A label server names a message the same wherever
-    /// it sits, so nothing there waits.
+    /// Waits for any write or sync pass still under way and keeps others
+    /// out until the answer drops. A write changes the store before the
+    /// server, so a pass that read the server in between would put the
+    /// mail back where it was, on any server. On IMAP a move also renames
+    /// the message, which a pass must not read halfway.
     pub(crate) async fn hold_moves(&self) -> Moves<'_> {
-        let held = match self.renames {
-            true => Some(self.moving.lock().await),
-            false => None,
-        };
         Moves {
             mail: self,
-            _held: held,
+            _held: self.moving.lock().await,
         }
     }
 
@@ -306,6 +334,21 @@ impl StoreMail {
         self.refs_as_stored(found).await
     }
 
+    /// One page of an explicit server mailbox, under store ids. The
+    /// cursor stays in server names even when a moved message's id does not.
+    pub(crate) async fn mailbox_page(
+        &self,
+        mailbox: &str,
+        cursor: Option<&str>,
+        limit: usize,
+    ) -> Result<Backfill, SyncError> {
+        let page = self.mail.mailbox_page(mailbox, cursor, limit).await?;
+        Ok(Backfill {
+            refs: self.refs_as_stored(page.refs).await?,
+            next: page.next,
+        })
+    }
+
     /// The sent message carrying the `Message-ID` header `message_id`.
     pub(crate) async fn find_sent(&self, message_id: &str) -> Result<Option<String>, SyncError> {
         match self.mail.find_sent(message_id).await? {
@@ -439,8 +482,13 @@ impl StoreMail {
         self.mail.set_of(id)
     }
 
-    pub(crate) fn follow(&self, mailbox: &str) -> bool {
-        self.mail.follow(mailbox)
+    pub(crate) async fn follow(&self, mailbox: &str) -> Option<Following> {
+        let moving = Arc::clone(&self.moving).lock_owned().await;
+        self.mail.follow(mailbox).then(|| Following {
+            mail: self.mail.clone(),
+            mailbox: Some(mailbox.to_string()),
+            _moving: moving,
+        })
     }
 
     pub(crate) async fn look_for_mail(&self) -> Look {
@@ -621,7 +669,9 @@ impl Moves<'_> {
         let ids: Vec<String> = changes
             .iter()
             .filter_map(|change| match change {
-                RemoteChange::Gained { id, .. } | RemoteChange::Lost { id, .. } => Some(id.clone()),
+                RemoteChange::Gained { id, .. }
+                | RemoteChange::Refresh { id, .. }
+                | RemoteChange::Lost { id, .. } => Some(id.clone()),
                 _ => None,
             })
             .collect();
@@ -658,6 +708,7 @@ fn named_in(change: &RemoteChange) -> Option<&str> {
         RemoteChange::Added { id, .. }
         | RemoteChange::Deleted { id }
         | RemoteChange::Gained { id, .. }
+        | RemoteChange::Refresh { id, .. }
         | RemoteChange::Lost { id, .. } => Some(id),
         RemoteChange::Vanished { .. }
         | RemoteChange::Holds { .. }
@@ -687,6 +738,10 @@ fn change_as_stored(
         } => RemoteChange::Gained {
             id: stored_id(&id, resolved)?,
             thread_id,
+            memberships,
+        },
+        RemoteChange::Refresh { id, memberships } => RemoteChange::Refresh {
+            id: stored_id(&id, resolved)?,
             memberships,
         },
         RemoteChange::Lost { id, memberships } => RemoteChange::Lost {
@@ -729,6 +784,14 @@ fn still_to_apply(
                 thread_id,
                 memberships,
             })
+        }
+        RemoteChange::Refresh { id, memberships } => {
+            let current = held.get(&id)?;
+            let memberships: Vec<_> = memberships
+                .into_iter()
+                .filter(|m| !current.has(m))
+                .collect();
+            (!memberships.is_empty()).then_some(RemoteChange::Refresh { id, memberships })
         }
         RemoteChange::Lost { id, memberships } => {
             let current = held.get(&id);
@@ -794,6 +857,45 @@ fn renamed(found: Found, resolved: &HashMap<String, Resolved>) -> Found {
 
 #[cfg(test)]
 mod tests {
+    #[tokio::test]
+    async fn a_queued_first_load_keeps_polling_out_after_cancellation() {
+        use crate::tests::imap_harness;
+        use std::time::Duration;
+
+        let h = imap_harness().await;
+        h.imap.add_mailbox("Work", None);
+        h.bootstrap().await;
+        let following = h.sync.mail.follow("Work").await.unwrap();
+        let (release, held) = std::sync::mpsc::channel::<()>();
+        let (entered, ready) = tokio::sync::oneshot::channel();
+        let db = h.db.clone();
+        let writer = tokio::spawn(async move {
+            db.write(move |_| {
+                let _ = entered.send(());
+                let _ = held.recv();
+                Ok(())
+            })
+            .await
+            .unwrap();
+        });
+        ready.await.unwrap();
+        let mut storing = Box::pin(following.store(&h.db, |_| Ok(())));
+        // Db::write queues its closure before its first pending await.
+        assert!(futures::poll!(storing.as_mut()).is_pending());
+        drop(storing);
+        assert!(
+            tokio::time::timeout(Duration::from_millis(50), h.sync.incremental())
+                .await
+                .is_err()
+        );
+        drop(release);
+        writer.await.unwrap();
+        h.db.write(|_| Ok(())).await.unwrap();
+        assert!(!h.is_followed("Work"));
+        h.sync.follow_mailbox("Work").await.unwrap();
+        assert!(h.is_followed("Work"));
+    }
+
     use std::collections::HashMap;
 
     use mailrs_domain::{Location, Membership, Memberships};

@@ -1,19 +1,13 @@
 name: Nix
 
+# CI calls this for every code change, so its verdict, which a release
+# waits for, includes the flake.
 on:
-  push:
-    branches: [main]
-    paths-ignore: ['**/*.md', 'docs/**', '.github/ISSUE_TEMPLATE/**']
-  pull_request:
-    paths-ignore: ['**/*.md', 'docs/**', '.github/ISSUE_TEMPLATE/**']
+  workflow_call:
   workflow_dispatch:
 
 permissions:
   contents: read
-
-concurrency:
-  group: nix-${{ github.ref }}-${{ github.event_name == 'pull_request' && 'pr' || github.sha }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   build:

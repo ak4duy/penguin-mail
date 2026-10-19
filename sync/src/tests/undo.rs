@@ -40,6 +40,52 @@ async fn run_and_undo(h: &Harness, targets: &[Target], action: MailAction) {
     assert_eq!(undone.outcome.done, targets);
 }
 
+/// Each toast's Undo names one action, so it must reverse that one even
+/// when later actions sit above it on the stack.
+#[tokio::test]
+async fn undoing_an_action_by_its_record_leaves_the_later_ones() {
+    let h = harness().await;
+    let now = now_millis();
+    h.fake.seed(meta("a", "t1", now - 1000, &["INBOX"]));
+    h.fake.seed(meta("b", "t2", now, &["INBOX"]));
+    h.bootstrap_all().await;
+    let actions = actions(&h);
+    let trash = || MailAction::Triage(TriageAction::Trash);
+    let first = actions
+        .run(
+            &[Target::thread(h.account_id, "t1")],
+            trash(),
+            History::Record,
+        )
+        .await;
+    let second = actions
+        .run(
+            &[Target::thread(h.account_id, "t2")],
+            trash(),
+            History::Record,
+        )
+        .await;
+    assert!(first.failed.is_empty() && second.failed.is_empty());
+
+    let undone = actions
+        .undo_this(first.recorded.expect("the first was recorded"))
+        .await
+        .expect("an undo");
+    assert_eq!(undone.outcome.done, [Target::thread(h.account_id, "t1")]);
+    assert_eq!(h.labels_of("a").await, ["INBOX"], "the first came back");
+    assert!(
+        h.labels_of("b").await.contains(&"TRASH".to_string()),
+        "the second stays"
+    );
+
+    let next = actions.undo().await.expect("the second is still there");
+    assert_eq!(next.outcome.done, [Target::thread(h.account_id, "t2")]);
+    assert!(
+        actions.undo_this(first.recorded.unwrap()).await.is_none(),
+        "an action is undone once"
+    );
+}
+
 #[tokio::test]
 async fn undoing_trash_on_an_archived_thread_leaves_it_archived() {
     let h = harness().await;

@@ -441,7 +441,9 @@ impl Recipients {
             let Some(index) = field.focused_chip() else {
                 return glib::Propagation::Proceed;
             };
-            if modifiers.intersects(gdk::ModifierType::CONTROL_MASK | gdk::ModifierType::ALT_MASK) {
+            if modifiers.intersects(
+                gdk::ModifierType::CONTROL_MASK | gdk::ModifierType::ALT_MASK | crate::ui::PRIMARY,
+            ) {
                 return glib::Propagation::Proceed;
             }
             field.chip_key(index, key)

@@ -1,0 +1,129 @@
+name: AppImage
+
+# CI calls this when the app or its packaging changes, without the OAuth
+# secrets, and the release calls it with them for the published file.
+on:
+  workflow_call:
+    secrets:
+      PENGUIN_MAIL_GOOGLE_CLIENT_ID:
+        required: false
+      PENGUIN_MAIL_GOOGLE_CLIENT_SECRET:
+        required: false
+      MICROSOFT_CLIENT_ID:
+        required: false
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build the AppImage
+    runs-on: ubuntu-latest
+    container: ubuntu:26.04@sha256:f144425ff09be612d6d9ad965196e9cdc23dae1f42110a8a11a3e9a8198759f7
+    timeout-minutes: 90
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    env:
+      CARGO_TERM_COLOR: always
+      CARGO_TARGET_DIR: target/appimage
+    steps:
+      - name: Install git
+        run: apt-get update && apt-get install -y --no-install-recommends git ca-certificates
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install build dependencies
+        run: |
+          scripts/ci-deps.sh
+          apt-get install -y --no-install-recommends python3 libglib2.0-bin \
+              libgl1-mesa-dri libegl-mesa0 libgles2 glib-networking glycin-loaders \
+              adwaita-icon-theme fonts-dejavu-core fonts-dejavu-mono fontconfig-config
+      - name: Put cargo on PATH
+        run: echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
+      - name: Read the version
+        id: version
+        run: |
+          version=$(sed -n '/^\[workspace.package\]/,/^\[/s/^version = "\(.*\)"/\1/p' Cargo.toml)
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+      - name: Build
+        env:
+          PENGUIN_MAIL_GOOGLE_CLIENT_ID: ${{ secrets.PENGUIN_MAIL_GOOGLE_CLIENT_ID }}
+          PENGUIN_MAIL_GOOGLE_CLIENT_SECRET: ${{ secrets.PENGUIN_MAIL_GOOGLE_CLIENT_SECRET }}
+          PENGUIN_MAIL_MICROSOFT_CLIENT_ID: ${{ secrets.MICROSOFT_CLIENT_ID }}
+        run: cargo build --locked --release -p mailrs -p mailrs-cli --features mailrs/packaging-appimage
+      - name: Pack
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          scripts/stage.sh appimage-tree
+          scripts/appimage.sh appimage-tree "$VERSION" dist
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: penguin-mail-${{ steps.version.outputs.version }}-appimage
+          path: dist/*.AppImage
+          if-no-files-found: error
+
+  test:
+    name: Test on ${{ matrix.system }}
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - system: Ubuntu 22.04
+            image: ubuntu:22.04@sha256:5ec03bb3441e8b0bf3b4f9cd4629a1ae763010dc3035bb8da3ae6cf026486401
+          - system: Ubuntu 24.04
+            image: ubuntu:24.04@sha256:534baea6a22c03a63003dbc8dbe78fe34bc0d7e595d9a9dc9834884ff530eb55
+          - system: Debian 13
+            image: debian:13@sha256:913f6706df59a68922d1dd08f78c2476560a8d367897200a6005b00e5f67c2d5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: penguin-mail-${{ needs.build.outputs.version }}-appimage
+          path: dist
+      # The containers share the runner's kernel and AppArmor, and the
+      # runner's Ubuntu 24.04 stops bubblewrap. The job below tests that.
+      - name: Allow user namespaces for the containers
+        run: |
+          if [ -f /proc/sys/kernel/apparmor_restrict_unprivileged_userns ]; then
+            sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+          fi
+      - name: Test the artifact
+        env:
+          BASE_IMAGE: ${{ matrix.image }}
+        run: |
+          chmod +x dist/*.AppImage
+          scripts/test-appimage.sh dist/*.AppImage "$BASE_IMAGE"
+
+  blocked:
+    name: Ubuntu 24.04's sandbox rules
+    needs: build
+    # The runner itself, not a container: a stock Ubuntu 24.04, where
+    # AppArmor stops bubblewrap for any program no profile names.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: penguin-mail-${{ needs.build.outputs.version }}-appimage
+          path: dist
+      - name: Install the desktop pieces
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends xvfb xauth bubblewrap xdg-dbus-proxy \
+              at-spi2-core python3-gi gir1.2-atspi-2.0 libglib2.0-bin
+      - name: The app shows the command, and the command allows it
+        run: |
+          chmod +x dist/*.AppImage
+          home=$(mktemp -d)
+          HOME=$home GDK_BACKEND=x11 GSK_RENDERER=cairo \
+              xvfb-run -a dbus-run-session -- python3 packaging/appimage/blocked.py dist/*.AppImage

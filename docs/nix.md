@@ -30,6 +30,11 @@ nix run github:c9dev/penguin-mail -- --demo
 nix profile install github:c9dev/penguin-mail#penguin-mail
 ```
 
+That follows `main`. For a released version, name its tag, such as
+`github:c9dev/penguin-mail/v1.0.9#penguin-mail`. Releases publish no Nix
+files: the flake builds the tagged source, and a release goes out only
+after CI has built the flake from that commit.
+
 On NixOS, add this repository as an input to your system flake and put
 `inputs.penguin-mail.packages.${pkgs.stdenv.hostPlatform.system}.penguin-mail`
 in `environment.systemPackages`, or in Home Manager's `home.packages`.
@@ -93,8 +98,9 @@ For translation work, install the Rust string extractor once with
 `cargo install --locked xtr --version 0.1.11`, as the regular build does.
 
 `nix flake check` builds the package and checks both executables' version
-commands. The Nix workflow also evaluates both Linux architectures and
-checks the development shell's compiler and native libraries.
+commands. CI runs the Nix workflow for every code change, and a release
+waits for CI to pass. The workflow also evaluates both Linux architectures
+and checks the development shell's compiler and native libraries.
 It also runs the skill sandbox tests with the Nix runtime and requires
 bubblewrap to work, so those tests cannot pass by skipping it.
 Run the workspace test suite and

@@ -46,6 +46,8 @@ apps:
       - desktop-legacy
       - wayland
       - x11
+      # The gpu extension supplies Mesa, but device access needs this plug.
+      - opengl
       # The tray icon reaches the shell's StatusNotifier host through this.
       - unity7
       - browser-support

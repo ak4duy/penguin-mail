@@ -368,7 +368,7 @@ pub(super) fn message_delta(
     s: &mut GraphState,
     folder: &str,
     link_text: Option<&str>,
-    since: &str,
+    since: Option<&str>,
 ) -> Answer<DeltaPage<Message>> {
     s.refuses(Area::Mail)?;
     if !s.folders.contains_key(folder) {
@@ -379,7 +379,7 @@ pub(super) fn message_delta(
     // filter after a `#since=` on each link it gives, and answers such a
     // change as a removal, which the adapter checks and drops.
     let (link_text, since_ms) = match link_text {
-        None => (None, millis(since)),
+        None => (None, since.map(millis).unwrap_or(i64::MIN)),
         Some(text) => match text.split_once("#since=") {
             Some((link, ms)) => (Some(link), ms.parse().unwrap_or(0)),
             None => (Some(text), 0),
@@ -873,7 +873,7 @@ mod tests {
         let (mut seen, mut link) = (Vec::new(), link);
         loop {
             let page = fake
-                .message_delta(folder, link.as_deref(), SINCE)
+                .message_delta(folder, link.as_deref(), Some(SINCE))
                 .await
                 .unwrap();
             seen.extend(page.value);
@@ -915,7 +915,7 @@ mod tests {
         let inbox = fake.folder_id("inbox");
         let (_, link) = to_the_end(&fake, &inbox, None).await;
         fake.expire_links();
-        let lost = fake.message_delta(&inbox, Some(&link), SINCE).await;
+        let lost = fake.message_delta(&inbox, Some(&link), Some(SINCE)).await;
         assert!(matches!(lost, Err(GraphError::SyncStateLost)));
     }
 
@@ -925,7 +925,11 @@ mod tests {
         let inbox = fake.folder_id("inbox");
         fake.expire_links();
         let (_, link) = to_the_end(&fake, &inbox, None).await;
-        assert!(fake.message_delta(&inbox, Some(&link), SINCE).await.is_ok());
+        assert!(
+            fake.message_delta(&inbox, Some(&link), Some(SINCE))
+                .await
+                .is_ok()
+        );
     }
 
     #[tokio::test]
@@ -941,7 +945,7 @@ mod tests {
                 },
             );
         }
-        let page = fake.message_delta(&inbox, None, SINCE).await.unwrap();
+        let page = fake.message_delta(&inbox, None, Some(SINCE)).await.unwrap();
         assert_eq!(page.value.len(), 50);
         assert!(page.next_link.is_some() && page.delta_link.is_none());
     }

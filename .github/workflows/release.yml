@@ -51,7 +51,9 @@ jobs:
     name: CI passed on this commit
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
-    timeout-minutes: 105
+    # CI's longest path is the AppImage: up to 90 minutes to build and 20
+    # to test.
+    timeout-minutes: 125
     permissions:
       actions: read # reads CI's runs on this commit
     steps:
@@ -61,7 +63,7 @@ jobs:
           REPO: ${{ github.repository }}
           SHA: ${{ github.sha }}
         run: |
-          for _ in $(seq 200); do
+          for _ in $(seq 240); do
             # A failed call is asked again on the next round.
             states=$(gh api "repos/$REPO/actions/workflows/ci.yml/runs?head_sha=$SHA&per_page=50" \
                 --jq '.workflow_runs[] | "\(.status) \(.conclusion)"') || states=
@@ -75,7 +77,7 @@ jobs:
             fi
             sleep 30
           done
-          echo "::error::CI on $SHA had not finished after 100 minutes"
+          echo "::error::CI on $SHA had not finished after 120 minutes"
           exit 1
 
   # The package jobs build without the Actions cache. Another run wrote
@@ -121,6 +123,15 @@ jobs:
           name: penguin-mail-${{ needs.version.outputs.version }}
           path: dist/
           if-no-files-found: error
+
+  appimage:
+    name: Build and test the AppImage
+    needs: version
+    uses: ./.github/workflows/appimage.yml # zizmor: ignore[self-repository]
+    secrets:
+      PENGUIN_MAIL_GOOGLE_CLIENT_ID: ${{ secrets.PENGUIN_MAIL_GOOGLE_CLIENT_ID }}
+      PENGUIN_MAIL_GOOGLE_CLIENT_SECRET: ${{ secrets.PENGUIN_MAIL_GOOGLE_CLIENT_SECRET }}
+      MICROSOFT_CLIENT_ID: ${{ secrets.MICROSOFT_CLIENT_ID }}
 
   rpm:
     name: Build the rpm
@@ -353,6 +364,8 @@ jobs:
         run: |
           sudo snap install core26 mesa-2604
           sudo snap install --dangerous "$SNAP_FILE"
+          # The headless smoke test uses software rendering and cannot check GPU access.
+          sudo snap run --shell penguin-mail -c 'snapctl is-connected opengl'
           sudo scripts/smoke-start.sh snap run penguin-mail
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
@@ -378,7 +391,7 @@ jobs:
 
   publish:
     name: Publish the release
-    needs: [version, ci, build, rpm, arch, flatpak, macos]
+    needs: [version, ci, build, appimage, rpm, arch, flatpak, macos]
     # Only a pushed tag publishes. A trial run from the Actions tab builds
     # everything and publishes nothing, whichever ref it ran on.
     if: github.event_name == 'push' && github.ref_type == 'tag'
@@ -413,7 +426,7 @@ jobs:
           fi
           cd dist
           rm -f SHA256SUMS SHA256SUMS.asc
-          sha256sum -- *.deb *.rpm *.pkg.tar.zst *.tar.gz *.zip *.flatpak > SHA256SUMS
+          sha256sum -- *.deb *.rpm *.pkg.tar.zst *.tar.gz *.zip *.flatpak *.AppImage > SHA256SUMS
           cat SHA256SUMS
           signing=$(mktemp -d)
           trap 'gpgconf --homedir "$signing" --kill all; rm -rf "$signing"' EXIT
@@ -436,7 +449,7 @@ jobs:
           set -euo pipefail
           shopt -s failglob
           files=(dist/*.deb dist/*.rpm dist/*.pkg.tar.zst dist/*.tar.gz dist/*.zip \
-              dist/*.flatpak dist/SHA256SUMS dist/SHA256SUMS.asc)
+              dist/*.flatpak dist/*.AppImage dist/SHA256SUMS dist/SHA256SUMS.asc)
           if gh release view "$TAG" >/dev/null 2>&1; then
               gh release edit "$TAG" --title "Penguin Mail $VERSION" \
                   --notes-file dist/notes.md --latest

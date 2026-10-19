@@ -81,10 +81,70 @@ async fn a_look_waits_for_a_move_in_flight() {
     look.await.unwrap();
 }
 
+/// Opening a folder lists it from the server; a listing read while a move
+/// is on its way would store the moved mail back where it was.
+#[tokio::test]
+async fn following_a_mailbox_waits_for_a_move_in_flight() {
+    let h = moved().await;
+    let moves = h.sync.mail().hold_moves().await;
+    let mut follow = std::pin::pin!(h.sync.follow_mailbox("Archive"));
+    // A real clock: the store answers on threads of its own.
+    assert!(
+        tokio::time::timeout(Duration::from_secs(2), follow.as_mut())
+            .await
+            .is_err(),
+        "the listing waits while mail is moving"
+    );
+    drop(moves);
+    follow.await.unwrap();
+}
+
+/// A sync pass that read the server before a delete reached it would
+/// write the message back into the Inbox, and its row with it, until the
+/// next pass. So the delete waits for the pass before it changes the
+/// store, and a label server waits as a folder server does.
+#[tokio::test]
+async fn a_delete_waits_for_a_sync_pass_before_it_changes_the_store() {
+    let h = harness().await;
+    h.fake
+        .seed(meta("m1", "t1", crate::now_millis(), &["INBOX"]));
+    h.bootstrap_all().await;
+    let account_id = h.account_id;
+    let in_inbox = || async {
+        h.db.read(move |c| mailrs_store::messages::by_ids(c, account_id, &["m1".to_string()]))
+            .await
+            .unwrap()
+            .pop()
+            .is_some_and(|m| m.in_role(mailrs_domain::Role::Inbox))
+    };
+
+    let pass = h.sync.mail().hold_moves().await;
+    let mut delete = std::pin::pin!(h.sync.triage_thread("t1", &TriageAction::Trash));
+    // A real clock: the store answers on threads of its own, which a paused
+    // clock would not wait for.
+    assert!(
+        tokio::time::timeout(Duration::from_secs(2), delete.as_mut())
+            .await
+            .is_err(),
+        "the delete waits while the pass runs"
+    );
+    assert!(
+        in_inbox().await,
+        "the store keeps the message where the pass sees it"
+    );
+
+    drop(pass);
+    delete.await.unwrap();
+    assert!(
+        !in_inbox().await,
+        "the delete went through once the pass ended"
+    );
+}
+
 /// Gmail's names are the store's ids, so nothing reads a ref: one planted
 /// here would send the fetch to a message Gmail does not have.
 #[tokio::test]
-async fn a_label_server_reads_no_refs_and_never_waits() {
+async fn a_label_server_reads_no_refs() {
     let h = harness().await;
     h.fake
         .seed(meta("m1", "t1", crate::now_millis(), &["INBOX"]));
@@ -103,8 +163,4 @@ async fn a_label_server_reads_no_refs_and_never_waits() {
 
     let raws = h.sync.mail().fetch_raw(&["m1".to_string()]).await.unwrap();
     assert_eq!(raws[0].id, "m1");
-
-    let _moves = h.sync.mail().hold_moves().await;
-    let again = futures::FutureExt::now_or_never(h.sync.mail().hold_moves());
-    assert!(again.is_some(), "nothing waits on a label server");
 }

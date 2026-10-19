@@ -313,6 +313,9 @@ impl AccountSync {
         let stored = self.keywords_stored(&wanted, ops).await;
         let (to_server, kept_here) = split_keywords(ops, &stored);
         let tags = self.tags().await?;
+        // Held from the store's change until the server has it, so no sync
+        // pass reads the server in between and writes the mail back.
+        let moves = self.mail.hold_moves().await;
         let (ids, applied) = {
             let (wanted, ops, roles) = (wanted.clone(), ops.to_vec(), self.roles());
             let from = from.and_then(|set| source_mailbox(set, &roles, &tags));
@@ -368,7 +371,6 @@ impl AccountSync {
             return Ok(applied);
         }
 
-        let moves = self.mail.hold_moves().await;
         let named = moves.named(&ids).await?;
         let writing = Writing {
             what: what.to_string(),

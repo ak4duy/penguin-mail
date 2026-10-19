@@ -1061,7 +1061,7 @@ impl Composer {
         let add = |trigger: &str, run: ComposerAction| {
             let weak = Rc::downgrade(self);
             shortcuts.add_shortcut(gtk::Shortcut::new(
-                gtk::ShortcutTrigger::parse_string(trigger),
+                crate::ui::primary_trigger(trigger),
                 Some(gtk::CallbackAction::new(move |_, _| {
                     if let Some(c) = weak.upgrade() {
                         run(&c);
@@ -1070,11 +1070,11 @@ impl Composer {
                 })),
             ));
         };
-        add("<Control>Return", Box::new(|c| c.send()));
-        add("<Control><Shift>d", Box::new(|c| c.send()));
-        add("<Control><Shift>a", Box::new(|c| c.pick_files()));
-        add("<Control><Shift>p", Box::new(|c| c.pick_images()));
-        add("<Control>s", Box::new(|c| c.save_draft(false)));
+        add("<Primary>Return", Box::new(|c| c.send()));
+        add("<Primary><Shift>d", Box::new(|c| c.send()));
+        add("<Primary><Shift>a", Box::new(|c| c.pick_files()));
+        add("<Primary><Shift>p", Box::new(|c| c.pick_images()));
+        add("<Primary>s", Box::new(|c| c.save_draft(false)));
         add("Escape", Box::new(|c| c.window.close()));
         self.window.add_controller(shortcuts);
 
@@ -1083,23 +1083,23 @@ impl Composer {
         formatting.set_propagation_phase(gtk::PropagationPhase::Capture);
         for (trigger, run) in [
             (
-                "<Control>b",
+                "<Primary>b",
                 Box::new(|c: &Rc<Composer>| c.style("bold")) as ComposerAction,
             ),
-            ("<Control>i", Box::new(|c| c.style("italic"))),
-            ("<Control><Shift>x", Box::new(|c| c.style("strike"))),
-            ("<Control>e", Box::new(|c| c.style("code"))),
-            ("<Control>k", Box::new(|c| c.link())),
-            ("<Control><Shift>8", Box::new(|c| c.list(BlockKind::Bullet))),
+            ("<Primary>i", Box::new(|c| c.style("italic"))),
+            ("<Primary><Shift>x", Box::new(|c| c.style("strike"))),
+            ("<Primary>e", Box::new(|c| c.style("code"))),
+            ("<Primary>k", Box::new(|c| c.link())),
+            ("<Primary><Shift>8", Box::new(|c| c.list(BlockKind::Bullet))),
             (
-                "<Control><Shift>7",
+                "<Primary><Shift>7",
                 Box::new(|c| c.list(BlockKind::Numbered)),
             ),
-            ("<Control><Shift>9", Box::new(|c| c.list(BlockKind::Quote))),
+            ("<Primary><Shift>9", Box::new(|c| c.list(BlockKind::Quote))),
         ] {
             let weak = Rc::downgrade(self);
             formatting.add_shortcut(gtk::Shortcut::new(
-                gtk::ShortcutTrigger::parse_string(trigger),
+                crate::ui::primary_trigger(trigger),
                 Some(gtk::CallbackAction::new(move |_, _| {
                     let Some(c) = weak.upgrade() else {
                         return glib::Propagation::Proceed;
@@ -1123,7 +1123,7 @@ impl Composer {
                 return glib::Propagation::Proceed;
             };
             if !matches!(key, gdk::Key::Return | gdk::Key::KP_Enter)
-                || modifiers.contains(gdk::ModifierType::CONTROL_MASK)
+                || modifiers.contains(crate::ui::PRIMARY)
                 || !c.editor.enter()
             {
                 return glib::Propagation::Proceed;
@@ -2765,8 +2765,8 @@ impl Composer {
             let Some(c) = weak.upgrade() else {
                 return glib::Propagation::Proceed;
             };
-            let paste = modifiers.contains(gdk::ModifierType::CONTROL_MASK)
-                && matches!(key, gdk::Key::v | gdk::Key::V);
+            let paste =
+                modifiers.contains(crate::ui::PRIMARY) && matches!(key, gdk::Key::v | gdk::Key::V);
             let clipboard = c.body.clipboard();
             let formats = clipboard.formats();
             if !paste

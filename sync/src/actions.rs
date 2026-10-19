@@ -4,6 +4,7 @@
 //! the undo stack and reports what happened instead of showing anything.
 
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
 
 use mailrs_domain::translate::{fill, gettext};
@@ -149,6 +150,21 @@ pub struct Outcome {
     /// Targets that changed, in the order given.
     pub done: Vec<Target>,
     pub failed: Vec<Failure>,
+    /// The action's place on the undo stack, when it went there, for an
+    /// Undo that names this action and no later one.
+    pub recorded: Option<Recorded>,
+}
+
+/// One recorded action, for [`MailActions::undo_this`].
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Recorded(u64);
+
+impl Recorded {
+    /// A record no stack holds, for the app's own tests.
+    #[doc(hidden)]
+    pub fn for_tests(id: u64) -> Self {
+        Recorded(id)
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -166,6 +182,8 @@ impl Outcome {
 
 /// How to reverse one recorded action.
 struct Undo {
+    /// Which action this is, for an undo that names it.
+    id: u64,
     /// What ran, so an undo can say what it took back.
     action: MailAction,
     /// Each changed target with the label change that reverses it.
@@ -238,6 +256,8 @@ pub struct MailActions<A: Accounts> {
     pub(crate) one_click: OneClick,
     /// The recorded actions, oldest first. Undo takes from the end.
     stack: Mutex<VecDeque<Undo>>,
+    /// The number the next recorded action gets.
+    next: AtomicU64,
 }
 
 impl<A: Accounts> MailActions<A> {
@@ -247,6 +267,7 @@ impl<A: Accounts> MailActions<A> {
             db,
             one_click,
             stack: Mutex::new(VecDeque::new()),
+            next: AtomicU64::new(1),
         }
     }
 
@@ -271,6 +292,7 @@ impl<A: Accounts> MailActions<A> {
     ) -> Outcome {
         let mut outcome = Outcome::default();
         let mut undo = Undo {
+            id: self.next.fetch_add(1, Ordering::Relaxed),
             action: action.clone(),
             relabel: Vec::new(),
             colors: Vec::new(),
@@ -335,7 +357,7 @@ impl<A: Accounts> MailActions<A> {
             }
         }
         if history == History::Record && !outcome.done.is_empty() {
-            self.record(undo).await;
+            outcome.recorded = Some(self.record(undo).await);
         }
         outcome
     }
@@ -563,6 +585,24 @@ impl<A: Accounts> MailActions<A> {
     /// archive cannot pull a conversation back out of the trash.
     pub async fn undo(&self) -> Option<Undone> {
         let undo = self.lock().pop_back()?;
+        Some(self.reverse_recorded(undo).await)
+    }
+
+    /// Reverses the one action `recorded` names and takes it off, wherever
+    /// it sits on the stack, leaving the actions after it for their own
+    /// undo. `None` when it is no longer there: undone already, or pushed
+    /// off the bottom.
+    pub async fn undo_this(&self, recorded: Recorded) -> Option<Undone> {
+        let undo = {
+            let mut stack = self.lock();
+            let at = stack.iter().position(|undo| undo.id == recorded.0)?;
+            stack.remove(at)?
+        };
+        Some(self.reverse_recorded(undo).await)
+    }
+
+    /// What `undo` and `undo_this` share once the entry is off the stack.
+    async fn reverse_recorded(&self, undo: Undo) -> Undone {
         let words = self
             .words_for(&undo.action, accounts_in(&undo.relabel))
             .await;
@@ -646,11 +686,11 @@ impl<A: Accounts> MailActions<A> {
                 }
             }
         }
-        Some(Undone {
+        Undone {
             action: undo.action,
             words,
             outcome,
-        })
+        }
     }
 
     /// Takes back each message's own change in as few calls as the changes
@@ -714,7 +754,7 @@ impl<A: Accounts> MailActions<A> {
     /// Puts `undo` on the stack, noting where the action left each target
     /// so a later undo can tell whether the world moved under it. The
     /// oldest entry goes when the stack is full.
-    async fn record(&self, mut undo: Undo) {
+    async fn record(&self, mut undo: Undo) -> Recorded {
         let targets: Vec<Target> = undo.relabel.iter().map(|r| r.target.clone()).collect();
         let folders = self.folders_of(&targets).await.unwrap_or_else(|err| {
             tracing::warn!(error = %err, "could not read where the action left the mail");
@@ -723,11 +763,13 @@ impl<A: Accounts> MailActions<A> {
         for (reversal, folder) in undo.relabel.iter_mut().zip(folders) {
             reversal.folder = folder;
         }
+        let recorded = Recorded(undo.id);
         let mut stack = self.lock();
         while stack.len() >= DEPTH {
             stack.pop_front();
         }
         stack.push_back(undo);
+        recorded
     }
 
     /// Whether each reversal's target has left the folder the action put

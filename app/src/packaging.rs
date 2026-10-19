@@ -1,12 +1,28 @@
 //! The kind of package this binary was built for, chosen at build time with
 //! a cargo feature: `packaging-rpm`, `packaging-arch`, `packaging-flatpak`
-//! `packaging-snap` or `packaging-nix`, and none for the .deb, the tarball
+//! `packaging-snap`, `packaging-nix` or `packaging-appimage`, and none for the .deb, the tarball
 //! and a build from source. It decides who installs new versions and whether skill
 //! scripts can run.
 
 use mailrs_domain::translate::gettext;
 
+#[cfg(all(
+    feature = "packaging-appimage",
+    not(all(target_os = "linux", target_arch = "x86_64"))
+))]
+compile_error!("the AppImage package currently requires x86_64 Linux");
+
 #[cfg(any(
+    all(
+        feature = "packaging-appimage",
+        any(
+            feature = "packaging-rpm",
+            feature = "packaging-arch",
+            feature = "packaging-nix",
+            feature = "packaging-flatpak",
+            feature = "packaging-snap"
+        )
+    ),
     all(feature = "packaging-rpm", feature = "packaging-arch"),
     all(feature = "packaging-rpm", feature = "packaging-flatpak"),
     all(feature = "packaging-rpm", feature = "packaging-snap"),
@@ -29,6 +45,7 @@ pub enum Packaging {
     Flatpak,
     Snap,
     Nix,
+    AppImage,
 }
 
 /// Who installs new versions of a package that does not update itself.
@@ -39,6 +56,7 @@ pub enum UpdatedBy {
     Flathub,
     SnapStore,
     Nix,
+    AppImage,
 }
 
 pub const BUILT_FOR: Packaging = if cfg!(feature = "packaging-rpm") {
@@ -51,6 +69,8 @@ pub const BUILT_FOR: Packaging = if cfg!(feature = "packaging-rpm") {
     Packaging::Snap
 } else if cfg!(feature = "packaging-nix") {
     Packaging::Nix
+} else if cfg!(feature = "packaging-appimage") {
+    Packaging::AppImage
 } else {
     Packaging::Native
 };
@@ -72,6 +92,7 @@ impl Packaging {
             Packaging::Flatpak => (Some(UpdatedBy::Flathub), Some("Flatpak")),
             Packaging::Snap => (Some(UpdatedBy::SnapStore), Some("Snap")),
             Packaging::Nix => (Some(UpdatedBy::Nix), None),
+            Packaging::AppImage => (Some(UpdatedBy::AppImage), None),
         };
         Traits {
             updated_by,
@@ -108,6 +129,7 @@ impl UpdatedBy {
             UpdatedBy::Flathub => gettext("Updates come from Flathub"),
             UpdatedBy::SnapStore => gettext("Updates come from the Snap Store"),
             UpdatedBy::Nix => gettext("Updates come from Nix"),
+            UpdatedBy::AppImage => gettext("Download a new AppImage to update"),
         }
     }
 }
@@ -122,6 +144,14 @@ mod tests {
         assert_eq!(Packaging::Arch.updated_by(), Some(UpdatedBy::Pacman));
         assert_eq!(Packaging::Flatpak.updated_by(), Some(UpdatedBy::Flathub));
         assert_eq!(Packaging::Snap.updated_by(), Some(UpdatedBy::SnapStore));
+        assert_eq!(Packaging::Native.updated_by(), None);
+    }
+
+    #[test]
+    fn the_appimage_never_installs_a_native_update() {
+        assert!(Packaging::AppImage.updated_by().is_some());
+        assert!(Packaging::AppImage.runs_skills());
+        assert_eq!(Packaging::Nix.updated_by(), Some(UpdatedBy::Nix));
         assert_eq!(Packaging::Native.updated_by(), None);
     }
 
@@ -142,7 +172,8 @@ mod tests {
             feature = "packaging-arch",
             feature = "packaging-flatpak",
             feature = "packaging-snap",
-            feature = "packaging-nix"
+            feature = "packaging-nix",
+            feature = "packaging-appimage"
         )) {
             assert_eq!(BUILT_FOR, Packaging::Native);
         }

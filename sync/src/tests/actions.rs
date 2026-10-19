@@ -904,6 +904,7 @@ async fn deleting_forever_takes_the_mail_out_of_gmail_and_the_store() {
         Permitted::Done(Outcome {
             done: vec![target],
             failed: vec![],
+            recorded: None,
         })
     );
     assert!(!in_gmail(&h, "a"), "Gmail no longer holds the message");
@@ -966,14 +967,12 @@ async fn erasing_one_message_leaves_the_rest_of_its_thread_consistent() {
     );
 }
 
-/// Waits until the writer has gone idle once, so the contacts tally it
-/// brings up to date when idle has committed. The first empty write can
-/// slip in ahead of that catch-up while the writer is still busy; the
-/// second can only run after it.
+/// Finishes the contacts tally before counting commits. Empty writes can
+/// stay queued and leave the writer no idle turn to finish it.
 async fn settled(h: &Harness) {
-    for _ in 0..2 {
-        h.db.write(|_| Ok(())).await.expect("an empty write");
-    }
+    h.db.write(mailrs_store::contacts::catch_up)
+        .await
+        .expect("the contacts tally caught up");
 }
 
 /// Transactions committed to the harness's database so far, counted from

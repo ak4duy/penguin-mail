@@ -7,15 +7,32 @@ the [releases page](https://github.com/c9dev/penguin-mail/releases).
 
 ### New
 
-- Russian, Greek, Romanian and Ukrainian translations, chosen in Preferences.
+- Choose reasoning separately for assistant chats and email translations in Preferences → AI.
+- Russian and Czech can be selected in Never Translate.
+- Choose Simplified Chinese, Russian, Italian, Japanese, Korean, Polish, Turkish, or Indonesian in Preferences.
+- Show or hide the mailbox sidebar with Ctrl+B, or Cmd+B on macOS.
+- An AppImage bundles the current runtime for Ubuntu 22.04 and newer, and Debian 13.
+- Choose Greek, Romanian or Ukrainian in Preferences.
 - Build and install Penguin Mail with Nix, or enter its development environment with `nix develop`.
 
 ### Fixed
 
+- Gmail Sent, Drafts, and custom labels show older server mail as you scroll, even outside the sync period.
+- Mail translations ask compatible local models to skip reasoning by default for faster replies.
+- IMAP folders, including nested folders, Sent, and Drafts, show older server mail as you scroll. Failed first loads can be retried without restarting ([#60](https://github.com/c9dev/penguin-mail/issues/60)). Thanks to [zwnk](https://github.com/zwnk) for the reproductions and patches.
+- Upgrading an Outlook account keeps pending deletions and moves, without notifications for old mail found during repair ([#66](https://github.com/c9dev/penguin-mail/issues/66)).
+- Outlook unread counts update when older inbox messages are read in another app ([#66](https://github.com/c9dev/penguin-mail/issues/66)).
+- The Snap can access the graphics devices it needs at startup ([#62](https://github.com/c9dev/penguin-mail/issues/62)).
+- macOS notifications use temporary banners by default, offer all selected buttons, and keep mail actions in the background.
 - Setting Language back to Follow System and pressing Restart shows your system's language again, instead of the language you had picked before.
 - Assistant skill scripts can run with the Nix package, including on NixOS.
 - Microsoft messages with attachments open without the contentId request error.
 - IMAP Junk and Trash show messages on the server even when they have not synced to this computer.
+- A deleted or archived message no longer flashes back into the list before the server has it, on any account ([#58](https://github.com/c9dev/penguin-mail/issues/58)).
+- The Undo toast shows as soon as you act, and its Undo takes back the action it names. Undo pressed while the action is still on its way waits for it. Quick deletes or archives share one toast, such as "Moved 3 conversations to Trash" ([#54](https://github.com/c9dev/penguin-mail/issues/54), [#57](https://github.com/c9dev/penguin-mail/issues/57)).
+- On macOS the shortcuts use Command: Cmd+W closes the window, Cmd+Z undoes, Cmd+F finds, and the rest follow ([#55](https://github.com/c9dev/penguin-mail/issues/55)).
+- Pressing the Preferences or About shortcut again no longer opens a second dialog ([#53](https://github.com/c9dev/penguin-mail/issues/53)).
+- On macOS the sidebar title shows "Mailboxes" in full beside the window buttons ([#56](https://github.com/c9dev/penguin-mail/issues/56)).
 
 ## 1.0.9 (2026-10-16)
 

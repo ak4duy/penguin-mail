@@ -706,7 +706,20 @@ impl Core {
                     error: err.to_string(),
                 })
                 .collect(),
+            recorded: None,
         })
+    }
+
+    /// Reverses the one action `recorded` names, wherever it sits on the
+    /// undo stack. `None` when it is no longer there.
+    pub async fn undo_this(&self, recorded: mailrs_sync::Recorded) -> Option<Undone> {
+        let actions = Arc::clone(&self.actions);
+        self.call(
+            async move { Ok::<_, std::convert::Infallible>(actions.undo_this(recorded).await) },
+        )
+        .await
+        .ok()
+        .flatten()
     }
 
     /// Reverses the action on top of the undo stack, from the window or

@@ -32,6 +32,14 @@ pub(super) struct MicrosoftState {
     /// this was kept.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub days: Option<i64>,
+    /// The Inbox cursor has no date filter. Older states lack this flag
+    /// and need a fresh round to repair the marks of retained old mail.
+    #[serde(default)]
+    pub whole_inbox: bool,
+    /// The unfiltered repair runs beside the old live feed, so pending
+    /// removals and arrivals still reach the store while it pages.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub inbox_repair: Option<Left>,
 }
 
 impl MicrosoftState {
@@ -45,7 +53,8 @@ impl MicrosoftState {
 }
 
 /// Where a folder's read stopped.
-enum Left {
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
+pub(super) enum Left {
     /// The round ended; the next look starts a new one from here.
     Delta(String),
     /// Pages remain; the next look carries on from here.
@@ -73,17 +82,51 @@ impl<G: GraphApi> Microsoft<G> {
             return self.feed_start(synced).await;
         };
         let mut state = MicrosoftState::read(since)?;
+        let inbox = self.known().roles.get(&Role::Inbox).cloned();
+        let repairing = inbox.as_deref().filter(|_| !state.whole_inbox);
+        let mut repair_changes = Vec::new();
+        let repaired = if let Some(folder) = repairing {
+            let (mut removed, mut present) = (Vec::new(), Vec::new());
+            let left = self
+                .read_folder(
+                    folder,
+                    state.inbox_repair.take().map(Left::link),
+                    &mut removed,
+                    &mut present,
+                )
+                .await?;
+            repair_changes = self
+                .changes_from(removed, present)
+                .await?
+                .into_iter()
+                .map(|change| match change {
+                    RemoteChange::Gained {
+                        id, memberships, ..
+                    } => RemoteChange::Refresh { id, memberships },
+                    other => other,
+                })
+                .collect();
+            Some(left)
+        } else {
+            None
+        };
         // The window changed since the rounds began: they start again over
         // the window now kept, so later looks report changes to the mail it
         // newly reaches. They start before this look reads the old rounds,
         // so mail arriving meanwhile is in the old rounds' changes or the
-        // new rounds' next ones. Every folder's old round is then read to
-        // its end, since its link goes after this look.
+        // new rounds' next ones. The windowed folders' old rounds are
+        // read to their ends before their links go. The Inbox keeps its
+        // unfiltered round.
         let days = self.settings().window_days;
         let restarted = match state.days {
             Some(began) if crate::window_reach(began) != crate::window_reach(days) => {
                 tracing::info!("the window changed; starting each folder's delta again");
-                Some(self.feed_start(synced.clone()).await?.state)
+                let windowed = synced
+                    .iter()
+                    .filter(|folder| Some(*folder) != inbox.as_ref())
+                    .cloned()
+                    .collect();
+                Some(self.feed_start(windowed).await?.state)
             }
             _ => None,
         };
@@ -91,11 +134,16 @@ impl<G: GraphApi> Microsoft<G> {
             Some(_) => (synced, true, self.known().full_check_requested),
             None => self.due(synced),
         };
-        let inbox = self.known().roles.get(&Role::Inbox).cloned();
         let (mut removed, mut present) = (Vec::new(), Vec::new());
+        let mut inbox_caught_up = false;
         for folder in due {
             let mut start = state.folders.get(&folder).cloned();
-            let to_the_end = restarted.is_some() && start.is_some();
+            if repairing.is_some() && Some(&folder) == inbox.as_ref() && start.is_none() {
+                inbox_caught_up = true;
+                continue;
+            }
+            let to_the_end =
+                restarted.is_some() && start.is_some() && Some(&folder) != inbox.as_ref();
             loop {
                 match self
                     .read_folder(&folder, start, &mut removed, &mut present)
@@ -103,6 +151,9 @@ impl<G: GraphApi> Microsoft<G> {
                 {
                     Ok(Left::Next(next)) if to_the_end => start = Some(next),
                     Ok(left) => {
+                        if Some(&folder) == inbox.as_ref() {
+                            inbox_caught_up = matches!(left, Left::Delta(_));
+                        }
                         state.folders.insert(folder, left.link());
                         break;
                     }
@@ -119,12 +170,38 @@ impl<G: GraphApi> Microsoft<G> {
                 }
             }
         }
+        if let Some(repaired) = repaired {
+            match repaired {
+                Left::Delta(link) if inbox_caught_up => {
+                    if let Some(inbox) = &inbox {
+                        state.folders.insert(inbox.clone(), link);
+                    }
+                    state.whole_inbox = true;
+                }
+                left => state.inbox_repair = Some(left),
+            }
+        }
         if slow {
             self.slow_poll_done(requested);
         }
-        let changes = self.changes_from(removed, present).await?;
+        // Replay the live feed after the repair, so a newer mark or move
+        // takes precedence over the snapshot on the same look.
+        let mut changes = repair_changes;
+        changes.extend(self.changes_from(removed, present).await?);
         let state = match restarted {
-            Some(state) => state,
+            Some(restarted) => {
+                let mut restarted = MicrosoftState::read(&restarted)?;
+                // The Inbox has no window filter. Keep its progress,
+                // including a repair round that still has pages to read.
+                if let Some(inbox) = inbox
+                    && let Some(link) = state.folders.remove(&inbox)
+                {
+                    restarted.folders.insert(inbox, link);
+                }
+                restarted.whole_inbox = state.whole_inbox;
+                restarted.inbox_repair = state.inbox_repair;
+                restarted.written()
+            }
             None => {
                 state.days = Some(days);
                 state.written()
@@ -138,6 +215,7 @@ impl<G: GraphApi> Microsoft<G> {
     async fn feed_start(&self, synced: Vec<String>) -> Result<Changes, BackendError> {
         let mut state = MicrosoftState {
             days: Some(self.settings().window_days),
+            whole_inbox: true,
             ..MicrosoftState::default()
         };
         for folder in synced {
@@ -173,11 +251,17 @@ impl<G: GraphApi> Microsoft<G> {
         present: &mut Vec<(String, Message)>,
     ) -> Result<Left, BackendError> {
         let since = self.window_start();
+        let is_inbox = self
+            .known()
+            .roles
+            .get(&Role::Inbox)
+            .is_some_and(|id| id == folder);
+        let received_since = (!is_inbox).then_some(since.as_str());
         let mut link = start;
         for _ in 0..PAGES_PER_LOOK {
             let page = self
                 .graph()
-                .message_delta(folder, link.as_deref(), &since)
+                .message_delta(folder, link.as_deref(), received_since)
                 .await
                 .map_err(backend)?;
             for message in page.value {

@@ -22,6 +22,7 @@ use crate::offered::Filing;
 use crate::settings::Space;
 use crate::ui::conversation::{Action, ConversationView};
 use crate::ui::thread_list::MENU_KEYS;
+use crate::ui::{PRIMARY, SPARE_CONTROL};
 
 /// Where a key works.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -174,23 +175,26 @@ impl Key {
     /// A letter names the character it types, so `numbersign` is `#` on
     /// any layout and `<Shift>m` is `M`, and Shift alone does not turn `j`
     /// into `J`'s shortcut. Keys that type no character, such as Delete,
-    /// match on the key and ignore Shift. Control names the one modifier a
-    /// letter may carry, and then no other: Ctrl+Shift+A is not Ctrl+A.
+    /// match on the key and ignore Shift. `<Primary>`, Command on macOS and
+    /// Control elsewhere, names the one modifier a letter may carry, and
+    /// then no other: Ctrl+Shift+A is not Ctrl+A.
     pub(super) fn pressed(&self, pressed: gdk::Key, modifiers: gdk::ModifierType) -> bool {
-        let (control, name) = strip(self.trigger, "<Control>");
+        let (primary, name) = strip(self.trigger, "<Primary>");
         let (shift, name) = strip(name, "<Shift>");
         let Some(wanted) = gdk::Key::from_name(name) else {
             return false;
         };
-        if modifiers.intersects(gdk::ModifierType::ALT_MASK | gdk::ModifierType::SUPER_MASK) {
+        if modifiers
+            .intersects(gdk::ModifierType::ALT_MASK | gdk::ModifierType::SUPER_MASK | SPARE_CONTROL)
+        {
             return false;
         }
-        if control {
-            return modifiers.contains(gdk::ModifierType::CONTROL_MASK)
+        if primary {
+            return modifiers.contains(PRIMARY)
                 && !modifiers.contains(gdk::ModifierType::SHIFT_MASK)
                 && pressed == wanted;
         }
-        if modifiers.contains(gdk::ModifierType::CONTROL_MASK) {
+        if modifiers.contains(PRIMARY) {
             return false;
         }
         match wanted.to_unicode().filter(|c| !c.is_control()) {
@@ -302,15 +306,15 @@ pub(super) static SHORTCUTS: &[Shortcut] = &[
         section: Section::Reading,
         description: || gettext("Open mailbox 1 to 9"),
         keys: &[
-            mailbox(1, "<Control>1"),
-            mailbox(2, "<Control>2"),
-            mailbox(3, "<Control>3"),
-            mailbox(4, "<Control>4"),
-            mailbox(5, "<Control>5"),
-            mailbox(6, "<Control>6"),
-            mailbox(7, "<Control>7"),
-            mailbox(8, "<Control>8"),
-            mailbox(9, "<Control>9"),
+            mailbox(1, "<Primary>1"),
+            mailbox(2, "<Primary>2"),
+            mailbox(3, "<Primary>3"),
+            mailbox(4, "<Primary>4"),
+            mailbox(5, "<Primary>5"),
+            mailbox(6, "<Primary>6"),
+            mailbox(7, "<Primary>7"),
+            mailbox(8, "<Primary>8"),
+            mailbox(9, "<Primary>9"),
         ],
     },
     Shortcut {
@@ -323,25 +327,25 @@ pub(super) static SHORTCUTS: &[Shortcut] = &[
     Shortcut {
         section: Section::Reading,
         description: || gettext("Search from a text field"),
-        keys: &[main("<Control><Alt>f", "win.search")],
+        keys: &[main("<Primary><Alt>f", "win.search")],
     },
     Shortcut {
         section: Section::Reading,
         description: || gettext("Find in the conversation"),
-        keys: &[both("<Control>f", "win.find")],
+        keys: &[both("<Primary>f", "win.find")],
     },
     Shortcut {
         section: Section::Reading,
         description: || gettext("Check for mail"),
         keys: &[
-            main("<Control><Shift>n", "win.check"),
+            main("<Primary><Shift>n", "win.check"),
             main("F5", "win.check"),
         ],
     },
     Shortcut {
         section: Section::Reading,
         description: || gettext("Select all"),
-        keys: &[letter("<Control>a", "win.select-all")],
+        keys: &[letter("<Primary>a", "win.select-all")],
     },
     Shortcut {
         section: Section::Reading,
@@ -352,9 +356,9 @@ pub(super) static SHORTCUTS: &[Shortcut] = &[
         section: Section::Reading,
         description: || gettext("Bigger or smaller text"),
         keys: &[
-            main("<Control>plus", "win.zoom-in"),
-            main("<Control>minus", "win.zoom-out"),
-            main("<Control>equal", "win.zoom-in").hidden(),
+            main("<Primary>plus", "win.zoom-in"),
+            main("<Primary>minus", "win.zoom-out"),
+            main("<Primary>equal", "win.zoom-in").hidden(),
         ],
     },
     Shortcut {
@@ -370,28 +374,28 @@ pub(super) static SHORTCUTS: &[Shortcut] = &[
     Shortcut {
         section: Section::Reading,
         description: || gettext("Open in a new window"),
-        keys: &[main("<Control>o", "win.open-window")],
+        keys: &[main("<Primary>o", "win.open-window")],
     },
     Shortcut {
         section: Section::Reading,
         description: || gettext("Print"),
-        keys: &[both("<Control>p", "win.print")],
+        keys: &[both("<Primary>p", "win.print")],
     },
     Shortcut {
         section: Section::Reading,
         description: || gettext("View source"),
-        keys: &[both("<Control><Alt>u", "win.view-source")],
+        keys: &[both("<Primary><Alt>u", "win.view-source")],
     },
     Shortcut {
         section: Section::Reading,
         description: || gettext("Normal text size"),
-        keys: &[main("<Control>0", "win.zoom-reset")],
+        keys: &[main("<Primary>0", "win.zoom-reset")],
     },
     Shortcut {
         section: Section::Organizing,
         description: || gettext("Archive"),
         keys: &[
-            both("<Control><Alt>a", "win.archive"),
+            both("<Primary><Alt>a", "win.archive"),
             letter("e", "win.archive"),
         ],
     },
@@ -409,13 +413,13 @@ pub(super) static SHORTCUTS: &[Shortcut] = &[
     Shortcut {
         section: Section::Organizing,
         description: || gettext("Junk"),
-        keys: &[both("<Control><Shift>j", "win.junk")],
+        keys: &[both("<Primary><Shift>j", "win.junk")],
     },
     Shortcut {
         section: Section::Organizing,
         description: || gettext("Flag or unflag"),
         keys: &[
-            both("<Control><Shift>l", "win.toggle-star"),
+            both("<Primary><Shift>l", "win.toggle-star"),
             letter("s", "win.toggle-star"),
         ],
     },
@@ -423,20 +427,20 @@ pub(super) static SHORTCUTS: &[Shortcut] = &[
         section: Section::Organizing,
         description: || gettext("Flag colors"),
         keys: &[
-            flag("red", "<Control><Alt>1"),
-            flag("orange", "<Control><Alt>2"),
-            flag("yellow", "<Control><Alt>3"),
-            flag("green", "<Control><Alt>4"),
-            flag("blue", "<Control><Alt>5"),
-            flag("purple", "<Control><Alt>6"),
-            flag("gray", "<Control><Alt>7"),
+            flag("red", "<Primary><Alt>1"),
+            flag("orange", "<Primary><Alt>2"),
+            flag("yellow", "<Primary><Alt>3"),
+            flag("green", "<Primary><Alt>4"),
+            flag("blue", "<Primary><Alt>5"),
+            flag("purple", "<Primary><Alt>6"),
+            flag("gray", "<Primary><Alt>7"),
         ],
     },
     Shortcut {
         section: Section::Organizing,
         description: || gettext("Mark read or unread"),
         keys: &[
-            both("<Control><Shift>u", "win.toggle-read"),
+            both("<Primary><Shift>u", "win.toggle-read"),
             letter("u", "win.toggle-read"),
         ],
     },
@@ -449,33 +453,33 @@ pub(super) static SHORTCUTS: &[Shortcut] = &[
         section: Section::Organizing,
         description: || gettext("Labels"),
         keys: &[
-            main("<Control><Alt>m", "win.label"),
+            main("<Primary><Alt>m", "win.label"),
             letter("l", "win.label"),
         ],
     },
     Shortcut {
         section: Section::Organizing,
         description: || gettext("Undo"),
-        keys: &[letter("<Control>z", "win.undo")],
+        keys: &[letter("<Primary>z", "win.undo")],
     },
     Shortcut {
         section: Section::Writing,
         description: || gettext("New message"),
         keys: &[
-            main("<Control>n", "win.compose"),
+            main("<Primary>n", "win.compose"),
             letter("c", "win.compose"),
         ],
     },
     Shortcut {
         section: Section::Writing,
         description: || gettext("Reply"),
-        keys: &[both("<Control>r", "win.reply"), letter("r", "win.reply")],
+        keys: &[both("<Primary>r", "win.reply"), letter("r", "win.reply")],
     },
     Shortcut {
         section: Section::Writing,
         description: || gettext("Reply all"),
         keys: &[
-            both("<Control><Shift>r", "win.reply-all"),
+            both("<Primary><Shift>r", "win.reply-all"),
             letter("a", "win.reply-all"),
         ],
     },
@@ -483,38 +487,38 @@ pub(super) static SHORTCUTS: &[Shortcut] = &[
         section: Section::Writing,
         description: || gettext("Forward"),
         keys: &[
-            both("<Control><Shift>f", "win.forward"),
+            both("<Primary><Shift>f", "win.forward"),
             letter("f", "win.forward"),
         ],
     },
     Shortcut {
         section: Section::Writing,
         description: || gettext("Send"),
-        keys: &[composer("<Control><Shift>d"), composer("<Control>Return")],
+        keys: &[composer("<Primary><Shift>d"), composer("<Primary>Return")],
     },
     Shortcut {
         section: Section::Writing,
         description: || gettext("Attach files"),
-        keys: &[composer("<Control><Shift>a")],
+        keys: &[composer("<Primary><Shift>a")],
     },
     Shortcut {
         section: Section::Writing,
         description: || gettext("Insert image"),
-        keys: &[composer("<Control><Shift>p")],
+        keys: &[composer("<Primary><Shift>p")],
     },
     Shortcut {
         section: Section::Writing,
         description: || gettext("Bold, italic, link"),
         keys: &[
-            composer("<Control>b"),
-            composer("<Control>i"),
-            composer("<Control>k"),
+            composer("<Primary>b"),
+            composer("<Primary>i"),
+            composer("<Primary>k"),
         ],
     },
     Shortcut {
         section: Section::Writing,
         description: || gettext("Save draft"),
-        keys: &[composer("<Control>s")],
+        keys: &[composer("<Primary>s")],
     },
     Shortcut {
         section: Section::Calendar,
@@ -564,7 +568,7 @@ pub(super) static SHORTCUTS: &[Shortcut] = &[
     Shortcut {
         section: Section::Calendar,
         description: || gettext("Search the calendar"),
-        keys: &[calendar("<Control>f")],
+        keys: &[calendar("<Primary>f")],
     },
     Shortcut {
         section: Section::Calendar,
@@ -574,7 +578,7 @@ pub(super) static SHORTCUTS: &[Shortcut] = &[
     Shortcut {
         section: Section::Calendar,
         description: || gettext("Undo, while its toast is still up"),
-        keys: &[calendar("<Control>z")],
+        keys: &[calendar("<Primary>z")],
     },
     Shortcut {
         section: Section::Calendar,
@@ -598,42 +602,47 @@ pub(super) static SHORTCUTS: &[Shortcut] = &[
         section: Section::Calendar,
         description: || gettext("Change when the focused event starts"),
         keys: &[
-            calendar_grid("<Control><Shift>Up"),
-            calendar_grid("<Control><Shift>Down"),
+            calendar_grid("<Primary><Shift>Up"),
+            calendar_grid("<Primary><Shift>Down"),
         ],
     },
     Shortcut {
         section: Section::Calendar,
         description: || gettext("Refresh the calendar"),
-        keys: &[calendar("F5"), calendar("<Control>r")],
+        keys: &[calendar("F5"), calendar("<Primary>r")],
     },
     Shortcut {
         section: Section::General,
         description: || gettext("Preferences"),
-        keys: &[main("<Control>comma", "win.preferences")],
+        keys: &[main("<Primary>comma", "win.preferences")],
     },
     Shortcut {
         section: Section::General,
         description: || gettext("Keyboard shortcuts"),
-        keys: &[main("<Control>question", "win.shortcuts")],
+        keys: &[main("<Primary>question", "win.shortcuts")],
+    },
+    Shortcut {
+        section: Section::General,
+        description: || gettext("Show or hide mailboxes"),
+        keys: &[main("<Primary>b", "win.toggle-mailboxes")],
     },
     Shortcut {
         section: Section::General,
         description: || gettext("Show or hide the assistant"),
-        keys: &[main("<Control>j", "win.assistant")],
+        keys: &[main("<Primary>j", "win.assistant")],
     },
     Shortcut {
         section: Section::General,
         description: || gettext("Close window"),
         keys: &[
-            both("<Control>w", "window.close"),
+            both("<Primary>w", "window.close"),
             conversation("Escape", "window.close").hidden(),
         ],
     },
     Shortcut {
         section: Section::General,
         description: || gettext("Quit"),
-        keys: &[main("<Control>q", "win.quit")],
+        keys: &[main("<Primary>q", "win.quit")],
     },
 ];
 
@@ -678,12 +687,12 @@ pub(super) fn calendar_key(pressed: gdk::Key, modifiers: gdk::ModifierType) -> O
         "a" => CalendarKey::Agenda,
         "Left" => CalendarKey::Previous,
         "Right" => CalendarKey::Next,
-        "<Control>f" => CalendarKey::Search,
+        "<Primary>f" => CalendarKey::Search,
         "Delete" | "KP_Delete" => CalendarKey::Delete,
         "n" => CalendarKey::NewEvent,
         "g" => CalendarKey::GoToDate,
-        "<Control>z" => CalendarKey::Undo,
-        "F5" | "<Control>r" => CalendarKey::Refresh,
+        "<Primary>z" => CalendarKey::Undo,
+        "F5" | "<Primary>r" => CalendarKey::Refresh,
         _ => return None,
     })
 }
@@ -749,7 +758,7 @@ fn chords(window: Place) -> gtk::ShortcutController {
     let controller = gtk::ShortcutController::new();
     for key in keys().filter(|k| !k.letter && k.place.reaches(window)) {
         let shortcut = gtk::Shortcut::new(
-            gtk::ShortcutTrigger::parse_string(key.trigger),
+            crate::ui::primary_trigger(key.trigger),
             Some(gtk::NamedAction::new(key.action)),
         );
         if let Some(argument) = key.argument {
@@ -781,7 +790,7 @@ pub(super) fn dialog(filing: Filing) -> adw::ShortcutsDialog {
         for shortcut in SHORTCUTS.iter().filter(|s| s.section == section) {
             group.add(adw::ShortcutsItem::new(
                 &shortcut.line(filing),
-                &shortcut.accelerators(),
+                &crate::ui::primary_accelerator(&shortcut.accelerators()),
             ));
         }
         dialog.add(group);
@@ -804,7 +813,7 @@ pub(super) static MAIN_ACTIONS: &[(&str, WindowRun)] = &[
     ("hide-my-email", |win| win.show_hide_my_email(None)),
     ("check", |win| {
         win.core.poke_all();
-        win.listing.reload_remote();
+        win.listing.reload();
         win.toast(&gettext("Checking for mail"));
     }),
     // The menu's Refresh under the calendar section; disabled outside
@@ -840,6 +849,9 @@ pub(super) static MAIN_ACTIONS: &[(&str, WindowRun)] = &[
         if let Some(app) = win.app.upgrade() {
             app.quit();
         }
+    }),
+    ("toggle-mailboxes", |win| {
+        win.split.set_show_sidebar(!win.split.shows_sidebar())
     }),
 ];
 
@@ -1029,7 +1041,7 @@ impl MainWindow {
             return glib::Propagation::Proceed;
         };
         // In the message itself, Control keys select and copy its text.
-        if modifiers.contains(gdk::ModifierType::CONTROL_MASK) && self.reading_text() {
+        if modifiers.contains(PRIMARY) && self.reading_text() {
             return glib::Propagation::Proceed;
         }
         // Escape belongs to whatever is under it unless there is a
@@ -1126,6 +1138,55 @@ mod tests {
         }
     }
 
+    /// Command on macOS, Control elsewhere: a trigger that names Control
+    /// would leave every shortcut deaf to Command, as 1.0.8 was.
+    #[test]
+    fn every_chord_uses_the_platforms_command_key() {
+        for key in keys() {
+            assert!(!key.trigger.contains("<Control>"), "{}", key.trigger);
+        }
+    }
+
+    #[test]
+    fn primary_b_toggles_mailboxes_only_in_the_main_window() {
+        let shortcut = SHORTCUTS
+            .iter()
+            .find(|s| s.keys.iter().any(|k| k.action == "win.toggle-mailboxes"))
+            .expect("the mailbox toggle is listed in the shortcuts dialog");
+        assert_eq!(shortcut.section, Section::General);
+        assert_eq!(shortcut.accelerators(), "<Primary>b");
+
+        let bound: Vec<_> = keys()
+            .filter(|k| k.trigger == "<Primary>b" && k.place.reaches(Place::Main))
+            .collect();
+        assert_eq!(bound.len(), 1);
+        let key = bound[0];
+        assert_eq!(key.action, "win.toggle-mailboxes");
+        assert_eq!(key.place, Place::Main);
+        assert_eq!(key.argument, None);
+        assert!(!key.letter);
+        assert!(key.shown);
+        assert!(
+            MAIN_ACTIONS
+                .iter()
+                .any(|(name, _)| *name == "toggle-mailboxes")
+        );
+    }
+
+    #[test]
+    fn primary_b_stays_a_composer_formatting_key() {
+        let bound: Vec<_> = keys()
+            .filter(|k| k.trigger == "<Primary>b" && k.place.reaches(Place::Composer))
+            .collect();
+        assert_eq!(bound.len(), 1);
+        assert!(bound[0].action.is_empty());
+        assert!(!bound[0].letter);
+        assert!(bound[0].shown);
+        assert!(
+            !keys().any(|k| { k.trigger == "<Primary>b" && k.place.reaches(Place::Conversation) })
+        );
+    }
+
     #[test]
     fn the_dialog_lists_the_keys_the_thread_list_opens_a_menu_with() {
         let listed: Vec<&str> = keys()
@@ -1141,7 +1202,7 @@ mod tests {
         let mut modifiers = gdk::ModifierType::empty();
         let mut name = trigger;
         for (prefix, mask) in [
-            ("<Control>", gdk::ModifierType::CONTROL_MASK),
+            ("<Primary>", PRIMARY),
             ("<Shift>", gdk::ModifierType::SHIFT_MASK),
             ("<Alt>", gdk::ModifierType::ALT_MASK),
         ] {
@@ -1209,10 +1270,7 @@ mod tests {
             calendar_key(gdk::Key::t, gdk::ModifierType::empty()),
             Some(CalendarKey::Today)
         );
-        assert_eq!(
-            calendar_key(gdk::Key::t, gdk::ModifierType::CONTROL_MASK),
-            None
-        );
+        assert_eq!(calendar_key(gdk::Key::t, PRIMARY), None);
         assert_eq!(
             calendar_key(gdk::Key::_1, gdk::ModifierType::ALT_MASK),
             None
@@ -1260,6 +1318,7 @@ mod tests {
             "compose",
             "preferences",
             "assistant",
+            "toggle-mailboxes",
             "go-mailbox",
             "show-mail",
         ] {
@@ -1280,7 +1339,7 @@ mod tests {
             Some(CalendarKey::Refresh)
         );
         assert_eq!(
-            calendar_key(gdk::Key::r, gdk::ModifierType::CONTROL_MASK),
+            calendar_key(gdk::Key::r, PRIMARY),
             Some(CalendarKey::Refresh)
         );
     }
@@ -1323,14 +1382,14 @@ mod tests {
                 .map(Shortcut::accelerators)
                 .unwrap()
         };
-        assert_eq!(line("Open mailbox 1 to 9"), "<Control>1...<Control>9");
+        assert_eq!(line("Open mailbox 1 to 9"), "<Primary>1...<Primary>9");
         assert_eq!(line("Move to trash"), "Delete numbersign");
         assert_eq!(
             line("Bigger or smaller text"),
-            "<Control>plus <Control>minus"
+            "<Primary>plus <Primary>minus"
         );
         assert_eq!(line("Search"), "slash");
-        assert_eq!(line("Search from a text field"), "<Control><Alt>f");
+        assert_eq!(line("Search from a text field"), "<Primary><Alt>f");
         assert_eq!(line("Day, week, month or agenda"), "d w m a");
         assert_eq!(line("Show the calendar"), "<Alt>2");
     }
@@ -1352,7 +1411,7 @@ mod tests {
     fn a_letter_is_the_character_it_types() {
         let none = gdk::ModifierType::empty();
         let shift = gdk::ModifierType::SHIFT_MASK;
-        let control = gdk::ModifierType::CONTROL_MASK;
+        let control = PRIMARY;
         let action = |key, modifiers| letter_for(key, modifiers).map(|k| k.action);
         assert_eq!(action(gdk::Key::e, none), Some("win.archive"));
         assert_eq!(action(gdk::Key::J, shift), None);

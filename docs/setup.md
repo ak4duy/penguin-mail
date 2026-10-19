@@ -172,6 +172,32 @@ window_days = 30
 body_cache_mb = 1024
 ```
 
+Opening a custom or nested IMAP folder, Sent, or Drafts lists its server mail
+beyond this background window. Each page reads at most 25 messages' metadata
+per IMAP account, without
+message text or attachments, and leaves unread mail unread. Scroll down or
+choose **More** below the list for another page. More also works when a page
+contains only replies to one conversation and has no scrollbar. A failed
+page leaves the rows already loaded and can be tried again with More.
+Refresh starts a fresh server listing after mail moves or is deleted.
+
+Pages walk the server's UIDs from newest to oldest. The loaded rows are
+sorted by date and grouped with the same local threading as synced mail;
+imported mail can therefore change the order as more pages arrive. Listing
+keeps metadata in the mail cache for threading and offline use, not message
+bodies. This metadata still follows normal sync-window pruning and is not
+protected by opening the folder. Offline, only cached mail is available;
+a failed server listing says so rather than claiming the folder is empty.
+The body cache limit still applies to message text, not listing metadata.
+Gmail labels, JMAP, Outlook and local POP3 folders keep their existing
+listing behavior. Unified Sent and Drafts combine these accounts' cached
+mail with the IMAP server pages.
+
+A failed first folder load can be retried by reopening the folder or choosing
+**Check for Mail**. Pending loads coalesce until the headers reach the store;
+a later visit can retry a load that failed or was canceled. The first visit
+after a restart also repairs headers an older client may have skipped.
+
 Penguin Mail keeps your refresh tokens in Keychain on macOS or the desktop
 keyring on Linux, not in this file. The Flatpak keeps them in its own store
 instead, through the Secret portal; see "Which package" below.
@@ -272,8 +298,10 @@ PENGUIN_MAIL_GOOGLE_CLIENT_ID=... PENGUIN_MAIL_GOOGLE_CLIENT_SECRET=... \
 "/Applications/Penguin Mail.app/Contents/MacOS/penguin-mail"
 ```
 
-A copy installed with `scripts/install-macos.sh` starts through
-`Contents/MacOS/penguin-mail-launcher` instead.
+A copy installed with `scripts/install-macos.sh` also needs
+`XDG_DATA_DIRS="$(brew --prefix)/share:/usr/local/share:/usr/share"` before
+the command when started from Terminal. Finder sets this through the
+app's `Info.plist`.
 
 ### What Penguin Mail keeps
 
@@ -401,9 +429,12 @@ instead of Linux's WebKitGTK and tray.
   cannot see those programs. A local model, the Anthropic API and MCP
   servers you reach by address work in every package. On macOS, install
   command-line programs separately and make them available on the app's PATH.
-- **No AppImage.** WebKit draws HTML mail in helper processes it
-  sandboxes with bubblewrap, and that sandbox mounts your system's `/usr`,
-  where helpers bundled in an AppImage find none of their libraries.
+- **AppImage.** The x86_64 AppImage carries the current app and its runtime
+  for Ubuntu 22.04 and newer, and Debian 13. It keeps WebKit and image-loader
+  sandboxes enabled and uses your desktop's services and GnuPG. On Ubuntu
+  24.04 it shows a command to run once, which lets it start those sandboxes.
+  Download a new AppImage to update. See [AppImage](appimage.md) for
+  installation, extraction mode, build instructions and testing limits.
 
 ## Where things live
 

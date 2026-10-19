@@ -102,7 +102,7 @@ pub struct MailTray {
 /// that does not search it, or nothing. A snap's icons are not on the
 /// host's search path, and without them the host draws a blank.
 pub fn installed_icons() -> String {
-    std::env::current_exe()
+    crate::exe::path()
         .ok()
         .and_then(|exe| icons_beside(&exe))
         .map(|path| path.to_string_lossy().into_owned())

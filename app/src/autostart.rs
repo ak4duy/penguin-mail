@@ -34,8 +34,8 @@ pub fn is_enabled(path: &Path) -> bool {
 
 /// Turns the login item on or off for this copy, however it was packaged.
 pub fn apply(path: &Path, enabled: bool) -> std::io::Result<()> {
-    let exe = crate::exe::launcher().unwrap_or_else(|_| "penguin-mail".into());
-    set_enabled(path, &exe, enabled)?;
+    let (exe, flags) = crate::exe::login().unwrap_or_else(|_| ("penguin-mail".into(), &[]));
+    set_enabled(path, &exe, flags, enabled)?;
     if BUILT_FOR == Packaging::Flatpak {
         ask_portal(enabled);
     }
@@ -78,8 +78,9 @@ fn ask_portal(enabled: bool) {
     });
 }
 
-/// Writes or removes the login item. `exe` is the binary to start.
-pub fn set_enabled(path: &Path, exe: &Path, enabled: bool) -> std::io::Result<()> {
+/// Writes or removes the login item. `exe` is the binary to start and
+/// `flags` go before `--background`.
+pub fn set_enabled(path: &Path, exe: &Path, flags: &[&str], enabled: bool) -> std::io::Result<()> {
     if !enabled {
         return match std::fs::remove_file(path) {
             Err(err) if err.kind() != std::io::ErrorKind::NotFound => Err(err),
@@ -93,8 +94,12 @@ pub fn set_enabled(path: &Path, exe: &Path, enabled: bool) -> std::io::Result<()
         path,
         format!(
             "[Desktop Entry]\nType=Application\nName=Penguin Mail\nComment=Keeps Gmail in sync from the system tray\n\
-             Exec={} --background\nIcon={}\nNoDisplay=true\nX-GNOME-Autostart-enabled=true\n",
+             Exec={}{} --background\nIcon={}\nNoDisplay=true\nX-GNOME-Autostart-enabled=true\n",
             exec_argument(exe),
+            flags
+                .iter()
+                .map(|flag| format!(" {flag}"))
+                .collect::<String>(),
             crate::APP_ID
         ),
     )
@@ -142,16 +147,22 @@ mod tests {
             .join("autostart")
             .join("io.github.c9dev.PenguinMail.desktop");
         assert!(!is_enabled(&path));
-        set_enabled(&path, Path::new("/opt/penguin-mail/bin/penguin-mail"), true).unwrap();
+        set_enabled(
+            &path,
+            Path::new("/opt/penguin-mail/bin/penguin-mail"),
+            &[],
+            true,
+        )
+        .unwrap();
         assert!(is_enabled(&path));
         assert!(
             std::fs::read_to_string(&path)
                 .unwrap()
                 .contains("Exec=\"/opt/penguin-mail/bin/penguin-mail\" --background")
         );
-        set_enabled(&path, Path::new("/x"), false).unwrap();
+        set_enabled(&path, Path::new("/x"), &[], false).unwrap();
         assert!(!is_enabled(&path));
-        set_enabled(&path, Path::new("/x"), false).unwrap();
+        set_enabled(&path, Path::new("/x"), &[], false).unwrap();
     }
 
     #[test]
@@ -161,12 +172,33 @@ mod tests {
         set_enabled(
             &path,
             Path::new("/home/ann/Penguin Mail/penguin-mail"),
+            &[],
             true,
         )
         .unwrap();
         let text = std::fs::read_to_string(&path).unwrap();
         assert!(
             text.contains("\nExec=\"/home/ann/Penguin Mail/penguin-mail\" --background\n"),
+            "{text}"
+        );
+    }
+
+    #[test]
+    fn an_appimage_without_fuse_unpacks_again_at_login() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("io.github.c9dev.PenguinMail.desktop");
+        set_enabled(
+            &path,
+            Path::new("/home/ann/Mail.AppImage"),
+            &["--appimage-extract-and-run"],
+            true,
+        )
+        .unwrap();
+        let text = std::fs::read_to_string(&path).unwrap();
+        assert!(
+            text.contains(
+                "\nExec=\"/home/ann/Mail.AppImage\" --appimage-extract-and-run --background\n"
+            ),
             "{text}"
         );
     }

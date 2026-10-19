@@ -58,6 +58,7 @@ mod flags;
 mod followup;
 mod hide_my_email;
 mod images;
+mod in_flight;
 mod invitation;
 mod listing;
 mod message_menu;
@@ -117,6 +118,9 @@ pub struct MainWindow {
     app: Weak<App>,
     core: Rc<Core>,
     toasts: adw::ToastOverlay,
+    /// Mail actions still on their way to the server: the rows they took
+    /// out of the list and the toast that speaks for them.
+    in_flight: in_flight::InFlight,
     /// Says a release is available, installing, waiting to restart, or failed.
     update_banner: adw::Banner,
     /// Says a snap cannot reach the keyring and gives the command that
@@ -141,6 +145,9 @@ pub struct MainWindow {
     /// The About window while it is open, so an update's progress reaches
     /// its button.
     about: RefCell<Option<Rc<crate::ui::about::About>>>,
+    /// Preferences while it is open, so another press brings it back
+    /// rather than stacking a second one.
+    preferences: RefCell<Option<Rc<super::preferences::dialog::Dialog>>>,
     stack: gtk::Stack,
     split: adw::OverlaySplitView,
     /// The mail's list and conversation, or the calendar, beside the
@@ -869,6 +876,7 @@ impl MainWindow {
                 app: Rc::downgrade(app),
                 core: Rc::clone(&app.core),
                 toasts,
+                in_flight: in_flight::InFlight::default(),
                 update_banner,
                 keyring_banner,
                 grant_banners,
@@ -876,6 +884,7 @@ impl MainWindow {
                 storage_banner_widgets: RefCell::new(HashMap::new()),
                 update_menu: gio::Menu::new(),
                 about: RefCell::new(None),
+                preferences: RefCell::new(None),
                 stack,
                 split,
                 spaces,
@@ -889,7 +898,7 @@ impl MainWindow {
                 listing: Rc::new(ListingRun::new(
                     app.settings_with(|s| s.default_category),
                     Rc::new(searching::ListPane(weak.clone())),
-                    Rc::new(searching::CoreLists(Rc::clone(&app.core))),
+                    Rc::new(searching::CoreLists::new(Rc::clone(&app.core))),
                 )),
                 accounts_read: RefCell::new(None),
                 authorizing: Cell::new(false),
@@ -1247,6 +1256,15 @@ impl MainWindow {
             .into_iter()
             .partition(|(a, _)| a.provider.serves_mail());
         self.listing.accounts_live(&live);
+        let mailboxes = data
+            .iter()
+            .flat_map(|(account, labels)| {
+                labels
+                    .iter()
+                    .map(move |label| (account.id, label.id.clone()))
+            })
+            .collect();
+        self.listing.mailboxes_live(&mailboxes);
         // A label deleted elsewhere, by the assistant or in the browser,
         // leaves the window on a mailbox that is no longer there, so the
         // inbox takes over as it does for a signed-out account.
@@ -2035,32 +2053,35 @@ impl MainWindow {
         if targets.is_empty() {
             return;
         }
+        // The rows leave and the toast shows now; the server may take a
+        // while, behind a sync pass or a slow connection.
+        let asked = targets.len();
+        let leaving = aftermath::leaves(&action, &self.shown()).then(|| {
+            self.list
+                .retain(|row| !targets.iter().any(|target| aftermath::covers(target, row)));
+            self.follow_selection();
+            self.in_flight.leave(&targets)
+        });
+        let run = match history {
+            History::Record => Some(self.announce(&action, asked, message)),
+            History::Skip => None,
+        };
         let this = Rc::clone(self);
         glib::spawn_future_local(async move {
             let outcome = this.core.act(targets, action.clone(), history, from).await;
+            if let Some(leaving) = leaving {
+                this.in_flight.arrived(leaving);
+            }
             this.after_mail(Cause::Did(&action, history), &outcome, None);
+            if let Some(run) = &run {
+                this.ran(run, &outcome);
+            }
+            // What the action did not change lists again where it was.
+            if leaving.is_some() && outcome.done.len() < asked {
+                this.listing.everything();
+            }
             if let Some(error) = outcome.first_error() {
-                return this.toast(error);
-            }
-            if history == History::Skip {
-                return;
-            }
-            let count = outcome.done.len();
-            if let Some(done) = message
-                .or_else(|| done_message(&action, count, this.settings_with(|s| s.threading)))
-            {
-                let toast = adw::Toast::builder()
-                    .title(toast_title(&done))
-                    .button_label(gettext("Undo"))
-                    .timeout(5)
-                    .build();
-                let weak = Rc::downgrade(&this);
-                toast.connect_button_clicked(move |_| {
-                    if let Some(win) = weak.upgrade() {
-                        win.undo();
-                    }
-                });
-                this.toasts.add_toast(toast);
+                this.say_now(error);
             }
         });
     }
@@ -2069,19 +2090,18 @@ impl MainWindow {
     /// the window or the assistant took it. The one before it is left for
     /// the next press.
     fn undo(self: &Rc<Self>) {
+        // An action still on its way is not on the stack yet, and pressing
+        // Undo right after it means that one.
+        if self.undo_newest() {
+            return;
+        }
         let this = Rc::clone(self);
         glib::spawn_future_local(async move {
-            let Some(undone) = this.core.undo().await else {
-                return this.toast(&gettext("Nothing to undo"));
-            };
-            this.after_mail(Cause::Undid, &undone.outcome, None);
-            match undone.outcome.first_error() {
-                Some(error) => this.toast(error),
-                None => this.toast(&fill(
-                    &gettext("{action} undone"),
-                    &[("action", &undone.words)],
-                )),
+            let undone = this.core.undo().await;
+            if let Some(undone) = &undone {
+                this.after_mail(Cause::Undid, &undone.outcome, None);
             }
+            this.say_undone(undone);
         });
     }
 
@@ -3273,9 +3293,12 @@ impl MainWindow {
         menu.append_section(None, &calendar);
         let first = gio::Menu::new();
         // The header in both spaces carries a button for this now (R12);
-        // the menu item stays too, so Ctrl+J shows here as well.
+        // the menu item stays too, so its key shows here as well.
         let assistant = gio::MenuItem::new(Some(&gettext("Assistant")), Some("win.assistant"));
-        assistant.set_attribute_value("accel", Some(&"<Control>j".to_variant()));
+        assistant.set_attribute_value(
+            "accel",
+            Some(&crate::ui::primary_accelerator("<Primary>j").to_variant()),
+        );
         first.append_item(&assistant);
         first.append(Some(&gettext("Check for Mail")), Some("win.check"));
         first.append(Some(&gettext("Add Account…")), Some("win.add-account"));
@@ -3691,10 +3714,19 @@ impl MainWindow {
         let Some(app) = self.app.upgrade() else {
             return;
         };
+        // One Preferences at a time. Asked for an account's signature
+        // while it is open, it turns to the accounts rather than starting
+        // again, which would drop what the person was in the middle of.
+        if let Some(open) = self.open_preferences() {
+            if focus.is_some() {
+                open.set_visible_page_name("accounts");
+            }
+            return;
+        }
         // Preferences puts each account on the pages that apply to it.
         let accounts = app.accounts();
         let weak = Rc::downgrade(self);
-        super::preferences::present(
+        let dialog = super::preferences::present(
             &app,
             &accounts,
             |id| self.offers(id),
@@ -3707,6 +3739,29 @@ impl MainWindow {
             &self.window,
             focus,
         );
+        self.keep_preferences(dialog);
+    }
+
+    /// Preferences, when it is open.
+    fn open_preferences(&self) -> Option<Rc<super::preferences::dialog::Dialog>> {
+        self.preferences.borrow().clone()
+    }
+
+    /// Holds `dialog` as the open Preferences until it closes.
+    fn keep_preferences(self: &Rc<Self>, dialog: Rc<super::preferences::dialog::Dialog>) {
+        let weak = Rc::downgrade(self);
+        dialog.window.connect_closed(move |closed| {
+            let Some(win) = weak.upgrade() else { return };
+            let ours = win
+                .preferences
+                .borrow()
+                .as_ref()
+                .is_some_and(|open| &open.window == closed);
+            if ours {
+                win.preferences.replace(None);
+            }
+        });
+        self.preferences.replace(Some(dialog));
     }
 
     fn show_rules(self: &Rc<Self>, account: Account) {
@@ -3732,9 +3787,13 @@ impl MainWindow {
         let Some(app) = self.app.upgrade() else {
             return;
         };
+        if let Some(open) = self.open_preferences() {
+            open.set_visible_page_name(page);
+            return;
+        }
         let accounts = app.accounts();
         let weak = Rc::downgrade(self);
-        super::preferences::present_page(
+        let dialog = super::preferences::present_page(
             &app,
             &accounts,
             |id| self.offers(id),
@@ -3747,6 +3806,7 @@ impl MainWindow {
             &self.window,
             page,
         );
+        self.keep_preferences(dialog);
     }
 
     fn show_vacation(self: &Rc<Self>, account: Account) {
@@ -3978,6 +4038,10 @@ impl MainWindow {
     }
 
     fn show_about(self: &Rc<Self>) {
+        // One About at a time: a second press finds it open already.
+        if self.about.borrow().is_some() {
+            return;
+        }
         let Some(app) = self.app.upgrade() else {
             return;
         };

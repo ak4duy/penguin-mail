@@ -32,7 +32,7 @@ mailrs-ai = { path = "ai" }
 mailrs-testmail = { path = "testmail" }
 
 adw = { package = "libadwaita", version = "0.9.2", features = ["v1_8"] }
-ammonia = "4.2.3"
+ammonia = "4.2.4"
 anyhow = "1.0.104"
 async-channel = "2.5.0"
 async-imap = { version = "0.12.0", default-features = false, features = ["runtime-tokio"] }
@@ -106,6 +106,7 @@ objc2-app-kit = "0.3.2"
 objc2-core-graphics = "0.3.2"
 objc2-foundation = "0.3.2"
 objc2-quartz-core = "0.3.2"
+objc2-user-notifications = { version = "0.3.2", default-features = false, features = ["std", "block2", "UNNotification", "UNNotificationAction", "UNNotificationCategory", "UNNotificationContent", "UNNotificationRequest", "UNNotificationResponse", "UNNotificationTrigger", "UNUserNotificationCenter"] }
 objc2-web-kit = "0.3.2"
 wiremock = "0.6.5"
 

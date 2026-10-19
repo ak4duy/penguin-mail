@@ -86,17 +86,18 @@ async fn a_failed_write_undoes_only_its_own_change() {
     h.bootstrap_all().await;
     let mut held = h.fake.hold("users.messages.modify");
     let reading = h.sync.triage_thread("t1", &TriageAction::MarkRead);
-    // While the write waits, the message is archived elsewhere and a
-    // replay stores that. Then Gmail refuses the write.
+    // While the write waits, the message is archived elsewhere. Then Gmail
+    // refuses the write, and the replay that carries the archive runs once
+    // the write is over.
     let meanwhile = async {
         held.entered().await;
         h.fake.remote_relabel("a", &[], &["INBOX"]);
-        h.sync.incremental().await.unwrap();
         h.fake.fail_next(GmailError::NeedsReauth);
         held.release();
     };
     let (read, ()) = tokio::join!(reading, meanwhile);
     assert!(read.is_err());
+    h.sync.incremental().await.unwrap();
     assert_eq!(h.labels_of("a").await, ["UNREAD"]);
 }
 

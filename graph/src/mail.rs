@@ -342,20 +342,24 @@ impl Graph {
 
     /// One page of `folder`'s delta. `link` is the next or delta link the
     /// last page gave; without one the round starts, over mail received
-    /// since `received_since` (RFC 3339).
+    /// since `received_since` (RFC 3339), or the whole folder when absent.
     pub async fn message_delta(
         &self,
         folder: &str,
         link: Option<&str>,
-        received_since: &str,
+        received_since: Option<&str>,
     ) -> Result<DeltaPage<Message>, GraphError> {
         if let Some(link) = link {
             return self.follow(link, &[PAGE_PREFER]).await;
         }
-        let filter = format!("receivedDateTime ge {received_since}");
+        let filter = received_since.map(|since| format!("receivedDateTime ge {since}"));
+        let mut query = vec![("$select", DELTA_FIELDS)];
+        if let Some(filter) = &filter {
+            query.push(("$filter", filter));
+        }
         self.get_with(
             &format!("me/mailFolders/{folder}/messages/delta"),
-            &[("$select", DELTA_FIELDS), ("$filter", &filter)],
+            &query,
             &[PAGE_PREFER],
         )
         .await
