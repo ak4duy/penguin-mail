@@ -5,10 +5,11 @@ the [releases page](https://github.com/c9dev/penguin-mail/releases).
 
 ## Unreleased
 
+## 1.0.10 (2026-10-20)
+
 ### New
 
 - Drag the mailbox and message-list dividers to resize their columns; widths are remembered between starts.
-
 - Choose reasoning separately for assistant chats and email translations in Preferences → AI.
 - Russian and Czech can be selected in Never Translate.
 - Choose Simplified Chinese, Russian, Italian, Japanese, Korean, Polish, Turkish, or Indonesian in Preferences.
