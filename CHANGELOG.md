@@ -16,6 +16,7 @@ the [releases page](https://github.com/c9dev/penguin-mail/releases).
 
 ### Fixed
 
+- Gmail Sent, Drafts, and custom labels show older server mail as you scroll, even outside the sync period.
 - Mail translations ask compatible local models to skip reasoning by default for faster replies.
 - IMAP folders, including nested folders, Sent, and Drafts, show older server mail as you scroll. Failed first loads can be retried without restarting ([#60](https://github.com/c9dev/penguin-mail/issues/60)). Thanks to [zwnk](https://github.com/zwnk) for the reproductions and patches.
 - Upgrading an Outlook account keeps pending deletions and moves, without notifications for old mail found during repair ([#66](https://github.com/c9dev/penguin-mail/issues/66)).
