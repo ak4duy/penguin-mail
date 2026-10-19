@@ -935,7 +935,7 @@ msgstr ""
 msgid "Continue opens {provider}'s sign-in page in your browser."
 msgstr ""
 
-#: app/src/app.rs:416
+#: app/src/app.rs:463
 msgid ""
 "Your preferences could not be read, so Penguin Mail started from the "
 "defaults. The old file is kept as {file}."
@@ -4059,55 +4059,59 @@ msgid ""
 "The message goes to Anthropic, for Claude to read through your subscription."
 msgstr ""
 
-#: app/src/tray.rs:24
+#: app/src/tray.rs:25
 msgid "No unread mail"
 msgstr ""
 
-#: app/src/tray.rs:26
+#: app/src/tray.rs:27
 msgid "{count} unread message"
 msgid_plural "{count} unread messages"
 msgstr[0] ""
 msgstr[1] ""
 
-#: app/src/tray.rs:40 app/src/ui/sidebar.rs:1521
+#: app/src/tray.rs:41 app/src/ui/sidebar.rs:1521
 msgid "{account}, {count} unread message"
 msgid_plural "{account}, {count} unread messages"
 msgstr[0] ""
 msgstr[1] ""
 
-#: app/src/tray.rs:147 app/src/tray.rs:185
+#: app/src/tray.rs:148 app/src/tray.rs:186
 msgid "Penguin Mail: {summary}"
 msgstr ""
 
-#: app/src/tray.rs:236
+#: app/src/tray.rs:239
+msgid "Mark All as Read"
+msgstr ""
+
+#: app/src/tray.rs:248
 msgid "Open Penguin Mail"
 msgstr ""
 
-#: app/src/tray.rs:237 app/src/ui/composer/mod.rs:365
+#: app/src/tray.rs:249 app/src/ui/composer/mod.rs:365
 #: app/src/ui/composer/mod.rs:668 app/src/ui/composer/mod.rs:1550
 #: app/src/ui/contact_card.rs:168 app/src/ui/thread_list.rs:456
 msgid "New Message"
 msgstr ""
 
-#: app/src/tray.rs:238 app/src/ui/sidebar.rs:1929 app/src/ui/window.rs:3408
+#: app/src/tray.rs:250 app/src/ui/sidebar.rs:1929 app/src/ui/window.rs:3408
 msgid "Check for Mail"
 msgstr ""
 
-#: app/src/tray.rs:242 app/src/update/mod.rs:98
+#: app/src/tray.rs:254 app/src/update/mod.rs:98
 msgid "Install Update {version}"
 msgstr ""
 
-#: app/src/tray.rs:245
+#: app/src/tray.rs:257
 msgid "What's New in {version}"
 msgstr ""
 
-#: app/src/tray.rs:249 app/src/ui/about.rs:119 app/src/ui/about.rs:227
+#: app/src/tray.rs:261 app/src/ui/about.rs:119 app/src/ui/about.rs:227
 #: app/src/ui/about.rs:235 app/src/ui/about.rs:242
 #: app/src/ui/preferences.rs:1030 app/src/update/mod.rs:108
 msgid "Check for Updates"
 msgstr ""
 
-#: app/src/tray.rs:254 app/src/ui/window.rs:3421
+#: app/src/tray.rs:266 app/src/ui/window.rs:3421
 #: app/src/ui/window/shortcuts.rs:644
 msgid "Quit"
 msgstr ""

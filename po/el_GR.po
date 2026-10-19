@@ -4546,6 +4546,10 @@ msgstr[1] "{account}, {count} μη αναγνωσμένα μηνύματα"
 msgid "Penguin Mail: {summary}"
 msgstr "Penguin Mail: {summary}"
 
+#: app/src/tray.rs:239
+msgid "Mark All as Read"
+msgstr "Σήμανση όλων ως αναγνωσμένα"
+
 #: app/src/tray.rs:236
 msgid "Open Penguin Mail"
 msgstr "Άνοιγμα του Penguin Mail"

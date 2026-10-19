@@ -307,3 +307,17 @@ fn folder_badges_count_only_unread_mail_in_the_folder() {
         }
     }
 }
+
+/// The tray's "Mark All as Read" takes unread inbox messages of every
+/// account, and leaves out read mail, other folders, Trash and Spam.
+#[test]
+fn unread_inbox_messages_are_the_unread_inbox_mail_of_every_account() {
+    let (conn, _, _) = mixed_mail();
+    let mut ids: Vec<_> = threads::unread_inbox_messages(&conn)
+        .unwrap()
+        .into_iter()
+        .filter_map(|row| row.message_id)
+        .collect();
+    ids.sort();
+    assert_eq!(ids, ["a2", "a3", "b1"]);
+}

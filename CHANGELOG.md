@@ -5,6 +5,10 @@ the [releases page](https://github.com/c9dev/penguin-mail/releases).
 
 ## Unreleased
 
+### New
+
+- Mark all unread inbox mail as read in every account from the tray menu.
+
 ## 1.0.10 (2026-10-20)
 
 ### New

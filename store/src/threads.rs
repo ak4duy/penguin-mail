@@ -1239,6 +1239,14 @@ fn messages_walking(
     Ok(rows.collect::<rusqlite::Result<Vec<_>>>()?)
 }
 
+/// The unread messages of every account's inbox, which is what the tray's
+/// "Mark All as Read" acts on.
+pub fn unread_inbox_messages(conn: &Connection) -> Result<Vec<ThreadSummary>> {
+    let filter = ThreadFilter::unified(MailSet::Role(Role::Inbox));
+    let rows = list_messages(conn, &filter, 0, i64::MAX)?;
+    Ok(rows.into_iter().filter(|row| row.unread).collect())
+}
+
 pub fn unread_messages(conn: &Connection, filter: &ThreadFilter) -> Result<i64> {
     let mut sql = filter.counting(conn, Rows::Messages, "SELECT COUNT(*)", true)?;
     sql.push(MESSAGE_UNREAD);

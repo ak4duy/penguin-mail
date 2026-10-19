@@ -4474,6 +4474,10 @@ msgstr[2] "{account}, {count} непрочитаних повідомлень"
 msgid "Penguin Mail: {summary}"
 msgstr "Penguin Mail: {summary}"
 
+#: app/src/tray.rs:239
+msgid "Mark All as Read"
+msgstr "Позначити все як прочитане"
+
 #: app/src/tray.rs:236
 msgid "Open Penguin Mail"
 msgstr "Відкрити Penguin Mail"
