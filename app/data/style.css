@@ -2035,3 +2035,9 @@ row.expander:checked > box > list > row.header image.expander-row-arrow {
   font-family: "DejaVu Sans Mono", monospace;
   font-size: 0.9em;
 }
+
+/* A wide hit area with a focus cue for the column dividers. */
+.column-resizer { background: transparent; }
+.column-resizer:hover, .column-resizer:focus-visible {
+  background: alpha(@accent_color, 0.35);
+}
