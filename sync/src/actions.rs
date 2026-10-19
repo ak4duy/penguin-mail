@@ -428,12 +428,22 @@ impl<A: Accounts> MailActions<A> {
     pub async fn empty_trash(
         &self,
         account_id: AccountId,
-    ) -> Result<Permitted<Outcome>, SyncError> {
-        let result = self.sync(account_id)?.empty_trash().await?;
-        if let Permitted::Done(outcome) = &result {
-            self.forget_erased(outcome);
+    ) -> Result<Permitted<crate::Emptied>, SyncError> {
+        self.sync(account_id)?
+            .empty_trash(|outcome| self.forget_erased(outcome))
+            .await
+    }
+
+    /// Continues through every confirmed account, including after a permission refusal.
+    pub async fn empty_trashes(
+        &self,
+        accounts: &[AccountId],
+    ) -> Vec<Result<Permitted<crate::Emptied>, SyncError>> {
+        let mut results = Vec::with_capacity(accounts.len());
+        for account in accounts {
+            results.push(self.empty_trash(*account).await);
         }
-        Ok(result)
+        results
     }
 
     fn forget_erased(&self, outcome: &Outcome) {

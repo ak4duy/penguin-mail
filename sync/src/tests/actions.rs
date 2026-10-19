@@ -1122,14 +1122,13 @@ async fn empty_trash_reaches_every_page_and_leaves_other_messages_in_the_same_th
     let Permitted::Done(outcome) = actions.empty_trash(h.account_id).await.unwrap() else {
         panic!("permission is granted");
     };
-    assert!(outcome.failed.is_empty(), "{:?}", outcome.failed);
-    assert_eq!(outcome.done.len(), 104);
-    assert!(outcome.done.iter().all(|t| t.message_id.is_some()));
+    assert!(outcome.failed == 0, "{:?}", outcome.failed);
+    assert_eq!(outcome.deleted, 104);
     assert!(in_gmail(&h, "inbox") && in_gmail(&h, "sent"));
     assert_eq!(h.fake.with(|s| s.messages.len()), 2);
     assert!(actions.undo().await.is_none());
     assert!(matches!(actions.empty_trash(h.account_id).await.unwrap(),
-        Permitted::Done(outcome) if outcome.done.is_empty() && outcome.failed.is_empty()));
+        Permitted::Done(outcome) if outcome.deleted == 0 && outcome.failed == 0));
 }
 
 #[tokio::test]
@@ -1199,8 +1198,8 @@ async fn empty_trash_reports_a_refused_batch_without_claiming_it_was_deleted() {
         let Permitted::Done(outcome) = actions.empty_trash(h.account_id).await.unwrap() else {
             panic!("granted");
         };
-        assert_eq!(outcome.done.len(), 2);
-        assert_eq!(outcome.failed.len(), 1);
+        assert_eq!(outcome.deleted, 2);
+        assert_eq!(outcome.failed, 1);
         assert!(!in_gmail(&h, "a") && !in_gmail(&h, "b"));
         assert!(in_gmail(&h, "c"));
     }
@@ -1221,7 +1220,7 @@ async fn empty_trash_leaves_a_message_restored_after_the_listing() {
     };
     let (result, ()) = tokio::join!(emptying, restore);
     assert!(
-        matches!(result.unwrap(), Permitted::Done(outcome) if outcome.done.is_empty() && outcome.failed.is_empty())
+        matches!(result.unwrap(), Permitted::Done(outcome) if outcome.deleted == 0 && outcome.failed == 0)
     );
     assert!(in_gmail(&h, "restored"));
     assert_eq!(
@@ -1229,4 +1228,78 @@ async fn empty_trash_leaves_a_message_restored_after_the_listing() {
             .with(|s| s.usage.calls_to("users.messages.batchDelete")),
         0
     );
+}
+
+#[tokio::test]
+async fn empty_trash_rechecks_earlier_mail_after_the_last_preflight_batch() {
+    let h = harness().await;
+    for n in 0..101 {
+        h.fake
+            .seed(meta(&format!("m{n:03}"), &format!("t{n}"), 1, &["TRASH"]));
+    }
+    let mut held = h.fake.hold_after("users.messages.get", 100);
+    let actions = actions(&h);
+    let restore = async {
+        held.entered().await;
+        h.fake.remote_relabel("m000", &["INBOX"], &["TRASH"]);
+        held.release();
+    };
+    let (result, ()) = tokio::join!(actions.empty_trash(h.account_id), restore);
+    let Permitted::Done(result) = result.unwrap() else {
+        panic!("granted")
+    };
+    assert_eq!(result.deleted, 100);
+    assert_eq!(result.failed, 0);
+    assert!(in_gmail(&h, "m000"));
+}
+
+#[tokio::test]
+async fn empty_trash_rechecks_the_next_batch_after_a_delete_answers() {
+    let h = harness().await;
+    for n in 0..101 {
+        h.fake
+            .seed(meta(&format!("m{n:03}"), &format!("t{n}"), 1, &["TRASH"]));
+    }
+    let mut held = h.fake.hold("users.messages.batchDelete");
+    let actions = actions(&h);
+    let restore = async {
+        held.entered().await;
+        h.fake.remote_relabel("m100", &["INBOX"], &["TRASH"]);
+        held.release();
+    };
+    let (result, ()) = tokio::join!(actions.empty_trash(h.account_id), restore);
+    let Permitted::Done(result) = result.unwrap() else {
+        panic!("granted")
+    };
+    assert_eq!(result.deleted, 100);
+    assert!(in_gmail(&h, "m100"));
+}
+
+#[tokio::test]
+async fn empty_trash_continues_with_the_next_account_after_permission_is_refused() {
+    let h = harness().await;
+    h.fake.seed(meta("mine", "t1", 1, &["TRASH"]));
+    h.fake.withhold(mailrs_gmail::DELETE_SCOPE);
+    let other_id =
+        h.db.write(|c| accounts::insert_account(c, "you@example.com", 0))
+            .await
+            .unwrap();
+    let other_fake = Arc::new(FakeGmail::new());
+    other_fake.seed(mailrs_domain::MessageMeta {
+        account_id: other_id,
+        ..meta("theirs", "t2", 1, &["TRASH"])
+    });
+    let other = Arc::new(AccountSync::new(
+        other_id,
+        AccountServices::google(Arc::clone(&other_fake)),
+        h.db.clone(),
+        async_channel::unbounded().0,
+    ));
+    let result = actions_over(&h, [other])
+        .empty_trashes(&[h.account_id, other_id])
+        .await;
+    assert!(matches!(&result[0], Ok(Permitted::NeedsPermission)));
+    assert!(matches!(&result[1], Ok(Permitted::Done(done)) if done.deleted == 1));
+    assert!(in_gmail(&h, "mine"));
+    assert!(other_fake.with(|s| s.messages.is_empty()));
 }

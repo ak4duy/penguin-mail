@@ -183,6 +183,49 @@ impl<J: JmapApi> Jmap<J> {
         Ok(update)
     }
 
+    pub(super) async fn destroy_in(
+        &self,
+        messages: &[String],
+        mailbox: &str,
+    ) -> Result<Vec<Relocated>, Unapplied> {
+        let limits = self
+            .api()
+            .session()
+            .await
+            .map_err(|e| unapplied(0, backend(e)))?
+            .limits();
+        let limit = limits
+            .max_objects_in_set
+            .min(limits.max_objects_in_get)
+            .clamp(1, PER_SET);
+        let mut taken = 0;
+        for chunk in messages.chunks(limit) {
+            let got = self
+                .api()
+                .emails(chunk, &["id", "mailboxIds"])
+                .await
+                .map_err(|e| unapplied(taken, backend(e)))?;
+            if got.state.is_empty()
+                || got
+                    .list
+                    .iter()
+                    .any(|m| m.mailbox_ids.get(mailbox) != Some(&true))
+            {
+                return Err(unapplied(taken, BackendError::Changed));
+            }
+            let answer = self
+                .api()
+                .set_emails(&Map::new(), chunk, Some(&got.state))
+                .await
+                .map_err(|e| unapplied(taken, backend(e)))?;
+            if let Some((at, error)) = first_refusal(chunk, &answer) {
+                return Err(unapplied(taken + at, error));
+            }
+            taken += chunk.len();
+        }
+        Ok(Vec::new())
+    }
+
     pub(super) async fn write(
         &self,
         messages: &[String],
@@ -211,13 +254,13 @@ impl<J: JmapApi> Jmap<J> {
         let mut taken = 0;
         for chunk in messages.chunks(per_set) {
             let answer = match &patch {
-                None => self.api().set_emails(&Map::new(), chunk).await,
+                None => self.api().set_emails(&Map::new(), chunk, None).await,
                 Some(patch) => {
                     let update = self
                         .updates_for(chunk, patch)
                         .await
                         .map_err(|e| unapplied(taken, e))?;
-                    self.api().set_emails(&update, &[]).await
+                    self.api().set_emails(&update, &[], None).await
                 }
             }
             .map_err(|e| unapplied(taken, backend(e)))?;

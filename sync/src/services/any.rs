@@ -259,6 +259,14 @@ impl MailBackend for AnyMail {
         forward_all!(AnyMail, self, apply(messages, ops))
     }
 
+    async fn destroy_checked(
+        &self,
+        messages: &[String],
+        mailbox: &str,
+    ) -> Result<Vec<Relocated>, Unapplied> {
+        forward_all!(AnyMail, self, destroy_checked(messages, mailbox))
+    }
+
     fn person_waiting(&self) -> bool {
         forward_all_now!(AnyMail, self, person_waiting())
     }

@@ -11185,13 +11185,14 @@ msgstr "Vacía"
 msgid "Emptying Trash…"
 msgstr ""
 
-#: app/src/ui/window/trash.rs:69 app/src/ui/window/trash.rs:88
+#: app/src/ui/window/trash.rs:74 app/src/ui/window/trash.rs:90
+#: app/src/ui/window/trash.rs:106 app/src/ui/window/trash.rs:118
 #, fuzzy
 #| msgid "Could not load mail for {account}: {reason}"
 msgid "Could not empty Trash for {account}: {reason}"
 msgstr "No se ha podido cargar el correo de {account}: {reason}"
 
-#: app/src/ui/window/trash.rs:73
+#: app/src/ui/window/trash.rs:94
 #, fuzzy
 #| msgid "Deleted {count} message forever"
 #| msgid_plural "Deleted {count} messages forever"
@@ -11556,11 +11557,11 @@ msgstr "Este mensaje no pide acuse de lectura."
 msgid "The server refused this request."
 msgstr "El servidor ha rechazado esta solicitud."
 
-#: sync/src/account/writes.rs:889
+#: sync/src/account/writes.rs:781
 msgid "{provider} is busy. Still working on {conversations}."
 msgstr "{provider} está ocupado. Sigue trabajando en {conversations}."
 
-#: sync/src/account/writes.rs:912
+#: sync/src/account/writes.rs:804
 msgid ""
 "{provider} is busy, so “{action}” did not go through for {conversations}. "
 "Try again in a moment."
@@ -11568,7 +11569,7 @@ msgstr ""
 "{provider} está ocupado, así que «{action}» no se ha aplicado a "
 "{conversations}. Inténtalo de nuevo dentro de un momento."
 
-#: sync/src/account/writes.rs:921
+#: sync/src/account/writes.rs:813
 msgid ""
 "{provider} stayed busy for {waited}, so “{action}” did not go through for "
 "{conversations}."
@@ -11576,25 +11577,25 @@ msgstr ""
 "{provider} ha seguido ocupado durante {waited}, así que «{action}» no se ha "
 "aplicado a {conversations}."
 
-#: sync/src/account/writes.rs:928
+#: sync/src/account/writes.rs:820
 msgid "{action} failed: {reason}"
 msgstr "{action} ha fallado: {reason}"
 
-#: sync/src/account/writes.rs:946
+#: sync/src/account/writes.rs:838
 msgid "a moment"
 msgstr "un momento"
 
-#: sync/src/account/writes.rs:948
+#: sync/src/account/writes.rs:840
 msgid "{count} second"
 msgid_plural "{count} seconds"
 msgstr[0] "{count} segundo"
 msgstr[1] "{count} segundos"
 
-#: sync/src/account/writes.rs:953
+#: sync/src/account/writes.rs:845
 msgid "a minute"
 msgstr "un minuto"
 
-#: sync/src/actions.rs:124 sync/src/actions.rs:737
+#: sync/src/actions.rs:124 sync/src/actions.rs:747
 msgid "Change labels"
 msgstr "Cambiar etiquetas"
 
@@ -11602,13 +11603,13 @@ msgstr "Cambiar etiquetas"
 msgid "Delete Forever failed: {reason}"
 msgstr "Eliminar para siempre ha fallado: {reason}"
 
-#: sync/src/actions.rs:629
+#: sync/src/actions.rs:639
 msgid "This mail has moved since, so Undo left it where it is."
 msgstr ""
 "Este correo se ha movido desde entonces, así que Deshacer lo ha dejado donde "
 "está."
 
-#: sync/src/actions.rs:690 sync/src/actions.rs:744
+#: sync/src/actions.rs:700 sync/src/actions.rs:754
 msgid "Could not undo: {reason}"
 msgstr "No se ha podido deshacer: {reason}"
 
@@ -12004,7 +12005,7 @@ msgstr "Este servidor no guarda colores para sus buzones."
 msgid "This server files sent mail itself."
 msgstr "Este servidor archiva por sí mismo el correo enviado."
 
-#: sync/src/services/jmap/mod.rs:584
+#: sync/src/services/jmap/mod.rs:594
 msgid "The server made an address Penguin Mail cannot read."
 msgstr "El servidor ha creado una dirección que Penguin Mail no puede leer."
 

@@ -20,7 +20,7 @@ Terms the code and its docs use for Gmail mail. The `domain` crate holds the cod
 
 **Folder**: Archive, Junk, Trash, or All Mail. Archive is the received mail outside the inbox, which Gmail has no label for. The local store does not keep this mail, so the app lists a folder with a query tree, which Gmail receives as a search, and checks a message's labels to see if it still belongs there. _Avoid_: mailbox, spam folder.
 
-**Empty Trash**: permanently deletes every message in an account's Trash, including mail outside the local sync window, after confirmation. The unified Trash names all affected accounts. Messages outside Trash remain even when they belong to the same conversation. `MailActions::empty_trash`.
+**Empty Trash**: permanently deletes every message in an account's Trash, including mail outside the local sync window, after confirmation. The unified Trash names all affected accounts. Messages outside Trash remain even when they belong to the same conversation. `MailActions::empty_trash` keeps its snapshot on disk and rechecks each batch before deleting it; JMAP also checks the server state at the write. `Emptied` reports counts and the first failure without retaining every target. A permission refusal in unified Trash leaves the other confirmed accounts running.
 
 **Target**: what a mail action applies to: a thread, or one message of it when the list shows messages instead of conversations. `mailrs_domain::Target`. _Avoid_: selection, item.
 

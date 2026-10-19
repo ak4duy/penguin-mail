@@ -408,11 +408,11 @@ async fn empty_trash_keeps_the_successful_prefix_of_a_refused_batch() {
         .collect();
     h.bootstrap_all().await;
     h.fake.with(|s| s.refused.insert(ids[2].clone()));
-    let crate::Permitted::Done(outcome) = h.sync.empty_trash().await.unwrap() else {
+    let crate::Permitted::Done(outcome) = h.sync.empty_trash(|_| {}).await.unwrap() else {
         panic!("granted")
     };
-    assert_eq!(outcome.done.len(), 2);
-    assert_eq!(outcome.failed.len(), 1);
+    assert_eq!(outcome.deleted, 2);
+    assert_eq!(outcome.failed, 1);
     assert!(h.fake.with(|s| !s.emails.contains_key(&ids[0])
         && !s.emails.contains_key(&ids[1])
         && s.emails.contains_key(&ids[2])));
@@ -422,4 +422,21 @@ async fn empty_trash_keeps_the_successful_prefix_of_a_refused_batch() {
             .await
             .unwrap();
     assert_eq!(stored.len(), 1);
+}
+
+#[tokio::test]
+async fn empty_trash_rejects_a_restore_between_the_jmap_check_and_delete() {
+    let h = fastmail().await;
+    let id = h
+        .fake
+        .deliver("trash", &raw("restore@example.com", "Keep me"), 1);
+    h.bootstrap_all().await;
+    h.fake
+        .with(|s| s.move_before_set = Some((id.clone(), "inbox".into())));
+    let crate::Permitted::Done(result) = h.sync.empty_trash(|_| {}).await.unwrap() else {
+        panic!("granted")
+    };
+    assert_eq!(result.deleted, 0);
+    assert_eq!(result.failed, 1);
+    assert!(h.fake.with(|s| s.emails.contains_key(&id)));
 }

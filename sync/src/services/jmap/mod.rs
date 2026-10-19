@@ -449,6 +449,16 @@ impl<J: JmapApi> MailBackend for Jmap<J> {
         written
     }
 
+    async fn destroy_checked(
+        &self,
+        messages: &[String],
+        mailbox: &str,
+    ) -> Result<Vec<Relocated>, Unapplied> {
+        let result = self.destroy_in(messages, mailbox).await;
+        self.known().writes += 1;
+        result
+    }
+
     async fn send(&self, raw: &[u8], _thread_id: Option<&str>) -> Result<String, BackendError> {
         self.send_raw(raw).await
     }

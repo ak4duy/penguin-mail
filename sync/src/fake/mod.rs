@@ -69,6 +69,7 @@ pub struct FakeGmail {
 
 /// A call held open by [`FakeGmail::hold`], seen from the fake's side.
 struct Hold {
+    skip: usize,
     entered: tokio::sync::oneshot::Sender<()>,
     release: tokio::sync::oneshot::Receiver<()>,
 }
@@ -559,12 +560,18 @@ impl FakeGmail {
     /// mailbox before it waits answers with what it read, as a slow reply
     /// from Gmail would.
     pub fn hold(&self, method: &'static str) -> Held {
+        self.hold_after(method, 0)
+    }
+
+    /// Holds a call after `skip` earlier calls have answered.
+    pub fn hold_after(&self, method: &'static str, skip: usize) -> Held {
         let (entered_tx, entered) = tokio::sync::oneshot::channel();
         let (release, release_rx) = tokio::sync::oneshot::channel();
         self.with(|s| {
             s.held.insert(
                 method,
                 Hold {
+                    skip,
                     entered: entered_tx,
                     release: release_rx,
                 },
@@ -575,7 +582,15 @@ impl FakeGmail {
 
     /// Waits out a hold a test put on `method`, if there is one.
     async fn wait_if_held(&self, method: &'static str) {
-        if let Some(hold) = self.with(|s| s.held.remove(method)) {
+        if let Some(hold) = self.with(|s| {
+            if let Some(hold) = s.held.get_mut(method)
+                && hold.skip > 0
+            {
+                hold.skip -= 1;
+                return None;
+            }
+            s.held.remove(method)
+        }) {
             let _ = hold.entered.send(());
             let _ = hold.release.await;
         }

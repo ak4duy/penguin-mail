@@ -10182,11 +10182,12 @@ msgstr "Empty Trash"
 msgid "Emptying Trash…"
 msgstr "Emptying Trash…"
 
-#: app/src/ui/window/trash.rs:69 app/src/ui/window/trash.rs:88
+#: app/src/ui/window/trash.rs:74 app/src/ui/window/trash.rs:90
+#: app/src/ui/window/trash.rs:106 app/src/ui/window/trash.rs:118
 msgid "Could not empty Trash for {account}: {reason}"
 msgstr "Could not empty Trash for {account}: {reason}"
 
-#: app/src/ui/window/trash.rs:73
+#: app/src/ui/window/trash.rs:94
 msgid "Deleted {count} message from Trash for {account}"
 msgid_plural "Deleted {count} messages from Trash for {account}"
 msgstr[0] "Deleted {count} message from Trash for {account}"
@@ -10525,37 +10526,37 @@ msgstr "This message asks for no read receipt."
 msgid "The server refused this request."
 msgstr "The server refused this request."
 
-#: sync/src/account/writes.rs:889
+#: sync/src/account/writes.rs:781
 msgid "{provider} is busy. Still working on {conversations}."
 msgstr "{provider} is busy. Still working on {conversations}."
 
-#: sync/src/account/writes.rs:912
+#: sync/src/account/writes.rs:804
 msgid "{provider} is busy, so “{action}” did not go through for {conversations}. Try again in a moment."
 msgstr "{provider} is busy, so “{action}” did not go through for {conversations}. Try again in a moment."
 
-#: sync/src/account/writes.rs:921
+#: sync/src/account/writes.rs:813
 msgid "{provider} stayed busy for {waited}, so “{action}” did not go through for {conversations}."
 msgstr "{provider} stayed busy for {waited}, so “{action}” did not go through for {conversations}."
 
-#: sync/src/account/writes.rs:928
+#: sync/src/account/writes.rs:820
 msgid "{action} failed: {reason}"
 msgstr "{action} failed: {reason}"
 
-#: sync/src/account/writes.rs:946
+#: sync/src/account/writes.rs:838
 msgid "a moment"
 msgstr "a moment"
 
-#: sync/src/account/writes.rs:948
+#: sync/src/account/writes.rs:840
 msgid "{count} second"
 msgid_plural "{count} seconds"
 msgstr[0] "{count} second"
 msgstr[1] "{count} seconds"
 
-#: sync/src/account/writes.rs:953
+#: sync/src/account/writes.rs:845
 msgid "a minute"
 msgstr "a minute"
 
-#: sync/src/actions.rs:124 sync/src/actions.rs:737
+#: sync/src/actions.rs:124 sync/src/actions.rs:747
 msgid "Change labels"
 msgstr "Change labels"
 
@@ -10563,11 +10564,11 @@ msgstr "Change labels"
 msgid "Delete Forever failed: {reason}"
 msgstr "Delete Forever failed: {reason}"
 
-#: sync/src/actions.rs:629
+#: sync/src/actions.rs:639
 msgid "This mail has moved since, so Undo left it where it is."
 msgstr "This mail has moved since, so Undo left it where it is."
 
-#: sync/src/actions.rs:690 sync/src/actions.rs:744
+#: sync/src/actions.rs:700 sync/src/actions.rs:754
 msgid "Could not undo: {reason}"
 msgstr "Could not undo: {reason}"
 
@@ -10934,7 +10935,7 @@ msgstr "This server keeps no colours for its mailboxes."
 msgid "This server files sent mail itself."
 msgstr "This server files sent mail itself."
 
-#: sync/src/services/jmap/mod.rs:584
+#: sync/src/services/jmap/mod.rs:594
 msgid "The server made an address Penguin Mail cannot read."
 msgstr "The server made an address Penguin Mail cannot read."
 

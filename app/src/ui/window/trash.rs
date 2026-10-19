@@ -54,17 +54,38 @@ impl MainWindow {
         glib::spawn_future_local(async move {
             if question.ask(&this.window).await {
                 this.toast(&gettext("Emptying Trash…"));
-                for account in accounts {
-                    let actions = this.core.actions();
-                    let id = account.id;
-                    let result = this
-                        .core
-                        .call(async move { actions.empty_trash(id).await })
-                        .await;
+                let actions = this.core.actions();
+                let ids: Vec<_> = accounts.iter().map(|a| a.id).collect();
+                let results = this
+                    .core
+                    .call(async move {
+                        Ok::<_, mailrs_sync::SyncError>(actions.empty_trashes(&ids).await)
+                    })
+                    .await;
+                this.core.forget_remote();
+                this.listing.reload_remote();
+                this.listing.everything();
+                this.refresh_counts();
+                this.refresh_open_threads(|id, _| accounts.iter().any(|a| a.id == id));
+                let results = match results {
+                    Ok(results) => results,
+                    Err(error) => {
+                        this.toast(&fill(
+                            &gettext("Could not empty Trash for {account}: {reason}"),
+                            &[("account", &names), ("reason", &error.to_string())],
+                        ));
+                        this.emptying_trash.set(false);
+                        return;
+                    }
+                };
+                let mut permission_needed = Vec::new();
+                for (account, result) in accounts.into_iter().zip(results) {
                     match result {
                         Ok(Permitted::Done(outcome)) => {
-                            this.after_mail(Cause::Erased, &outcome, Some(&this.conversation));
-                            match outcome.first_error() {
+                            if outcome.needs_permission {
+                                permission_needed.push(account.clone());
+                            }
+                            match outcome.error.as_deref() {
                                 Some(error) => this.toast(&fill(
                                     &gettext("Could not empty Trash for {account}: {reason}"),
                                     &[("account", &account.email), ("reason", error)],
@@ -72,22 +93,45 @@ impl MainWindow {
                                 None => this.toast(&fill_plural(
                                     "Deleted {count} message from Trash for {account}",
                                     "Deleted {count} messages from Trash for {account}",
-                                    outcome.done.len(),
+                                    outcome.deleted,
                                     &[
                                         ("account", &account.email),
-                                        ("count", &outcome.done.len().to_string()),
+                                        ("count", &outcome.deleted.to_string()),
                                     ],
                                 )),
                             }
                         }
                         Ok(Permitted::NeedsPermission) => {
-                            this.ask_permission(id, Permission::Delete, Occasion::Needed);
-                            break;
+                            this.toast(&fill(
+                                &gettext("Could not empty Trash for {account}: {reason}"),
+                                &[
+                                    ("account", &account.email),
+                                    (
+                                        "reason",
+                                        &mailrs_sync::BackendError::NeedsPermission.to_string(),
+                                    ),
+                                ],
+                            ));
+                            permission_needed.push(account);
                         }
                         Err(error) => this.toast(&fill(
                             &gettext("Could not empty Trash for {account}: {reason}"),
                             &[("account", &account.email), ("reason", &error.to_string())],
                         )),
+                    }
+                }
+                for account in permission_needed {
+                    if permission::ask(
+                        &this.window,
+                        account.id,
+                        &account.email,
+                        account.provider,
+                        Permission::Delete,
+                        Occasion::Needed,
+                    )
+                    .await
+                    {
+                        this.grant(account.email);
                     }
                 }
             }

@@ -11139,13 +11139,14 @@ msgstr "Kosong"
 msgid "Emptying Trash…"
 msgstr ""
 
-#: app/src/ui/window/trash.rs:69 app/src/ui/window/trash.rs:88
+#: app/src/ui/window/trash.rs:74 app/src/ui/window/trash.rs:90
+#: app/src/ui/window/trash.rs:106 app/src/ui/window/trash.rs:118
 #, fuzzy
 #| msgid "Could not load mail for {account}: {reason}"
 msgid "Could not empty Trash for {account}: {reason}"
 msgstr "Tidak dapat memuat email untuk {account}: {reason}"
 
-#: app/src/ui/window/trash.rs:73
+#: app/src/ui/window/trash.rs:94
 #, fuzzy
 #| msgid "Deleted {count} message forever"
 #| msgid_plural "Deleted {count} messages forever"
@@ -11513,11 +11514,11 @@ msgstr "Pesan ini tidak meminta konfirmasi baca."
 msgid "The server refused this request."
 msgstr "Server menolak permintaan ini."
 
-#: sync/src/account/writes.rs:889
+#: sync/src/account/writes.rs:781
 msgid "{provider} is busy. Still working on {conversations}."
 msgstr "{provider} sedang sibuk. Masih memproses {conversations}."
 
-#: sync/src/account/writes.rs:912
+#: sync/src/account/writes.rs:804
 msgid ""
 "{provider} is busy, so “{action}” did not go through for {conversations}. "
 "Try again in a moment."
@@ -11525,7 +11526,7 @@ msgstr ""
 "{provider} sedang sibuk, sehingga “{action}” tidak berhasil untuk "
 "{conversations}. Coba lagi sebentar lagi."
 
-#: sync/src/account/writes.rs:921
+#: sync/src/account/writes.rs:813
 msgid ""
 "{provider} stayed busy for {waited}, so “{action}” did not go through for "
 "{conversations}."
@@ -11533,25 +11534,25 @@ msgstr ""
 "{provider} tetap sibuk selama {waited}, sehingga “{action}” tidak berhasil "
 "untuk {conversations}."
 
-#: sync/src/account/writes.rs:928
+#: sync/src/account/writes.rs:820
 msgid "{action} failed: {reason}"
 msgstr "{action} gagal: {reason}"
 
-#: sync/src/account/writes.rs:946
+#: sync/src/account/writes.rs:838
 msgid "a moment"
 msgstr "sebentar"
 
-#: sync/src/account/writes.rs:948
+#: sync/src/account/writes.rs:840
 msgid "{count} second"
 msgid_plural "{count} seconds"
 msgstr[0] "{count} detik"
 msgstr[1] "{count} detik"
 
-#: sync/src/account/writes.rs:953
+#: sync/src/account/writes.rs:845
 msgid "a minute"
 msgstr "satu menit"
 
-#: sync/src/actions.rs:124 sync/src/actions.rs:737
+#: sync/src/actions.rs:124 sync/src/actions.rs:747
 msgid "Change labels"
 msgstr "Ubah label"
 
@@ -11559,13 +11560,13 @@ msgstr "Ubah label"
 msgid "Delete Forever failed: {reason}"
 msgstr "Hapus Permanen gagal: {reason}"
 
-#: sync/src/actions.rs:629
+#: sync/src/actions.rs:639
 msgid "This mail has moved since, so Undo left it where it is."
 msgstr ""
 "Email ini sudah dipindahkan, sehingga Urungkan membiarkannya di tempatnya "
 "sekarang."
 
-#: sync/src/actions.rs:690 sync/src/actions.rs:744
+#: sync/src/actions.rs:700 sync/src/actions.rs:754
 msgid "Could not undo: {reason}"
 msgstr "Tidak dapat mengurungkan: {reason}"
 
@@ -11957,7 +11958,7 @@ msgstr "Server ini tidak menyimpan warna kotak surat."
 msgid "This server files sent mail itself."
 msgstr "Server ini menyimpan sendiri email terkirim."
 
-#: sync/src/services/jmap/mod.rs:584
+#: sync/src/services/jmap/mod.rs:594
 msgid "The server made an address Penguin Mail cannot read."
 msgstr "Server membuat alamat yang tidak dapat dibaca Penguin Mail."
 

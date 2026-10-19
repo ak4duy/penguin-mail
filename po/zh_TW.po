@@ -10648,13 +10648,14 @@ msgstr "空白"
 msgid "Emptying Trash…"
 msgstr ""
 
-#: app/src/ui/window/trash.rs:69 app/src/ui/window/trash.rs:88
+#: app/src/ui/window/trash.rs:74 app/src/ui/window/trash.rs:90
+#: app/src/ui/window/trash.rs:106 app/src/ui/window/trash.rs:118
 #, fuzzy
 #| msgid "Could not load mail for {account}: {reason}"
 msgid "Could not empty Trash for {account}: {reason}"
 msgstr "無法載入 {account} 的郵件：{reason}"
 
-#: app/src/ui/window/trash.rs:73
+#: app/src/ui/window/trash.rs:94
 #, fuzzy
 #| msgid "Deleted {count} message forever"
 #| msgid_plural "Deleted {count} messages forever"
@@ -10999,42 +11000,42 @@ msgstr "此郵件未要求已讀回條。"
 msgid "The server refused this request."
 msgstr "伺服器拒絕了此請求。"
 
-#: sync/src/account/writes.rs:889
+#: sync/src/account/writes.rs:781
 msgid "{provider} is busy. Still working on {conversations}."
 msgstr "{provider} 忙碌中。仍在處理 {conversations}。"
 
-#: sync/src/account/writes.rs:912
+#: sync/src/account/writes.rs:804
 msgid ""
 "{provider} is busy, so “{action}” did not go through for {conversations}. "
 "Try again in a moment."
 msgstr ""
 "{provider} 忙碌中，因此「{action}」未能套用至 {conversations}。請稍後重試。"
 
-#: sync/src/account/writes.rs:921
+#: sync/src/account/writes.rs:813
 msgid ""
 "{provider} stayed busy for {waited}, so “{action}” did not go through for "
 "{conversations}."
 msgstr ""
 "{provider} 持續忙碌了 {waited}，因此「{action}」未能套用至 {conversations}。"
 
-#: sync/src/account/writes.rs:928
+#: sync/src/account/writes.rs:820
 msgid "{action} failed: {reason}"
 msgstr "{action} 失敗：{reason}"
 
-#: sync/src/account/writes.rs:946
+#: sync/src/account/writes.rs:838
 msgid "a moment"
 msgstr "片刻"
 
-#: sync/src/account/writes.rs:948
+#: sync/src/account/writes.rs:840
 msgid "{count} second"
 msgid_plural "{count} seconds"
 msgstr[0] "{count} 秒"
 
-#: sync/src/account/writes.rs:953
+#: sync/src/account/writes.rs:845
 msgid "a minute"
 msgstr "一分鐘"
 
-#: sync/src/actions.rs:124 sync/src/actions.rs:737
+#: sync/src/actions.rs:124 sync/src/actions.rs:747
 msgid "Change labels"
 msgstr "變更標籤"
 
@@ -11042,11 +11043,11 @@ msgstr "變更標籤"
 msgid "Delete Forever failed: {reason}"
 msgstr "[永久刪除] 失敗：{reason}"
 
-#: sync/src/actions.rs:629
+#: sync/src/actions.rs:639
 msgid "This mail has moved since, so Undo left it where it is."
 msgstr "此郵件之後已移動，因此 [復原] 將郵件留在原處。"
 
-#: sync/src/actions.rs:690 sync/src/actions.rs:744
+#: sync/src/actions.rs:700 sync/src/actions.rs:754
 msgid "Could not undo: {reason}"
 msgstr "無法復原：{reason}"
 
@@ -11422,7 +11423,7 @@ msgstr "此伺服器不會儲存信箱的顏色。"
 msgid "This server files sent mail itself."
 msgstr "此伺服器會自行歸檔寄出的郵件。"
 
-#: sync/src/services/jmap/mod.rs:584
+#: sync/src/services/jmap/mod.rs:594
 msgid "The server made an address Penguin Mail cannot read."
 msgstr "伺服器建立的地址無法由 Penguin Mail 讀取。"
 

@@ -1287,6 +1287,17 @@ pub trait MailBackend: Send + Sync + 'static {
         ops: &[MailOp],
     ) -> impl Future<Output = Result<Vec<Relocated>, Unapplied>> + Send;
 
+    /// Destroys a freshly checked batch. Adapters with conditional writes
+    /// also reject a server-side change between the check and the write.
+    fn destroy_checked(
+        &self,
+        messages: &[String],
+        _mailbox: &str,
+    ) -> impl Future<Output = Result<Vec<Relocated>, Unapplied>> + Send {
+        // shortcut: Without a server precondition, mail can move after the check; add one when the provider supports it.
+        self.apply(messages, &[MailOp::Destroy])
+    }
+
     /// Sends raw RFC 822 bytes. Returns the new message id.
     fn send(
         &self,

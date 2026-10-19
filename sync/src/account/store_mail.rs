@@ -594,6 +594,15 @@ impl Moves<'_> {
             .collect())
     }
 
+    pub(crate) async fn destroy_checked(
+        &self,
+        messages: &[Named],
+        mailbox: &str,
+    ) -> Result<Vec<Relocated>, Unapplied> {
+        let names: Vec<String> = messages.iter().map(|m| m.name.clone()).collect();
+        self.mail.mail.destroy_checked(&names, mailbox).await
+    }
+
     /// Applies `ops` to `messages`, in order, as
     /// [`MailBackend::apply`] does, and answers where the server moved
     /// each one under its store id.

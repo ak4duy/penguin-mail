@@ -558,9 +558,9 @@ async fn empty_trash_lists_old_unsynced_mail_and_keeps_the_sent_reply() {
     );
     let h = imap_harness_on(imap, fake_settings()).await;
     h.bootstrap().await;
-    let result = h.sync.empty_trash().await.unwrap();
+    let result = h.sync.empty_trash(|_| {}).await.unwrap();
     assert!(
-        matches!(result, crate::Permitted::Done(outcome) if outcome.done.len() == 1 && outcome.failed.is_empty())
+        matches!(result, crate::Permitted::Done(outcome) if outcome.deleted == 1 && outcome.failed == 0)
     );
     assert!(undeleted(&h, "Trash").await.is_empty());
     assert_eq!(undeleted(&h, "Sent").await.len(), 1);
@@ -573,9 +573,9 @@ async fn empty_trash_resolves_a_message_moved_there_from_the_inbox() {
         .triage_thread(&thread, &TriageAction::Trash)
         .await
         .unwrap();
-    let result = h.sync.empty_trash().await.unwrap();
+    let result = h.sync.empty_trash(|_| {}).await.unwrap();
     assert!(
-        matches!(result, crate::Permitted::Done(outcome) if outcome.done.len() == 1 && outcome.failed.is_empty())
+        matches!(result, crate::Permitted::Done(outcome) if outcome.deleted == 1 && outcome.failed == 0)
     );
     assert!(undeleted(&h, "Trash").await.is_empty());
     assert!(h.ids().await.is_empty());

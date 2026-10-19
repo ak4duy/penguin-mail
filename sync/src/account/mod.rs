@@ -12,6 +12,7 @@ mod receipts;
 mod space;
 mod store_mail;
 mod threads;
+mod trash;
 mod window;
 mod writes;
 
@@ -20,6 +21,7 @@ pub(crate) use space::quiet;
 
 pub use listed::Searched;
 pub(crate) use store_mail::StoreMail;
+pub use trash::Emptied;
 
 use std::collections::BTreeSet;
 use std::sync::{Arc, Mutex, PoisonError};

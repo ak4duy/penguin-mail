@@ -60,14 +60,15 @@ impl AccountSync {
         }
         let ids = self.erasable(targets).await?;
         let moves = self.mail.hold_moves().await;
-        self.erase_ids(targets, ids, moves).await
+        self.erase_ids(targets, ids, &moves, None).await
     }
 
-    async fn erase_ids(
+    pub(super) async fn erase_ids(
         &self,
         targets: &[Target],
         ids: Vec<Vec<String>>,
-        moves: Moves<'_>,
+        moves: &Moves<'_>,
+        mailbox: Option<&str>,
     ) -> Result<Vec<Result<(), SyncError>>, SyncError> {
         let mut all: Vec<String> = ids.iter().flatten().cloned().collect();
         all.sort();
@@ -77,9 +78,11 @@ impl AccountSync {
         let named = moves.named(&all).await?;
         let mut chunks = named.chunks(limit);
         while let Some(chunk) = chunks.next() {
-            if let Err(Unapplied { error, taken, .. }) =
-                moves.apply(chunk, &[MailOp::Destroy]).await
-            {
+            let result = match mailbox {
+                Some(mailbox) => moves.destroy_checked(chunk, mailbox).await,
+                None => moves.apply(chunk, &[MailOp::Destroy]).await,
+            };
+            if let Err(Unapplied { error, taken, .. }) = result {
                 refused.extend(
                     chunk
                         .iter()
@@ -97,7 +100,6 @@ impl AccountSync {
                 }
             }
         }
-        drop(moves);
         let erased: Vec<String> = all
             .iter()
             .filter(|id| !refused.contains_key(*id))
@@ -146,116 +148,6 @@ impl AccountSync {
                 None => Ok(()),
             })
             .collect())
-    }
-
-    /// Empties the account's entire Trash, including mail outside the sync window.
-    /// Messages in other folders of the same conversation are left alone.
-    pub(crate) async fn empty_trash(&self) -> Result<crate::Permitted<crate::Outcome>, SyncError> {
-        if !self.mail.capabilities().delete_forever {
-            return Err(BackendError::Unsupported.into());
-        }
-        let moves = self.mail.hold_moves().await;
-        let Some(trash) = self.mail.mailbox_for(Role::Trash) else {
-            return Ok(crate::Permitted::Done(crate::Outcome::default()));
-        };
-        let refs = if matches!(self.services.mail, crate::AnyMail::Pop3(_)) {
-            let account_id = self.account_id;
-            self.db
-                .read(move |c| {
-                    let query = mailrs_domain::query::Query::Term(mailrs_domain::query::Term::In(
-                        MailSet::Role(Role::Trash),
-                    ));
-                    Ok(mailrs_store::query::matching(
-                        c,
-                        account_id,
-                        &query,
-                        &chrono::Utc::now(),
-                        usize::MAX,
-                    )?
-                    .into_iter()
-                    .map(|hit| crate::RemoteRef {
-                        id: hit.message_id,
-                        thread_id: hit.thread_id,
-                    })
-                    .collect::<Vec<_>>())
-                })
-                .await?
-        } else {
-            let mut refs = Vec::new();
-            let mut cursor = None;
-            let mut cursors = HashSet::new();
-            loop {
-                let page = self
-                    .mail
-                    .mailbox_page(&trash, cursor.as_deref(), 500)
-                    .await?;
-                refs.extend(page.refs);
-                let Some(next) = page.next else { break };
-                if !cursors.insert(next.clone()) {
-                    return Err(BackendError::StateLost.into());
-                }
-                cursor = Some(next);
-            }
-            refs
-        };
-        let mut targets = Vec::new();
-        let mut seen = HashSet::new();
-        // Finish listing and checking every message before deleting anything.
-        // Fresh memberships keep a restored message out, even if the store is stale.
-        for chunk in refs.chunks(100) {
-            let fetched = self
-                .fetch(chunk.iter().cloned().map(crate::Want::from).collect())
-                .await?;
-            let wanted: HashSet<_> = chunk.iter().map(|hit| hit.id.as_str()).collect();
-            let still_in_trash: HashSet<_> = fetched
-                .metas
-                .iter()
-                .filter(|meta| {
-                    wanted.contains(meta.id.as_str()) && meta.held.mailboxes.contains(&trash)
-                })
-                .map(|meta| meta.id.clone())
-                .collect();
-            let account_id = self.account_id;
-            let metas = self
-                .db
-                .write(move |c| fetched.store_missing(c, account_id).map(|(metas, _)| metas))
-                .await?;
-            for meta in metas {
-                if still_in_trash.contains(&meta.id) && seen.insert(meta.id.clone()) {
-                    targets.push(Target {
-                        account_id,
-                        thread_id: meta.thread_id,
-                        message_id: Some(meta.id),
-                    });
-                }
-            }
-        }
-        let ids = targets
-            .iter()
-            .map(|target| target.message_id.iter().cloned().collect())
-            .collect();
-        let results = self.erase_ids(&targets, ids, moves).await?;
-        if !results.is_empty()
-            && results.iter().all(|result| {
-                matches!(
-                    result,
-                    Err(SyncError::Backend(BackendError::NeedsPermission))
-                )
-            })
-        {
-            return Ok(crate::Permitted::NeedsPermission);
-        }
-        let mut outcome = crate::Outcome::default();
-        for (target, result) in targets.into_iter().zip(results) {
-            match result {
-                Ok(()) => outcome.done.push(target),
-                Err(error) => outcome.failed.push(crate::Failure {
-                    target,
-                    error: error.to_string(),
-                }),
-            }
-        }
-        Ok(crate::Permitted::Done(outcome))
     }
 
     /// The ids each target names: from the store, else from what a search
