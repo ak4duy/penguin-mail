@@ -9529,7 +9529,7 @@ msgstr "Διακοπή της αποστολής του μηνύματος"
 #: app/src/ui/sidebar.rs:374 app/src/ui/sidebar.rs:718
 #: app/src/ui/sidebar/sections.rs:26
 msgid "Mailboxes"
-msgstr "Γραμματοκιβώτια"
+msgstr "Αλληλογραφία"
 
 #: app/src/ui/sidebar.rs:381 app/src/ui/sidebar.rs:1489
 #: app/src/ui/thread_list.rs:331

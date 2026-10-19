@@ -36,7 +36,7 @@ msgid ""
 msgstr ""
 "Penguin Mail работает с учётными записями Gmail, Outlook.com и Microsoft "
 "365, а также с любыми учётными записями IMAP или POP3 с SMTP, например "
-"Fastmail, iCloud и Yahoo, и сам находит параметры серверов. Приложение "
+"Fastmail, iCloud и Yahoo, и сам находит настройки серверов. Приложение "
 "синхронизирует почту из системного лотка, показывает учётные записи в общих "
 "входящих или по одной и хранит вашу почту на вашем компьютере."
 
@@ -351,7 +351,7 @@ msgstr "Сервер исходящей почты отклонил свой п�
 #: app/src/add_account.rs:825
 msgid "Check the outgoing password in Server Settings, then choose Sign In."
 msgstr ""
-"Проверьте пароль исходящей почты в разделе «Параметры сервера», затем "
+"Проверьте пароль исходящей почты в разделе «Настройки сервера», затем "
 "выберите «Войти»."
 
 #: app/src/add_account.rs:829
@@ -506,7 +506,7 @@ msgid ""
 "that account, and type this server's address under Calendar, Contacts and "
 "Rules Servers."
 msgstr ""
-"Чтобы видеть там календари этого сервера, откройте «Параметры», затем "
+"Чтобы видеть там календари этого сервера, откройте «Настройки», затем "
 "«Учётные записи», откройте эту учётную запись и введите адрес этого сервера "
 "в разделе «Серверы календаря, контактов и правил»."
 
@@ -804,11 +804,11 @@ msgstr "Нет сервера JMAP на {host}"
 #: app/src/add_account.rs:2069
 msgid "Check the session URL in Server Settings, or use IMAP instead."
 msgstr ""
-"Проверьте URL сеанса в разделе «Параметры сервера» или используйте IMAP."
+"Проверьте URL сеанса в разделе «Настройки сервера» или используйте IMAP."
 
 #: app/src/add_account.rs:2070
 msgid "Check the session URL in Server Settings."
-msgstr "Проверьте URL сеанса в разделе «Параметры сервера»."
+msgstr "Проверьте URL сеанса в разделе «Настройки сервера»."
 
 #: app/src/add_account.rs:2074
 msgid "{provider} offers no mail over JMAP"
@@ -821,7 +821,7 @@ msgstr "Используйте для этой учётной записи IMAP.
 #: app/src/add_account.rs:2077
 msgid "Choose IMAP in Server Settings to add this account."
 msgstr ""
-"Выберите IMAP в разделе «Параметры сервера», чтобы добавить эту учётную "
+"Выберите IMAP в разделе «Настройки сервера», чтобы добавить эту учётную "
 "запись."
 
 #: app/src/add_account.rs:2084
@@ -835,7 +835,7 @@ msgid ""
 msgstr ""
 "Он пытался передать ваши данные для входа на {other}, и Penguin Mail "
 "отказал. Если вы доверяете {other}, введите его URL сеанса в разделе "
-"«Параметры сервера»."
+"«Настройки сервера»."
 
 #: app/src/add_account.rs:2097
 msgid "Check your connection, then choose Sign In."
@@ -1064,8 +1064,8 @@ msgid ""
 "Your preferences could not be read, so Penguin Mail started from the "
 "defaults. The old file is kept as {file}."
 msgstr ""
-"Не удалось прочитать ваши параметры, поэтому Penguin Mail запущен с "
-"параметрами по умолчанию. Старый файл сохранён как {file}."
+"Не удалось прочитать ваши настройки, поэтому Penguin Mail запущен с "
+"настройками по умолчанию. Старый файл сохранён как {file}."
 
 #: app/src/app/sending.rs:31
 msgid "That account is not connected. Check its status in the sidebar."
@@ -1133,25 +1133,25 @@ msgstr "Не удалось подключиться к GitHub для прове
 
 #: app/src/assistant/mod.rs:121
 msgid "The assistant is off. Choose a model in Preferences."
-msgstr "Ассистент выключен. Выберите модель в параметрах."
+msgstr "Ассистент выключен. Выберите модель в настройках."
 
 #: app/src/assistant/mod.rs:123
 msgid "Translation has no model. Choose one in Preferences, on the AI page."
 msgstr ""
-"Для перевода не выбрана модель. Выберите её в параметрах на странице «ИИ»."
+"Для перевода не выбрана модель. Выберите её в настройках на странице «ИИ»."
 
 #: app/src/assistant/mod.rs:126
 msgid "Unsubscribing has no model. Choose one in Preferences, on the AI page."
 msgstr ""
-"Для отписки не выбрана модель. Выберите её в параметрах на странице «ИИ»."
+"Для отписки не выбрана модель. Выберите её в настройках на странице «ИИ»."
 
 #: app/src/assistant/mod.rs:132
 msgid "Choose a model for the local server in Preferences."
-msgstr "Выберите модель для локального сервера в параметрах."
+msgstr "Выберите модель для локального сервера в настройках."
 
 #: app/src/assistant/mod.rs:144
 msgid "Add an Anthropic API key in Preferences."
-msgstr "Добавьте ключ API Anthropic в параметрах."
+msgstr "Добавьте ключ API Anthropic в настройках."
 
 #: app/src/assistant/mod.rs:151
 msgid "Claude Code is not installed. Install it and sign in, then try again."
@@ -1231,7 +1231,7 @@ msgstr ""
 
 #: app/src/assistant/run.rs:1610
 msgid "Change the setting {name} to {value}?"
-msgstr "Изменить параметр {name} на {value}?"
+msgstr "Изменить настройку {name} на {value}?"
 
 #: app/src/assistant/run.rs:1632
 msgid "Remove your signature for {account}?"
@@ -2602,19 +2602,19 @@ msgstr "Новая вложенная папка…"
 
 #: app/src/offered.rs:346
 msgid "Label Options for {name}"
-msgstr "Параметры ярлыка «{name}»"
+msgstr "Настройки ярлыка «{name}»"
 
 #: app/src/offered.rs:347
 msgid "Folder Options for {name}"
-msgstr "Параметры папки «{name}»"
+msgstr "Настройки папки «{name}»"
 
 #: app/src/offered.rs:354
 msgid "Label options"
-msgstr "Параметры ярлыка"
+msgstr "Настройки ярлыка"
 
 #: app/src/offered.rs:355
 msgid "Folder options"
-msgstr "Параметры папки"
+msgstr "Настройки папки"
 
 #: app/src/offered.rs:362
 msgid "A label cannot go inside a label nested under it"
@@ -4574,7 +4574,7 @@ msgstr "Вход через браузер"
 
 #: app/src/ui/add_account.rs:571
 msgid "Enter server settings by hand"
-msgstr "Ввести параметры сервера вручную"
+msgstr "Ввести настройки сервера вручную"
 
 #: app/src/ui/add_account.rs:578
 msgid "Add a calendar without mail"
@@ -4612,7 +4612,7 @@ msgstr "Продолжить"
 #. The same full-width secondary button as on the address page.
 #: app/src/ui/add_account.rs:665 app/src/ui/add_account.rs:758
 msgid "Enter Server Settings"
-msgstr "Ввести параметры сервера"
+msgstr "Ввести настройки сервера"
 
 #: app/src/ui/add_account.rs:667
 msgid "Your email address"
@@ -4710,7 +4710,7 @@ msgstr ""
 
 #: app/src/ui/add_account.rs:1053 app/src/ui/add_account.rs:1682
 msgid "Server Settings"
-msgstr "Параметры сервера"
+msgstr "Настройки сервера"
 
 #: app/src/ui/add_account.rs:1077 app/src/ui/add_account.rs:3065
 msgid "Outgoing"
@@ -4781,7 +4781,7 @@ msgid ""
 "Preferences."
 msgstr ""
 "Кнопка «Предоставить доступ» снова откроет страницу Google. Это также можно "
-"сделать позже в параметрах."
+"сделать позже в настройках."
 
 #: app/src/ui/add_account.rs:1323
 msgid "Open Inbox"
@@ -4882,7 +4882,7 @@ msgstr "Оставьте имя пользователя пустым, чтоб�
 
 #: app/src/ui/add_account.rs:1671 app/src/ui/add_account.rs:3378
 msgid "Use These Settings"
-msgstr "Использовать эти параметры"
+msgstr "Использовать эти настройки"
 
 #: app/src/ui/add_account.rs:1711 app/src/ui/assistant_prefs.rs:63
 msgid "Server Address"
@@ -5182,7 +5182,7 @@ msgstr "Изменения вступят в силу со следующего 
 
 #: app/src/ui/assistant/controls.rs:151 app/src/ui/assistant/controls.rs:203
 msgid "Manage in Preferences"
-msgstr "Управлять в параметрах"
+msgstr "Управлять в настройках"
 
 #: app/src/ui/assistant/controls.rs:179 app/src/ui/assistant/controls.rs:181
 #: app/src/ui/assistant_prefs.rs:635
@@ -5559,7 +5559,7 @@ msgid ""
 "Preferences again."
 msgstr ""
 "Запустите сервер LM Studio или Ollama либо установите Claude Code, затем "
-"снова откройте параметры."
+"снова откройте настройки."
 
 #: app/src/ui/assistant_prefs.rs:877
 msgid "{model} and {count} more"
@@ -6901,11 +6901,11 @@ msgstr "Показать или скрыть календари этой учё�
 
 #: app/src/ui/calendar/sidebar.rs:1181
 msgid "Calendar options"
-msgstr "Параметры календаря"
+msgstr "Настройки календаря"
 
 #: app/src/ui/calendar/sidebar.rs:1186
 msgid "Options for {calendar}"
-msgstr "Параметры календаря {calendar}"
+msgstr "Настройки календаря {calendar}"
 
 #: app/src/ui/calendar/sidebar.rs:1230 app/src/ui/contacts_prefs.rs:449
 msgid "Grant Access for {account}"
@@ -6925,11 +6925,11 @@ msgstr "Удалить учётную запись…"
 
 #: app/src/ui/calendar/sidebar.rs:1287 app/src/ui/sidebar.rs:1959
 msgid "Account options"
-msgstr "Параметры учётной записи"
+msgstr "Настройки учётной записи"
 
 #: app/src/ui/calendar/sidebar.rs:1292 app/src/ui/sidebar.rs:1964
 msgid "Options for {account}"
-msgstr "Параметры для {account}"
+msgstr "Настройки для {account}"
 
 #: app/src/ui/calendar/sidebar.rs:1387
 msgid "{address}. You can only read this calendar"
@@ -8220,7 +8220,7 @@ msgid ""
 msgstr ""
 "Ни в одной учётной записи нет календаря, в который Penguin Mail может "
 "добавлять события. Добавьте учётную запись с календарём или включите его в "
-"параметрах, в разделе «Календарь», затем снова откройте файл."
+"настройках, в разделе «Календарь», затем снова откройте файл."
 
 #: app/src/ui/ics_file.rs:275
 msgid ""
@@ -8239,7 +8239,7 @@ msgid ""
 "Penguin Mail has no permission to use this calendar. Allow it in Preferences."
 msgstr ""
 "У Penguin Mail нет разрешения на использование этого календаря. Разрешите "
-"его в параметрах."
+"его в настройках."
 
 #: app/src/ui/ics_file.rs:294
 msgid "Could not add to your calendar: {reason}"
@@ -8966,7 +8966,7 @@ msgstr "Тексты прочитанных писем, сохранённые �
 
 #: app/src/ui/preferences.rs:974
 msgid "Message Cache"
-msgstr "Кэш сообщений"
+msgstr "История сообщений"
 
 #: app/src/ui/preferences.rs:1003
 msgid "Startup"
@@ -9184,11 +9184,11 @@ msgstr "Переместить {account} ниже"
 #: app/src/ui/preferences/dialog.rs:353 app/src/ui/preferences/dialog.rs:355
 #: app/src/ui/window.rs:3289 app/src/ui/window/shortcuts.rs:612
 msgid "Preferences"
-msgstr "Параметры"
+msgstr "Настройки"
 
 #: app/src/ui/preferences/dialog.rs:35 app/src/ui/preferences/dialog.rs:38
 msgid "Search preferences"
-msgstr "Поиск по параметрам"
+msgstr "Поиск по настройкам"
 
 #: app/src/ui/preferences/dialog.rs:48 app/src/ui/preferences/dialog.rs:50
 #: app/src/ui/window/on_screen.rs:226 app/src/ui/window/shortcuts.rs:318
@@ -9443,7 +9443,7 @@ msgstr "Не дать сообщению уйти"
 #: app/src/ui/sidebar.rs:374 app/src/ui/sidebar.rs:718
 #: app/src/ui/sidebar/sections.rs:26
 msgid "Mailboxes"
-msgstr "Почтовые ящики"
+msgstr "Почта"
 
 #: app/src/ui/sidebar.rs:381 app/src/ui/sidebar.rs:1489
 #: app/src/ui/thread_list.rs:331

@@ -12,6 +12,7 @@ the [releases page](https://github.com/c9dev/penguin-mail/releases).
 
 ### Fixed
 
+- Setting Language back to Follow System and pressing Restart shows your system's language again, instead of the language you had picked before.
 - Assistant skill scripts can run with the Nix package, including on NixOS.
 - Microsoft messages with attachments open without the contentId request error.
 - IMAP Junk and Trash show messages on the server even when they have not synced to this computer.
