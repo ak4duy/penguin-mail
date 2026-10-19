@@ -393,3 +393,33 @@ async fn adding_a_mailbox_and_removing_it_again_still_files_in_archive() {
         BTreeSet::from([h.fake.mailbox("archive")])
     );
 }
+
+#[tokio::test]
+async fn empty_trash_keeps_the_successful_prefix_of_a_refused_batch() {
+    let h = fastmail().await;
+    let ids: Vec<_> = (0..3)
+        .map(|n| {
+            h.fake.deliver(
+                "trash",
+                &raw(&format!("trash{n}@example.com"), "Old mail"),
+                1,
+            )
+        })
+        .collect();
+    h.bootstrap_all().await;
+    h.fake.with(|s| s.refused.insert(ids[2].clone()));
+    let crate::Permitted::Done(outcome) = h.sync.empty_trash().await.unwrap() else {
+        panic!("granted")
+    };
+    assert_eq!(outcome.done.len(), 2);
+    assert_eq!(outcome.failed.len(), 1);
+    assert!(h.fake.with(|s| !s.emails.contains_key(&ids[0])
+        && !s.emails.contains_key(&ids[1])
+        && s.emails.contains_key(&ids[2])));
+    let account = h.account_id;
+    let stored =
+        h.db.read(move |c| mailrs_store::messages::by_ids(c, account, &ids))
+            .await
+            .unwrap();
+    assert_eq!(stored.len(), 1);
+}

@@ -420,8 +420,23 @@ impl<A: Accounts> MailActions<A> {
                 None => {}
             }
         }
-        // Undo cannot bring erased mail back, so the stack lets go of the
-        // erased threads, and of any entry left with nothing to reverse.
+        self.forget_erased(&outcome);
+        Ok(Permitted::Done(outcome))
+    }
+
+    /// Erases every message in this account's Trash after the caller confirms.
+    pub async fn empty_trash(
+        &self,
+        account_id: AccountId,
+    ) -> Result<Permitted<Outcome>, SyncError> {
+        let result = self.sync(account_id)?.empty_trash().await?;
+        if let Permitted::Done(outcome) = &result {
+            self.forget_erased(outcome);
+        }
+        Ok(result)
+    }
+
+    fn forget_erased(&self, outcome: &Outcome) {
         let mut stack = self.lock();
         for target in &outcome.done {
             for undo in stack.iter_mut() {
@@ -429,8 +444,6 @@ impl<A: Accounts> MailActions<A> {
             }
         }
         stack.retain(|undo| !undo.is_empty());
-        drop(stack);
-        Ok(Permitted::Done(outcome))
     }
 
     /// Applies each target's label change, one Gmail call per account

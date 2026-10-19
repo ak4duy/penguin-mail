@@ -83,6 +83,7 @@ mod spaces;
 mod storage;
 mod thread;
 mod translation;
+mod trash;
 mod triage;
 mod undo_send;
 
@@ -170,6 +171,7 @@ pub struct MainWindow {
     /// waits for, since the colours come with it.
     accounts_read: RefCell<Option<Shared<LocalBoxFuture<'static, ()>>>>,
     authorizing: Cell<bool>,
+    emptying_trash: Cell<bool>,
     assistant: Rc<super::assistant::AssistantPane>,
     assistant_split: adw::OverlaySplitView,
     assistant_window: RefCell<Option<adw::Window>>,
@@ -902,6 +904,7 @@ impl MainWindow {
                 )),
                 accounts_read: RefCell::new(None),
                 authorizing: Cell::new(false),
+                emptying_trash: Cell::new(false),
                 assistant,
                 assistant_split,
                 assistant_window: RefCell::new(None),
@@ -3111,6 +3114,7 @@ impl MainWindow {
         let view = Rc::clone(&self.conversation);
         self.install_outbox_actions(&self.actions, &view);
         self.install_main_actions();
+        self.install_empty_trash();
         let remind_at = gio::SimpleAction::new("remind-at", Some(glib::VariantTy::INT64));
         let weak = Rc::downgrade(self);
         remind_at.connect_activate(move |_, parameter| {

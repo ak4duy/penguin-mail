@@ -1212,8 +1212,8 @@ pub trait MailBackend: Send + Sync + 'static {
 
     /// One page of an explicit server mailbox, outside the sync window.
     /// The cursor belongs only to this mailbox and becomes `StateLost`
-    /// when its message names no longer hold. Only services advertising
-    /// `paged_mailboxes` are asked; other services keep their local listing.
+    /// when its message names no longer hold. Interactive listings use this
+    /// only with `paged_mailboxes`; Empty Trash uses it for every remote account.
     fn mailbox_page(
         &self,
         _mailbox: &str,

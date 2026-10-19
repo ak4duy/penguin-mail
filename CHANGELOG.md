@@ -7,6 +7,8 @@ the [releases page](https://github.com/c9dev/penguin-mail/releases).
 
 ### New
 
+- Empty Trash from its mailbox menu, including older mail outside the local cache.
+
 - Choose reasoning separately for assistant chats and email translations in Preferences → AI.
 - Russian and Czech can be selected in Never Translate.
 - Choose Simplified Chinese, Russian, Italian, Japanese, Korean, Polish, Turkish, or Indonesian in Preferences.

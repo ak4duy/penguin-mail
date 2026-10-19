@@ -696,7 +696,10 @@ impl FakeGmail {
         };
         Ok(self.with(|s| {
             s.searched.push(query.to_string());
-            let mut found = s.search(query);
+            let mut found = match label_id {
+                Some(labels::TRASH) => s.search(&format!("in:anywhere {query}")),
+                _ => s.search(query),
+            };
             if let Some(label_id) = label_id {
                 found.retain(|id| has_label(&s.messages[id], label_id));
             }

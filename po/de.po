@@ -3764,8 +3764,8 @@ msgstr "Dieses Konto ist nicht verbunden."
 msgid "Could not save: {reason}"
 msgstr "Speichern fehlgeschlagen: {reason}"
 
-#: app/src/protection/draft.rs:212 app/src/ui/window.rs:2608
-#: app/src/ui/window.rs:2631
+#: app/src/protection/draft.rs:212 app/src/ui/window.rs:2611
+#: app/src/ui/window.rs:2634
 msgid "Could not open the draft: {reason}"
 msgstr "Der Entwurf konnte nicht geöffnet werden: {reason}"
 
@@ -4096,7 +4096,7 @@ msgstr "{host} hat die Anmeldung abgelehnt: {reason}"
 #: app/src/servers.rs:59 app/src/ui/calendar/editor.rs:1219
 #: app/src/ui/calendar/editor.rs:1295 app/src/ui/contacts_prefs.rs:27
 #: app/src/ui/contacts_prefs.rs:333 app/src/ui/sidebar.rs:392
-#: app/src/ui/sidebar.rs:1497 app/src/ui/window/shortcuts.rs:240
+#: app/src/ui/sidebar.rs:1509 app/src/ui/window/shortcuts.rs:240
 msgid "Calendar"
 msgstr "Kalender"
 
@@ -4134,8 +4134,8 @@ msgstr "Anthropic-API"
 msgid "Claude Subscription"
 msgstr "Claude-Abonnement"
 
-#: app/src/settings/mod.rs:227 app/src/ui/window.rs:3297
-#: app/src/ui/window.rs:3377
+#: app/src/settings/mod.rs:227 app/src/ui/window.rs:3301
+#: app/src/ui/window.rs:3381
 msgid "Assistant"
 msgstr "Assistent"
 
@@ -4489,7 +4489,7 @@ msgid_plural "{count} unread messages"
 msgstr[0] "{count} ungelesene Nachricht"
 msgstr[1] "{count} ungelesene Nachrichten"
 
-#: app/src/tray.rs:40 app/src/ui/sidebar.rs:1521
+#: app/src/tray.rs:40 app/src/ui/sidebar.rs:1533
 msgid "{account}, {count} unread message"
 msgid_plural "{account}, {count} unread messages"
 msgstr[0] "{account}, {count} ungelesene Nachricht"
@@ -4509,7 +4509,7 @@ msgstr "Penguin Mail öffnen"
 msgid "New Message"
 msgstr "Neue Nachricht"
 
-#: app/src/tray.rs:238 app/src/ui/sidebar.rs:1929 app/src/ui/window.rs:3303
+#: app/src/tray.rs:238 app/src/ui/sidebar.rs:1949 app/src/ui/window.rs:3307
 msgid "Check for Mail"
 msgstr "Nach E-Mails sehen"
 
@@ -4527,7 +4527,7 @@ msgstr "Neuigkeiten in {version}"
 msgid "Check for Updates"
 msgstr "Nach Aktualisierungen suchen"
 
-#: app/src/tray.rs:254 app/src/ui/window.rs:3316
+#: app/src/tray.rs:254 app/src/ui/window.rs:3320
 #: app/src/ui/window/shortcuts.rs:644
 msgid "Quit"
 msgstr "Beenden"
@@ -4548,7 +4548,7 @@ msgstr "Neuigkeiten"
 msgid "Website"
 msgstr "Webseite"
 
-#: app/src/ui/about.rs:179 app/src/ui/window.rs:3315
+#: app/src/ui/about.rs:179 app/src/ui/window.rs:3319
 msgid "Donate"
 msgstr "Spenden"
 
@@ -4556,7 +4556,7 @@ msgstr "Spenden"
 msgid "License"
 msgstr "Lizenz"
 
-#: app/src/ui/about.rs:203 app/src/ui/window.rs:3314
+#: app/src/ui/about.rs:203 app/src/ui/window.rs:3318
 msgid "About Penguin Mail"
 msgstr "Info zu Penguin Mail"
 
@@ -4607,12 +4607,12 @@ msgid "The update to {version} failed"
 msgstr "Die Aktualisierung auf {version} ist fehlgeschlagen"
 
 #: app/src/ui/add_account.rs:419 app/src/ui/sandbox_setup.rs:129
-#: app/src/ui/sandbox_setup.rs:136 app/src/ui/window.rs:1397
+#: app/src/ui/sandbox_setup.rs:136 app/src/ui/window.rs:1400
 msgid "Copy Command"
 msgstr "Befehl kopieren"
 
 #: app/src/ui/add_account.rs:429 app/src/ui/sandbox_setup.rs:143
-#: app/src/ui/window.rs:1402
+#: app/src/ui/window.rs:1405
 msgid "Command copied"
 msgstr "Befehl kopiert"
 
@@ -4723,7 +4723,7 @@ msgstr "Abbrechen"
 
 #: app/src/ui/add_account.rs:984 app/src/ui/add_account.rs:1139
 #: app/src/ui/add_account.rs:2918 app/src/ui/add_account.rs:3008
-#: app/src/ui/add_account.rs:3465 app/src/ui/window.rs:1342
+#: app/src/ui/add_account.rs:3465 app/src/ui/window.rs:1345
 msgid "Sign In"
 msgstr "Anmelden"
 
@@ -4846,7 +4846,7 @@ msgstr "Nicht jetzt"
 #: app/src/ui/add_account.rs:1332 app/src/ui/calendar/editor.rs:1681
 #: app/src/ui/calendar/sidebar.rs:1003 app/src/ui/contacts_prefs.rs:442
 #: app/src/ui/invitation.rs:490 app/src/ui/permission.rs:42
-#: app/src/ui/permission.rs:66 app/src/ui/window.rs:1464
+#: app/src/ui/permission.rs:66 app/src/ui/window.rs:1467
 msgid "Grant Access"
 msgstr "Zugriff gewähren"
 
@@ -5063,7 +5063,7 @@ msgstr ""
 "Dieser Server kann seine Nachrichten nicht auseinanderhalten, daher kann "
 "Penguin Mail nicht sicher von ihm herunterladen."
 
-#: app/src/ui/assistant.rs:35 app/src/ui/window.rs:3463
+#: app/src/ui/assistant.rs:35 app/src/ui/window.rs:3467
 msgid "Summarize this conversation"
 msgstr "Diese Unterhaltung zusammenfassen"
 
@@ -5088,13 +5088,13 @@ msgstr "Eine Antwort auf die geöffnete Unterhaltung entwerfen"
 msgid "Choose a Model"
 msgstr "Modell wählen"
 
-#: app/src/ui/assistant.rs:123 app/src/ui/window.rs:3424
-#: app/src/ui/window.rs:3425
+#: app/src/ui/assistant.rs:123 app/src/ui/window.rs:3428
+#: app/src/ui/window.rs:3429
 msgid "Detach"
 msgstr "Abtrennen"
 
 #: app/src/ui/assistant.rs:124 app/src/ui/key_import.rs:213
-#: app/src/ui/key_import.rs:217 app/src/ui/window.rs:4034
+#: app/src/ui/key_import.rs:217 app/src/ui/window.rs:4038
 msgid "Close"
 msgstr "Schließen"
 
@@ -5305,7 +5305,7 @@ msgstr "{server} bearbeiten"
 
 #: app/src/ui/assistant_mcp_prefs.rs:137 app/src/ui/calendar/editor.rs:1726
 #: app/src/ui/composer/mod.rs:2219 app/src/ui/composer/recipients.rs:318
-#: app/src/ui/sender_prefs.rs:149 app/src/ui/window.rs:3068
+#: app/src/ui/sender_prefs.rs:149 app/src/ui/window.rs:3071
 msgid "Remove"
 msgstr "Entfernen"
 
@@ -6133,8 +6133,8 @@ msgid "Only people who can change this calendar see the details"
 msgstr "Nur Personen, die diesen Kalender ändern können, sehen die Details"
 
 #: app/src/ui/calendar/editor.rs:2025 app/src/ui/calendar/manage.rs:412
-#: app/src/ui/calendar/sidebar.rs:1482 app/src/ui/sidebar.rs:1695
-#: app/src/ui/sidebar.rs:1946
+#: app/src/ui/calendar/sidebar.rs:1482 app/src/ui/sidebar.rs:1707
+#: app/src/ui/sidebar.rs:1966
 msgid "Color"
 msgstr "Farbe"
 
@@ -6986,19 +6986,19 @@ msgstr "Zugriff für {account} gewähren"
 msgid "Sign in again to {account}"
 msgstr "Erneut bei {account} anmelden"
 
-#: app/src/ui/calendar/sidebar.rs:1272 app/src/ui/sidebar.rs:1951
+#: app/src/ui/calendar/sidebar.rs:1272 app/src/ui/sidebar.rs:1971
 msgid "Sign In Again…"
 msgstr "Erneut anmelden …"
 
-#: app/src/ui/calendar/sidebar.rs:1273 app/src/ui/sidebar.rs:1959
+#: app/src/ui/calendar/sidebar.rs:1273 app/src/ui/sidebar.rs:1979
 msgid "Remove Account…"
 msgstr "Konto entfernen …"
 
-#: app/src/ui/calendar/sidebar.rs:1287 app/src/ui/sidebar.rs:1966
+#: app/src/ui/calendar/sidebar.rs:1287 app/src/ui/sidebar.rs:1986
 msgid "Account options"
 msgstr "Kontooptionen"
 
-#: app/src/ui/calendar/sidebar.rs:1292 app/src/ui/sidebar.rs:1971
+#: app/src/ui/calendar/sidebar.rs:1292 app/src/ui/sidebar.rs:1991
 msgid "Options for {account}"
 msgstr "Optionen für {account}"
 
@@ -7026,13 +7026,13 @@ msgstr "In der Liste ausblenden"
 msgid "Original Color"
 msgstr "Ursprüngliche Farbe"
 
-#: app/src/ui/calendar/sidebar.rs:1486 app/src/ui/sidebar.rs:1684
-#: app/src/ui/sidebar.rs:1936
+#: app/src/ui/calendar/sidebar.rs:1486 app/src/ui/sidebar.rs:1696
+#: app/src/ui/sidebar.rs:1956
 msgid "Rename…"
 msgstr "Umbenennen …"
 
-#: app/src/ui/calendar/sidebar.rs:1487 app/src/ui/sidebar.rs:1582
-#: app/src/ui/sidebar.rs:1710
+#: app/src/ui/calendar/sidebar.rs:1487 app/src/ui/sidebar.rs:1594
+#: app/src/ui/sidebar.rs:1722
 msgid "Delete…"
 msgstr "Löschen …"
 
@@ -7154,7 +7154,7 @@ msgstr "{date}, hat Termine"
 msgid "Offline, last updated {time}"
 msgstr "Offline, zuletzt aktualisiert {time}"
 
-#: app/src/ui/calendar/words.rs:396 app/src/ui/sidebar.rs:2029
+#: app/src/ui/calendar/words.rs:396 app/src/ui/sidebar.rs:2049
 msgid "Offline"
 msgstr "Offline"
 
@@ -7725,7 +7725,7 @@ msgid "Find Again"
 msgstr "Erneut suchen"
 
 #: app/src/ui/contacts_prefs.rs:157 app/src/ui/conversation.rs:550
-#: app/src/ui/queued.rs:60 app/src/ui/sidebar.rs:1576
+#: app/src/ui/queued.rs:60 app/src/ui/sidebar.rs:1588
 msgid "Edit…"
 msgstr "Bearbeiten …"
 
@@ -8186,7 +8186,7 @@ msgstr ""
 msgid "Allow Hide My Email"
 msgstr "Hide My Email erlauben"
 
-#: app/src/ui/hide_my_email.rs:652 app/src/ui/window.rs:3514
+#: app/src/ui/hide_my_email.rs:652 app/src/ui/window.rs:3518
 msgid "Add an account first"
 msgstr "Fügen Sie zuerst ein Konto hinzu"
 
@@ -9234,7 +9234,7 @@ msgstr "{account} nach unten verschieben"
 #: app/src/ui/preferences/dialog.rs:27 app/src/ui/preferences/dialog.rs:33
 #: app/src/ui/preferences/dialog.rs:82 app/src/ui/preferences/dialog.rs:83
 #: app/src/ui/preferences/dialog.rs:353 app/src/ui/preferences/dialog.rs:355
-#: app/src/ui/window.rs:3312 app/src/ui/window/shortcuts.rs:616
+#: app/src/ui/window.rs:3316 app/src/ui/window/shortcuts.rs:616
 msgid "Preferences"
 msgstr "Einstellungen"
 
@@ -9544,7 +9544,7 @@ msgstr "Das Senden der Nachricht verhindern"
 msgid "Mailboxes"
 msgstr "Postfächer"
 
-#: app/src/ui/sidebar.rs:388 app/src/ui/sidebar.rs:1496
+#: app/src/ui/sidebar.rs:388 app/src/ui/sidebar.rs:1508
 #: app/src/ui/thread_list.rs:346
 msgid "Mail"
 msgstr "E-Mail"
@@ -9561,101 +9561,105 @@ msgstr "VIPs"
 msgid "Outbox"
 msgstr "Postausgang"
 
-#: app/src/ui/sidebar.rs:1162
+#: app/src/ui/sidebar.rs:1174
 msgid "Holds folders, not mail"
 msgstr "Enthält Ordner, keine E-Mails"
 
-#: app/src/ui/sidebar.rs:1446
+#: app/src/ui/sidebar.rs:1458
 msgid "{mailbox}, {count} unread message"
 msgid_plural "{mailbox}, {count} unread messages"
 msgstr[0] "{mailbox}, {count} ungelesene Nachricht"
 msgstr[1] "{mailbox}, {count} ungelesene Nachrichten"
 
-#: app/src/ui/sidebar.rs:1452
+#: app/src/ui/sidebar.rs:1464
 msgid "{mailbox}, {count} message"
 msgid_plural "{mailbox}, {count} messages"
 msgstr[0] "{mailbox}, {count} Nachricht"
 msgstr[1] "{mailbox}, {count} Nachrichten"
 
-#: app/src/ui/sidebar.rs:1487
+#: app/src/ui/sidebar.rs:1499
 msgid "99+"
 msgstr "99+"
 
-#: app/src/ui/sidebar.rs:1499
+#: app/src/ui/sidebar.rs:1511
 msgid "Mail, {count} unread"
 msgid_plural "Mail, {count} unread"
 msgstr[0] "E-Mail, {count} ungelesen"
 msgstr[1] "E-Mail, {count} ungelesen"
 
-#: app/src/ui/sidebar.rs:1505
+#: app/src/ui/sidebar.rs:1517
 msgid "Calendar, {count} waiting for your answer"
 msgid_plural "Calendar, {count} waiting for your answer"
 msgstr[0] "Kalender, {count} wartet auf Ihre Antwort"
 msgstr[1] "Kalender, {count} warten auf Ihre Antwort"
 
-#: app/src/ui/sidebar.rs:1578 app/src/ui/sidebar.rs:1701
-#: app/src/ui/sidebar.rs:1947
+#: app/src/ui/sidebar.rs:1590 app/src/ui/sidebar.rs:1713
+#: app/src/ui/sidebar.rs:1967
 msgid "Move Up"
 msgstr "Nach oben"
 
-#: app/src/ui/sidebar.rs:1579 app/src/ui/sidebar.rs:1704
-#: app/src/ui/sidebar.rs:1948
+#: app/src/ui/sidebar.rs:1591 app/src/ui/sidebar.rs:1716
+#: app/src/ui/sidebar.rs:1968
 msgid "Move Down"
 msgstr "Nach unten"
 
-#: app/src/ui/sidebar.rs:1837
+#: app/src/ui/sidebar.rs:1729
+msgid "Empty Trash…"
+msgstr ""
+
+#: app/src/ui/sidebar.rs:1857
 msgid "Automatic Reply…"
 msgstr "Automatische Antwort …"
 
-#: app/src/ui/sidebar.rs:1838
+#: app/src/ui/sidebar.rs:1858
 msgid "Signature…"
 msgstr "Signatur …"
 
-#: app/src/ui/sidebar.rs:1839
+#: app/src/ui/sidebar.rs:1859
 msgid "Rules…"
 msgstr "Regeln …"
 
-#: app/src/ui/sidebar.rs:1840 app/src/ui/window.rs:3306
+#: app/src/ui/sidebar.rs:1860 app/src/ui/window.rs:3310
 msgid "Hide My Email…"
 msgstr "Hide My Email …"
 
-#: app/src/ui/sidebar.rs:1849
+#: app/src/ui/sidebar.rs:1869
 msgid "On this computer"
 msgstr "Auf diesem Rechner"
 
-#: app/src/ui/sidebar.rs:1857
+#: app/src/ui/sidebar.rs:1877
 msgid "On this computer. Show or hide this account's mailboxes"
 msgstr "Auf diesem Rechner. Postfächer dieses Kontos ein- oder ausblenden"
 
-#: app/src/ui/sidebar.rs:1858
+#: app/src/ui/sidebar.rs:1878
 msgid "Show or hide this account's mailboxes"
 msgstr "Postfächer dieses Kontos ein- oder ausblenden"
 
-#: app/src/ui/sidebar.rs:1952
+#: app/src/ui/sidebar.rs:1972
 msgid "Switch to JMAP…"
 msgstr "Zu JMAP wechseln …"
 
-#: app/src/ui/sidebar.rs:1954
+#: app/src/ui/sidebar.rs:1974
 msgid "Messages That Will Not Download…"
 msgstr "Nachrichten, die sich nicht herunterladen lassen …"
 
-#: app/src/ui/sidebar.rs:2027
+#: app/src/ui/sidebar.rs:2047
 msgid "Sign in again to keep syncing"
 msgstr "Melden Sie sich erneut an, um weiter abzugleichen"
 
-#: app/src/ui/sidebar.rs:2033
+#: app/src/ui/sidebar.rs:2053
 msgid "{provider} is not responding; retrying"
 msgstr "{provider} antwortet nicht, neuer Versuch läuft"
 
-#: app/src/ui/sidebar.rs:2044
+#: app/src/ui/sidebar.rs:2064
 msgid "The keyring is not responding; retrying"
 msgstr "Der Schlüsselbund antwortet nicht, neuer Versuch läuft"
 
-#: app/src/ui/sidebar.rs:2047
+#: app/src/ui/sidebar.rs:2067
 msgid "Downloading mail"
 msgstr "E-Mails werden heruntergeladen"
 
-#: app/src/ui/sidebar.rs:2051
+#: app/src/ui/sidebar.rs:2071
 msgid "Syncing stopped after an error; restart Penguin Mail to try again"
 msgstr ""
 "Der Abgleich wurde nach einem Fehler beendet; starten Sie Penguin Mail neu, "
@@ -9835,7 +9839,7 @@ msgstr "E-Mails durchsuchen"
 msgid "VIP"
 msgstr "VIP"
 
-#: app/src/ui/thread_row.rs:127 app/src/ui/window.rs:401
+#: app/src/ui/thread_row.rs:127 app/src/ui/window.rs:403
 msgid "Muted"
 msgstr "Stummgeschaltet"
 
@@ -10052,197 +10056,197 @@ msgstr ""
 "Wählen Sie, wo Ihre E-Mails liegen. Weitere können Sie später über das "
 "Hauptmenü hinzufügen."
 
-#: app/src/ui/window.rs:282
+#: app/src/ui/window.rs:284
 msgid "Deleted forever"
 msgstr "Endgültig gelöscht"
 
-#: app/src/ui/window.rs:284
+#: app/src/ui/window.rs:286
 msgid "Deleted {count} conversation forever"
 msgid_plural "Deleted {count} conversations forever"
 msgstr[0] "{count} Unterhaltung endgültig gelöscht"
 msgstr[1] "{count} Unterhaltungen endgültig gelöscht"
 
-#: app/src/ui/window.rs:290
+#: app/src/ui/window.rs:292
 msgid "Deleted {count} message forever"
 msgid_plural "Deleted {count} messages forever"
 msgstr[0] "{count} Nachricht endgültig gelöscht"
 msgstr[1] "{count} Nachrichten endgültig gelöscht"
 
-#: app/src/ui/window.rs:303
+#: app/src/ui/window.rs:305
 msgid "{label}, on this mail"
 msgstr "{label}, bei dieser E-Mail"
 
-#: app/src/ui/window.rs:332
+#: app/src/ui/window.rs:334
 msgid "Added {person} to VIPs"
 msgstr "{person} zu VIPs hinzugefügt"
 
-#: app/src/ui/window.rs:333
+#: app/src/ui/window.rs:335
 msgid "Removed {person} from VIPs"
 msgstr "{person} aus VIPs entfernt"
 
-#: app/src/ui/window.rs:339
+#: app/src/ui/window.rs:341
 msgid "Could not load mail: {reason}"
 msgstr "E-Mails konnten nicht geladen werden: {reason}"
 
-#: app/src/ui/window.rs:349
+#: app/src/ui/window.rs:351
 msgid "Added {account}. Downloading mail…"
 msgstr "{account} hinzugefügt. E-Mails werden heruntergeladen …"
 
-#: app/src/ui/window.rs:353 app/src/ui/window.rs:2793
+#: app/src/ui/window.rs:355 app/src/ui/window.rs:2796
 msgid "{account} is signed in again."
 msgstr "{account} ist wieder angemeldet."
 
-#: app/src/ui/window.rs:372
+#: app/src/ui/window.rs:374
 msgid "Made a folder called “{name}” on {provider} for archived mail"
 msgstr "Ordner „{name}“ bei {provider} für archivierte E-Mails angelegt"
 
-#: app/src/ui/window.rs:381
+#: app/src/ui/window.rs:383
 msgid "Flagged red"
 msgstr "Rot markiert"
 
-#: app/src/ui/window.rs:382
+#: app/src/ui/window.rs:384
 msgid "Flagged orange"
 msgstr "Orange markiert"
 
-#: app/src/ui/window.rs:383
+#: app/src/ui/window.rs:385
 msgid "Flagged yellow"
 msgstr "Gelb markiert"
 
-#: app/src/ui/window.rs:384
+#: app/src/ui/window.rs:386
 msgid "Flagged green"
 msgstr "Grün markiert"
 
-#: app/src/ui/window.rs:385
+#: app/src/ui/window.rs:387
 msgid "Flagged blue"
 msgstr "Blau markiert"
 
-#: app/src/ui/window.rs:386
+#: app/src/ui/window.rs:388
 msgid "Flagged purple"
 msgstr "Violett markiert"
 
-#: app/src/ui/window.rs:387
+#: app/src/ui/window.rs:389
 msgid "Flagged gray"
 msgstr "Grau markiert"
 
-#: app/src/ui/window.rs:398 app/src/ui/window.rs:496
+#: app/src/ui/window.rs:400 app/src/ui/window.rs:498
 msgid "Labels changed"
 msgstr "Labels geändert"
 
-#: app/src/ui/window.rs:402
+#: app/src/ui/window.rs:404
 msgid "Unmuted"
 msgstr "Stummschaltung aufgehoben"
 
-#: app/src/ui/window.rs:404
+#: app/src/ui/window.rs:406
 msgid "Muted {count} conversation"
 msgid_plural "Muted {count} conversations"
 msgstr[0] "{count} Unterhaltung stummgeschaltet"
 msgstr[1] "{count} Unterhaltungen stummgeschaltet"
 
-#: app/src/ui/window.rs:410
+#: app/src/ui/window.rs:412
 msgid "Muted {count} message"
 msgid_plural "Muted {count} messages"
 msgstr[0] "{count} Nachricht stummgeschaltet"
 msgstr[1] "{count} Nachrichten stummgeschaltet"
 
-#: app/src/ui/window.rs:416
+#: app/src/ui/window.rs:418
 msgid "Unmuted {count} conversation"
 msgid_plural "Unmuted {count} conversations"
 msgstr[0] "Stummschaltung für {count} Unterhaltung aufgehoben"
 msgstr[1] "Stummschaltung für {count} Unterhaltungen aufgehoben"
 
-#: app/src/ui/window.rs:422
+#: app/src/ui/window.rs:424
 msgid "Unmuted {count} message"
 msgid_plural "Unmuted {count} messages"
 msgstr[0] "Stummschaltung für {count} Nachricht aufgehoben"
 msgstr[1] "Stummschaltung für {count} Nachrichten aufgehoben"
 
-#: app/src/ui/window.rs:432
+#: app/src/ui/window.rs:434
 msgid "Dismissed {count} follow-up"
 msgid_plural "Dismissed {count} follow-ups"
 msgstr[0] "{count} Nachfassen verworfen"
 msgstr[1] "{count} Nachfassen verworfen"
 
-#: app/src/ui/window.rs:441
+#: app/src/ui/window.rs:443
 msgid "Archived"
 msgstr "Archiviert"
 
-#: app/src/ui/window.rs:443
+#: app/src/ui/window.rs:445
 msgid "Archived {count} conversation"
 msgid_plural "Archived {count} conversations"
 msgstr[0] "{count} Unterhaltung archiviert"
 msgstr[1] "{count} Unterhaltungen archiviert"
 
-#: app/src/ui/window.rs:449
+#: app/src/ui/window.rs:451
 msgid "Archived {count} message"
 msgid_plural "Archived {count} messages"
 msgstr[0] "{count} Nachricht archiviert"
 msgstr[1] "{count} Nachrichten archiviert"
 
-#: app/src/ui/window.rs:454
+#: app/src/ui/window.rs:456
 msgid "Moved to Trash"
 msgstr "In den Papierkorb verschoben"
 
-#: app/src/ui/window.rs:456
+#: app/src/ui/window.rs:458
 msgid "Moved {count} conversation to Trash"
 msgid_plural "Moved {count} conversations to Trash"
 msgstr[0] "{count} Unterhaltung in den Papierkorb verschoben"
 msgstr[1] "{count} Unterhaltungen in den Papierkorb verschoben"
 
-#: app/src/ui/window.rs:462
+#: app/src/ui/window.rs:464
 msgid "Moved {count} message to Trash"
 msgid_plural "Moved {count} messages to Trash"
 msgstr[0] "{count} Nachricht in den Papierkorb verschoben"
 msgstr[1] "{count} Nachrichten in den Papierkorb verschoben"
 
-#: app/src/ui/window.rs:467
+#: app/src/ui/window.rs:469
 msgid "Marked as junk"
 msgstr "Als Spam markiert"
 
-#: app/src/ui/window.rs:469
+#: app/src/ui/window.rs:471
 msgid "Marked {count} conversation as junk"
 msgid_plural "Marked {count} conversations as junk"
 msgstr[0] "{count} Unterhaltung als Spam markiert"
 msgstr[1] "{count} Unterhaltungen als Spam markiert"
 
-#: app/src/ui/window.rs:475
+#: app/src/ui/window.rs:477
 msgid "Marked {count} message as junk"
 msgid_plural "Marked {count} messages as junk"
 msgstr[0] "{count} Nachricht als Spam markiert"
 msgstr[1] "{count} Nachrichten als Spam markiert"
 
-#: app/src/ui/window.rs:480
+#: app/src/ui/window.rs:482
 msgid "Moved to the Inbox"
 msgstr "In den Posteingang verschoben"
 
-#: app/src/ui/window.rs:482
+#: app/src/ui/window.rs:484
 msgid "Moved {count} conversation to the Inbox"
 msgid_plural "Moved {count} conversations to the Inbox"
 msgstr[0] "{count} Unterhaltung in den Posteingang verschoben"
 msgstr[1] "{count} Unterhaltungen in den Posteingang verschoben"
 
-#: app/src/ui/window.rs:488
+#: app/src/ui/window.rs:490
 msgid "Moved {count} message to the Inbox"
 msgid_plural "Moved {count} messages to the Inbox"
 msgstr[0] "{count} Nachricht in den Posteingang verschoben"
 msgstr[1] "{count} Nachrichten in den Posteingang verschoben"
 
-#: app/src/ui/window.rs:822
+#: app/src/ui/window.rs:824
 msgid "Penguin Mail (Demo)"
 msgstr "Penguin Mail (Demo)"
 
-#: app/src/ui/window.rs:1233
+#: app/src/ui/window.rs:1236
 msgid "Could not read accounts: {reason}"
 msgstr "Konten konnten nicht gelesen werden: {reason}"
 
-#: app/src/ui/window.rs:1905
+#: app/src/ui/window.rs:1908
 msgid "Could not delete the mail: {reason}"
 msgstr "Die E-Mails konnten nicht gelöscht werden: {reason}"
 
-#: app/src/ui/window.rs:1997
+#: app/src/ui/window.rs:2000
 msgid "Turn On the {service}"
 msgstr "{service} einschalten"
 
-#: app/src/ui/window.rs:2000
+#: app/src/ui/window.rs:2003
 msgid ""
 "The Google Cloud project Penguin Mail signs in with has the {service} "
 "switched off, so Google refuses before it can ask for your permission. Turn "
@@ -10253,63 +10257,63 @@ msgstr ""
 "kann. Schalten Sie es ein, warten Sie eine Minute und versuchen Sie es "
 "erneut."
 
-#: app/src/ui/window.rs:2006
+#: app/src/ui/window.rs:2009
 msgid "Open Google Cloud"
 msgstr "Google Cloud öffnen"
 
-#: app/src/ui/window.rs:2327
+#: app/src/ui/window.rs:2330
 msgid "Select mail from one account to tag it."
 msgstr ""
 "Wählen Sie E-Mails aus einem einzigen Konto aus, um sie zu verschlagworten."
 
-#: app/src/ui/window.rs:2339
+#: app/src/ui/window.rs:2342
 msgid "This account has no tags yet. Make one in Outlook."
 msgstr ""
 "Dieses Konto hat noch keine Schlagwörter. Erstellen Sie eines in Outlook."
 
-#: app/src/ui/window.rs:2506
+#: app/src/ui/window.rs:2509
 msgid "Could not include {file}: {reason}"
 msgstr "{file} konnte nicht eingefügt werden: {reason}"
 
-#: app/src/ui/window.rs:2587
+#: app/src/ui/window.rs:2590
 msgid "The server had already sent this message."
 msgstr "Der Server hatte diese Nachricht bereits gesendet."
 
-#: app/src/ui/window.rs:2592
+#: app/src/ui/window.rs:2595
 msgid "This message was canceled in another app and is no longer in Drafts."
 msgstr ""
 "Diese Nachricht wurde in einer anderen App abgebrochen und ist nicht mehr in "
 "den Entwürfen."
 
-#: app/src/ui/window.rs:2706
+#: app/src/ui/window.rs:2709
 msgid "Downloading {file}…"
 msgstr "{file} wird heruntergeladen …"
 
-#: app/src/ui/window.rs:2727 app/src/ui/window/attachments.rs:231
+#: app/src/ui/window.rs:2730 app/src/ui/window/attachments.rs:231
 msgid "Saved {file} to Downloads"
 msgstr "{file} in Downloads gespeichert"
 
-#: app/src/ui/window.rs:2730
+#: app/src/ui/window.rs:2733
 msgid "Open"
 msgstr "Öffnen"
 
-#: app/src/ui/window.rs:2745 app/src/ui/window/attachments.rs:236
+#: app/src/ui/window.rs:2748 app/src/ui/window/attachments.rs:236
 msgid "Could not save {file}: {reason}"
 msgstr "{file} konnte nicht gespeichert werden: {reason}"
 
-#: app/src/ui/window.rs:2924
+#: app/src/ui/window.rs:2927
 msgid "Continue in your browser"
 msgstr "Im Browser fortfahren"
 
-#: app/src/ui/window.rs:2954
+#: app/src/ui/window.rs:2957
 msgid "This copy of Penguin Mail was built without Google sign-in."
 msgstr "Diese Ausgabe von Penguin Mail wurde ohne Google-Anmeldung gebaut."
 
-#: app/src/ui/window.rs:2962
+#: app/src/ui/window.rs:2965
 msgid "Get a Release"
 msgstr "Veröffentlichung herunterladen"
 
-#: app/src/ui/window.rs:3054
+#: app/src/ui/window.rs:3057
 msgid ""
 "Could not check for messages the server holds to send later, so {account} "
 "stays: {reason}"
@@ -10317,75 +10321,75 @@ msgstr ""
 "Die Nachrichten, die der Server zum späteren Senden bereithält, konnten "
 "nicht geprüft werden, daher bleibt {account}: {reason}"
 
-#: app/src/ui/window.rs:3065
+#: app/src/ui/window.rs:3068
 msgid "Remove {account}?"
 msgstr "{account} entfernen?"
 
-#: app/src/ui/window.rs:3084
+#: app/src/ui/window.rs:3087
 msgid "Remove Anyway"
 msgstr "Trotzdem entfernen"
 
-#: app/src/ui/window.rs:3097
+#: app/src/ui/window.rs:3100
 msgid "Removed {account}"
 msgstr "{account} entfernt"
 
-#: app/src/ui/window.rs:3099
+#: app/src/ui/window.rs:3102
 msgid "Could not remove {account}: {reason}"
 msgstr "{account} konnte nicht entfernt werden: {reason}"
 
-#: app/src/ui/window.rs:3284
+#: app/src/ui/window.rs:3288
 msgid "Refresh"
 msgstr "Aktualisieren"
 
-#: app/src/ui/window.rs:3288
+#: app/src/ui/window.rs:3292
 msgid "Show Declined Events"
 msgstr "Abgelehnte Termine anzeigen"
 
-#: app/src/ui/window.rs:3304
+#: app/src/ui/window.rs:3308
 msgid "Add Account…"
 msgstr "Konto hinzufügen …"
 
-#: app/src/ui/window.rs:3305
+#: app/src/ui/window.rs:3309
 msgid "New Smart Mailbox…"
 msgstr "Neues intelligentes Postfach …"
 
-#: app/src/ui/window.rs:3313
+#: app/src/ui/window.rs:3317
 msgid "Keyboard Shortcuts"
 msgstr "Tastenkürzel"
 
-#: app/src/ui/window.rs:3322 app/src/ui/window.rs:3324
+#: app/src/ui/window.rs:3326 app/src/ui/window.rs:3328
 msgid "Main Menu"
 msgstr "Hauptmenü"
 
-#: app/src/ui/window.rs:3389 app/src/ui/window.rs:3390
+#: app/src/ui/window.rs:3393 app/src/ui/window.rs:3394
 msgid "Dock"
 msgstr "Andocken"
 
-#: app/src/ui/window.rs:3515
+#: app/src/ui/window.rs:3519
 msgid "Add a mail account first"
 msgstr "Fügen Sie zuerst ein E-Mail-Konto hinzu"
 
-#: app/src/ui/window.rs:3836
+#: app/src/ui/window.rs:3840
 msgid "Open a message from the person first"
 msgstr "Öffnen Sie zuerst eine Nachricht dieser Person"
 
-#: app/src/ui/window.rs:3917
+#: app/src/ui/window.rs:3921
 msgid "Penguin Mail shows the new language after a restart"
 msgstr "Penguin Mail zeigt die neue Sprache nach einem Neustart an"
 
-#: app/src/ui/window.rs:3919 app/src/update/mod.rs:130
+#: app/src/ui/window.rs:3923 app/src/update/mod.rs:130
 msgid "Restart"
 msgstr "Neu starten"
 
-#: app/src/ui/window.rs:3983
+#: app/src/ui/window.rs:3987
 msgid "Show Rules"
 msgstr "Regeln anzeigen"
 
-#: app/src/ui/window.rs:4009
+#: app/src/ui/window.rs:4013
 msgid "Messages That Will Not Download"
 msgstr "Nachrichten, die sich nicht herunterladen lassen"
 
-#: app/src/ui/window.rs:4011
+#: app/src/ui/window.rs:4015
 msgid ""
 "Penguin Mail could not download these from {address}'s server. It tries "
 "again at each check, except for a message too large to download."
@@ -11249,6 +11253,43 @@ msgstr "Das Konto ist noch nicht verbunden."
 msgid "Messages in {language} will no longer offer a translation"
 msgstr "Für Nachrichten auf {language} wird keine Übersetzung mehr angeboten"
 
+#: app/src/ui/window/trash.rs:43
+msgid "Empty Trash?"
+msgstr ""
+
+#: app/src/ui/window/trash.rs:46
+msgid ""
+"Permanently delete every message in Trash for these accounts, including "
+"older mail not stored on this computer? This cannot be undone.\n"
+"\n"
+"{accounts}"
+msgstr ""
+
+#: app/src/ui/window/trash.rs:50
+#, fuzzy
+#| msgid "Empty"
+msgid "Empty Trash"
+msgstr "Leer"
+
+#: app/src/ui/window/trash.rs:56
+msgid "Emptying Trash…"
+msgstr ""
+
+#: app/src/ui/window/trash.rs:69 app/src/ui/window/trash.rs:88
+#, fuzzy
+#| msgid "Could not load mail for {account}: {reason}"
+msgid "Could not empty Trash for {account}: {reason}"
+msgstr "E-Mails für {account} konnten nicht geladen werden: {reason}"
+
+#: app/src/ui/window/trash.rs:73
+#, fuzzy
+#| msgid "Deleted {count} message forever"
+#| msgid_plural "Deleted {count} messages forever"
+msgid "Deleted {count} message from Trash for {account}"
+msgid_plural "Deleted {count} messages from Trash for {account}"
+msgstr[0] "{count} Nachricht endgültig gelöscht"
+msgstr[1] "{count} Nachrichten endgültig gelöscht"
+
 #: app/src/unsubscribe_page.rs:181
 msgid "the page took longer than 20 seconds"
 msgstr "die Seite brauchte länger als 20 Sekunden"
@@ -11607,11 +11648,11 @@ msgstr "Diese Nachricht fordert keine Lesebestätigung an."
 msgid "The server refused this request."
 msgstr "Der Server hat diese Anfrage abgelehnt."
 
-#: sync/src/account/writes.rs:765
+#: sync/src/account/writes.rs:889
 msgid "{provider} is busy. Still working on {conversations}."
 msgstr "{provider} ist ausgelastet. Noch in Bearbeitung: {conversations}."
 
-#: sync/src/account/writes.rs:788
+#: sync/src/account/writes.rs:912
 msgid ""
 "{provider} is busy, so “{action}” did not go through for {conversations}. "
 "Try again in a moment."
@@ -11619,7 +11660,7 @@ msgstr ""
 "{provider} ist ausgelastet, daher wurde „{action}“ für {conversations} nicht "
 "ausgeführt. Versuchen Sie es gleich noch einmal."
 
-#: sync/src/account/writes.rs:797
+#: sync/src/account/writes.rs:921
 msgid ""
 "{provider} stayed busy for {waited}, so “{action}” did not go through for "
 "{conversations}."
@@ -11627,25 +11668,25 @@ msgstr ""
 "{provider} war {waited} lang ausgelastet, daher wurde „{action}“ für "
 "{conversations} nicht ausgeführt."
 
-#: sync/src/account/writes.rs:804
+#: sync/src/account/writes.rs:928
 msgid "{action} failed: {reason}"
 msgstr "{action} fehlgeschlagen: {reason}"
 
-#: sync/src/account/writes.rs:822
+#: sync/src/account/writes.rs:946
 msgid "a moment"
 msgstr "einen Moment"
 
-#: sync/src/account/writes.rs:824
+#: sync/src/account/writes.rs:948
 msgid "{count} second"
 msgid_plural "{count} seconds"
 msgstr[0] "{count} Sekunde"
 msgstr[1] "{count} Sekunden"
 
-#: sync/src/account/writes.rs:829
+#: sync/src/account/writes.rs:953
 msgid "a minute"
 msgstr "eine Minute"
 
-#: sync/src/actions.rs:124 sync/src/actions.rs:724
+#: sync/src/actions.rs:124 sync/src/actions.rs:737
 msgid "Change labels"
 msgstr "Labels ändern"
 
@@ -11653,13 +11694,13 @@ msgstr "Labels ändern"
 msgid "Delete Forever failed: {reason}"
 msgstr "Endgültiges Löschen fehlgeschlagen: {reason}"
 
-#: sync/src/actions.rs:616
+#: sync/src/actions.rs:629
 msgid "This mail has moved since, so Undo left it where it is."
 msgstr ""
 "Diese E-Mail wurde inzwischen verschoben, daher hat „Rückgängig“ sie dort "
 "gelassen, wo sie ist."
 
-#: sync/src/actions.rs:677 sync/src/actions.rs:731
+#: sync/src/actions.rs:690 sync/src/actions.rs:744
 msgid "Could not undo: {reason}"
 msgstr "Rückgängigmachen fehlgeschlagen: {reason}"
 
@@ -12062,11 +12103,11 @@ msgstr ""
 msgid "This server keeps no colors for its mailboxes."
 msgstr "Dieser Server speichert keine Farben für seine Postfächer."
 
-#: sync/src/services/jmap/mod.rs:402
+#: sync/src/services/jmap/mod.rs:411
 msgid "This server files sent mail itself."
 msgstr "Dieser Server legt gesendete E-Mails selbst ab."
 
-#: sync/src/services/jmap/mod.rs:575
+#: sync/src/services/jmap/mod.rs:584
 msgid "The server made an address Penguin Mail cannot read."
 msgstr ""
 "Der Server hat eine Adresse erstellt, die Penguin Mail nicht lesen kann."

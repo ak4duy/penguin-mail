@@ -20,6 +20,8 @@ Terms the code and its docs use for Gmail mail. The `domain` crate holds the cod
 
 **Folder**: Archive, Junk, Trash, or All Mail. Archive is the received mail outside the inbox, which Gmail has no label for. The local store does not keep this mail, so the app lists a folder with a query tree, which Gmail receives as a search, and checks a message's labels to see if it still belongs there. _Avoid_: mailbox, spam folder.
 
+**Empty Trash**: permanently deletes every message in an account's Trash, including mail outside the local sync window, after confirmation. The unified Trash names all affected accounts. Messages outside Trash remain even when they belong to the same conversation. `MailActions::empty_trash`.
+
 **Target**: what a mail action applies to: a thread, or one message of it when the list shows messages instead of conversations. `mailrs_domain::Target`. _Avoid_: selection, item.
 
 **Reach**: what a button or key pressed in one conversation view acts on: its targets, what they carry (unread, flagged, muted), and the mailbox they were picked from. In the main window several selected rows win over the open conversation; a conversation in a window of its own reaches only itself, in the mailbox it was opened from. `ui::window::reach::Reach`, built by `MainWindow::reach(view)`. _Avoid_: scope, selection.
