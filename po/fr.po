@@ -1072,7 +1072,7 @@ msgid "Continue opens {provider}'s sign-in page in your browser."
 msgstr ""
 "Continuer ouvre la page de connexion de {provider} dans votre navigateur."
 
-#: app/src/app.rs:416
+#: app/src/app.rs:468
 msgid ""
 "Your preferences could not be read, so Penguin Mail started from the "
 "defaults. The old file is kept as {file}."
@@ -4452,55 +4452,59 @@ msgstr ""
 "Le message est envoyé à Anthropic, pour que Claude le lise via votre "
 "abonnement."
 
-#: app/src/tray.rs:24
+#: app/src/tray.rs:25
 msgid "No unread mail"
 msgstr "Aucun message non lu"
 
-#: app/src/tray.rs:26
+#: app/src/tray.rs:27
 msgid "{count} unread message"
 msgid_plural "{count} unread messages"
 msgstr[0] "{count} message non lu"
 msgstr[1] "{count} messages non lus"
 
-#: app/src/tray.rs:40 app/src/ui/sidebar.rs:1521
+#: app/src/tray.rs:41 app/src/ui/sidebar.rs:1521
 msgid "{account}, {count} unread message"
 msgid_plural "{account}, {count} unread messages"
 msgstr[0] "{account}, {count} message non lu"
 msgstr[1] "{account}, {count} messages non lus"
 
-#: app/src/tray.rs:147 app/src/tray.rs:185
+#: app/src/tray.rs:148 app/src/tray.rs:186
 msgid "Penguin Mail: {summary}"
 msgstr "Penguin Mail : {summary}"
 
-#: app/src/tray.rs:236
+#: app/src/tray.rs:239
+msgid "Mark All as Read"
+msgstr "Tout marquer comme lu"
+
+#: app/src/tray.rs:248
 msgid "Open Penguin Mail"
 msgstr "Ouvrir Penguin Mail"
 
-#: app/src/tray.rs:237 app/src/ui/composer/mod.rs:365
+#: app/src/tray.rs:249 app/src/ui/composer/mod.rs:365
 #: app/src/ui/composer/mod.rs:668 app/src/ui/composer/mod.rs:1550
 #: app/src/ui/contact_card.rs:168 app/src/ui/thread_list.rs:456
 msgid "New Message"
 msgstr "Nouveau message"
 
-#: app/src/tray.rs:238 app/src/ui/sidebar.rs:1929 app/src/ui/window.rs:3303
+#: app/src/tray.rs:250 app/src/ui/sidebar.rs:1929 app/src/ui/window.rs:3303
 msgid "Check for Mail"
 msgstr "Relever le courrier"
 
-#: app/src/tray.rs:242 app/src/update/mod.rs:98
+#: app/src/tray.rs:254 app/src/update/mod.rs:98
 msgid "Install Update {version}"
 msgstr "Installer la mise à jour {version}"
 
-#: app/src/tray.rs:245
+#: app/src/tray.rs:257
 msgid "What's New in {version}"
 msgstr "Nouveautés de la version {version}"
 
-#: app/src/tray.rs:249 app/src/ui/about.rs:119 app/src/ui/about.rs:227
+#: app/src/tray.rs:261 app/src/ui/about.rs:119 app/src/ui/about.rs:227
 #: app/src/ui/about.rs:235 app/src/ui/about.rs:242
 #: app/src/ui/preferences.rs:1030 app/src/update/mod.rs:108
 msgid "Check for Updates"
 msgstr "Rechercher des mises à jour"
 
-#: app/src/tray.rs:254 app/src/ui/window.rs:3316
+#: app/src/tray.rs:266 app/src/ui/window.rs:3316
 #: app/src/ui/window/shortcuts.rs:644
 msgid "Quit"
 msgstr "Quitter"

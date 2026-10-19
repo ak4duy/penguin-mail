@@ -7,6 +7,7 @@ the [releases page](https://github.com/c9dev/penguin-mail/releases).
 
 ### New
 
+- Mark downloaded mail in all inboxes as read from the tray menu.
 - Choose reasoning separately for assistant chats and email translations in Preferences → AI.
 - Russian and Czech can be selected in Never Translate.
 - Choose Simplified Chinese, Russian, Italian, Japanese, Korean, Polish, Turkish, or Indonesian in Preferences.

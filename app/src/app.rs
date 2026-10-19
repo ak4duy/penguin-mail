@@ -373,6 +373,58 @@ impl App {
         });
     }
 
+    fn read_all(self: &Rc<Self>) {
+        use mailrs_domain::{MailSet, Target};
+        use mailrs_store::threads::{self, ThreadFilter};
+        use mailrs_sync::{MailAction, TriageAction};
+
+        let this = Rc::clone(self);
+        glib::spawn_future_local(async move {
+            let targets = this
+                .core
+                .read(|c| {
+                    let filter = ThreadFilter::unified(MailSet::Role(Role::Inbox));
+                    let rows = threads::list_messages(c, &filter, 0, i64::MAX)?;
+                    Ok(rows
+                        .iter()
+                        .filter(|row| row.unread)
+                        .map(Target::from_row)
+                        .collect::<Vec<_>>())
+                })
+                .await;
+
+            let targets = match targets {
+                Ok(targets) => targets,
+                Err(err) => {
+                    tracing::warn!(error = %err, "could not list unread inbox mail");
+                    return;
+                }
+            };
+            if targets.is_empty() {
+                return;
+            }
+
+            let action = MailAction::Triage(TriageAction::MarkRead);
+            let outcome = this
+                .core
+                .act(
+                    targets,
+                    action.clone(),
+                    History::Record,
+                    MovedFrom::nowhere(),
+                )
+                .await;
+
+            this.tell_window(Notice::MailChanged {
+                action: &action,
+                outcome: &outcome,
+            });
+            if let Some(error) = outcome.first_error() {
+                tracing::warn!(error, "could not mark all inbox mail read");
+            }
+        });
+    }
+
     /// Shows the window on `account_id`'s inbox, as the sidebar's Inbox row
     /// under that account does. A tray line can outlive its account, and
     /// then the window opens as it is.
@@ -1750,6 +1802,7 @@ impl App {
         glib::spawn_future_local(async move {
             while let Ok(command) = received.recv().await {
                 match command {
+                    TrayCommand::ReadAll => this.read_all(),
                     TrayCommand::Toggle => match this.window() {
                         Some(window) if window.is_active() => window.window.close(),
                         _ => {

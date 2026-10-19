@@ -973,7 +973,7 @@ msgstr "{provider} 透過瀏覽器登入"
 msgid "Continue opens {provider}'s sign-in page in your browser."
 msgstr "選擇 [繼續] 會在瀏覽器中開啟 {provider} 的登入頁面。"
 
-#: app/src/app.rs:416
+#: app/src/app.rs:468
 msgid ""
 "Your preferences could not be read, so Penguin Mail started from the "
 "defaults. The old file is kept as {file}."
@@ -4152,53 +4152,57 @@ msgid ""
 "The message goes to Anthropic, for Claude to read through your subscription."
 msgstr "郵件會傳送至 Anthropic，透過 Claude 訂閱供 Claude 讀取。"
 
-#: app/src/tray.rs:24
+#: app/src/tray.rs:25
 msgid "No unread mail"
 msgstr "沒有未讀郵件"
 
-#: app/src/tray.rs:26
+#: app/src/tray.rs:27
 msgid "{count} unread message"
 msgid_plural "{count} unread messages"
 msgstr[0] "{count} 封未讀郵件"
 
-#: app/src/tray.rs:40 app/src/ui/sidebar.rs:1521
+#: app/src/tray.rs:41 app/src/ui/sidebar.rs:1521
 msgid "{account}, {count} unread message"
 msgid_plural "{account}, {count} unread messages"
 msgstr[0] "{account}，{count} 封未讀郵件"
 
-#: app/src/tray.rs:147 app/src/tray.rs:185
+#: app/src/tray.rs:148 app/src/tray.rs:186
 msgid "Penguin Mail: {summary}"
 msgstr "Penguin Mail：{summary}"
 
-#: app/src/tray.rs:236
+#: app/src/tray.rs:239
+msgid "Mark All as Read"
+msgstr "全部標示為已讀"
+
+#: app/src/tray.rs:248
 msgid "Open Penguin Mail"
 msgstr "開啟 Penguin Mail"
 
-#: app/src/tray.rs:237 app/src/ui/composer/mod.rs:365
+#: app/src/tray.rs:249 app/src/ui/composer/mod.rs:365
 #: app/src/ui/composer/mod.rs:668 app/src/ui/composer/mod.rs:1550
 #: app/src/ui/contact_card.rs:168 app/src/ui/thread_list.rs:456
 msgid "New Message"
 msgstr "新增郵件"
 
-#: app/src/tray.rs:238 app/src/ui/sidebar.rs:1929 app/src/ui/window.rs:3303
+#: app/src/tray.rs:250 app/src/ui/sidebar.rs:1929 app/src/ui/window.rs:3303
 msgid "Check for Mail"
 msgstr "檢查郵件"
 
-#: app/src/tray.rs:242 app/src/update/mod.rs:98
+#: app/src/tray.rs:254 app/src/update/mod.rs:98
 msgid "Install Update {version}"
 msgstr "安裝 {version} 更新"
 
-#: app/src/tray.rs:245
+#: app/src/tray.rs:257
 msgid "What's New in {version}"
 msgstr "{version} 的新功能"
 
-#: app/src/tray.rs:249 app/src/ui/about.rs:119 app/src/ui/about.rs:227
+#: app/src/tray.rs:261 app/src/ui/about.rs:119 app/src/ui/about.rs:227
 #: app/src/ui/about.rs:235 app/src/ui/about.rs:242
 #: app/src/ui/preferences.rs:1030 app/src/update/mod.rs:108
 msgid "Check for Updates"
 msgstr "檢查更新"
 
-#: app/src/tray.rs:254 app/src/ui/window.rs:3316
+#: app/src/tray.rs:266 app/src/ui/window.rs:3316
 #: app/src/ui/window/shortcuts.rs:644
 msgid "Quit"
 msgstr "結束"
