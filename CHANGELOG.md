@@ -14,6 +14,7 @@ the [releases page](https://github.com/c9dev/penguin-mail/releases).
 - Choose Simplified Chinese, Russian, Italian, Japanese, Korean, Polish, Turkish, or Indonesian in Preferences.
 - Show or hide the mailbox sidebar with Ctrl+B, or Cmd+B on macOS.
 - An AppImage bundles the current runtime for Ubuntu 22.04 and newer, and Debian 13.
+- Choose Greek, Romanian or Ukrainian in Preferences.
 - Build and install Penguin Mail with Nix, or enter its development environment with `nix develop`.
 
 ### Fixed
@@ -27,6 +28,7 @@ the [releases page](https://github.com/c9dev/penguin-mail/releases).
 - Outlook unread counts update when older inbox messages are read in another app ([#66](https://github.com/c9dev/penguin-mail/issues/66)).
 - The Snap can access the graphics devices it needs at startup ([#62](https://github.com/c9dev/penguin-mail/issues/62)).
 - macOS notifications use temporary banners by default, offer all selected buttons, and keep mail actions in the background.
+- Setting Language back to Follow System and pressing Restart shows your system's language again, instead of the language you had picked before.
 - Assistant skill scripts can run with the Nix package, including on NixOS.
 - Microsoft messages with attachments open without the contentId request error.
 - IMAP Junk and Trash show messages on the server even when they have not synced to this computer.
