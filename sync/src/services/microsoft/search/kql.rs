@@ -2,7 +2,9 @@
 //! messages. Graph's KQL has no property for read or flagged state, so a
 //! query naming either cannot be said, and the caller answers it from the
 //! store alone, as with IMAP. A folder named at the top level is where the
-//! search looks; anywhere deeper it cannot be said.
+//! search looks; anywhere deeper it cannot be said. Unread at the top level
+//! of a query with no other words becomes a filter on the listing, since
+//! Graph refuses a filter beside a search.
 
 use chrono::NaiveDate;
 use mailrs_domain::MailSet;
@@ -21,6 +23,7 @@ pub(crate) enum Place {
 pub(crate) struct Printed {
     pub within: Option<Place>,
     pub kql: String,
+    pub unread: bool,
 }
 
 pub(crate) fn print(query: &Query, today: NaiveDate) -> Result<Printed, Unsayable> {
@@ -29,8 +32,13 @@ pub(crate) fn print(query: &Query, today: NaiveDate) -> Result<Printed, Unsayabl
         other => vec![other],
     };
     let mut within = None;
+    let mut unread = false;
     let mut said = Vec::new();
     for part in parts {
+        if let Query::Term(Term::Unread) = part {
+            unread = true;
+            continue;
+        }
         let place = match part {
             Query::Term(Term::In(set @ (MailSet::Role(_) | MailSet::Mailbox(_)))) => {
                 Some(Place::Set(set.clone()))
@@ -44,9 +52,13 @@ pub(crate) fn print(query: &Query, today: NaiveDate) -> Result<Printed, Unsayabl
             None => said.extend(clause(part, today)?),
         }
     }
+    if unread && !said.is_empty() {
+        return Err(Unsayable);
+    }
     Ok(Printed {
         within,
         kql: said.join(" AND "),
+        unread,
     })
 }
 
@@ -167,7 +179,17 @@ mod tests {
 
     #[test]
     fn read_and_flagged_are_unsayable() {
-        assert!(print(&Query::term(Term::Unread), today()).is_err());
+        assert!(
+            print(
+                &Query::And(vec![
+                    Query::term(Term::From("a".into())),
+                    Query::term(Term::Unread)
+                ]),
+                today()
+            )
+            .is_err()
+        );
+        assert!(print(&Query::Not(Box::new(Query::term(Term::Unread))), today()).is_err());
         assert!(
             print(
                 &Query::And(vec![
@@ -196,6 +218,17 @@ mod tests {
             )
             .is_err()
         );
+    }
+
+    #[test]
+    fn unread_mail_in_a_folder_is_a_filter() {
+        let query = Query::And(vec![
+            Query::is_in(MailSet::Role(Role::Inbox)),
+            Query::term(Term::Unread),
+        ]);
+        let printed = print(&query, today()).unwrap();
+        assert_eq!(printed.within, Some(Place::Set(MailSet::Role(Role::Inbox))));
+        assert!(printed.unread && printed.kql.is_empty());
     }
 
     #[test]

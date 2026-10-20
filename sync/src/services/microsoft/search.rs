@@ -49,6 +49,7 @@ impl<G: GraphApi> Microsoft<G> {
         let listing = Listing {
             folder,
             search: (!printed.kql.is_empty()).then_some(printed.kql),
+            unread: printed.unread,
             top: u32::try_from(limit.clamp(1, 250)).unwrap_or(250),
             fields: Fields::Ids,
             ..Listing::default()

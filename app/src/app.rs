@@ -377,22 +377,21 @@ impl App {
     /// Mark All as Read. Each page asks the accounts' servers, so mail
     /// older than this computer keeps goes read too.
     fn read_all(self: &Rc<Self>) {
-        use mailrs_sync::{MailAction, TriageAction};
-
         let this = Rc::clone(self);
         glib::spawn_future_local(async move {
             let accounts: Vec<_> = this.mail_accounts().into_iter().map(|a| a.id).collect();
-            let outcome = this.core.read_inboxes(accounts).await;
-            if outcome.done.is_empty() && outcome.failed.is_empty() {
-                return;
+            let read = this.core.read_inboxes(accounts).await;
+            if read.read > 0 {
+                this.tell_window(Notice::InboxesRead);
             }
-            let action = MailAction::Triage(TriageAction::MarkRead);
-            this.tell_window(Notice::MailChanged {
-                action: &action,
-                outcome: &outcome,
-            });
-            if let Some(error) = outcome.first_error() {
-                tracing::warn!(error, "could not mark all inbox mail read");
+            for (account, error) in &read.failed {
+                tracing::warn!(account, error, "could not mark all inbox mail read");
+            }
+            if let Some((_, reason)) = read.failed.first() {
+                this.tell_window(Notice::Toast(fill(
+                    &gettext("Could not mark all mail as read: {reason}"),
+                    &[("reason", reason)],
+                )));
             }
         });
     }

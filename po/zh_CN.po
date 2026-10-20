@@ -976,7 +976,11 @@ msgstr "{provider} 通过浏览器登录"
 msgid "Continue opens {provider}'s sign-in page in your browser."
 msgstr "选择 [继续] 会在浏览器中打开 {provider} 的登录页面。"
 
-#: app/src/app.rs:440
+#: app/src/app.rs:392
+msgid "Could not mark all mail as read: {reason}"
+msgstr "无法将所有邮件标记为已读：{reason}"
+
+#: app/src/app.rs:439
 msgid ""
 "Your preferences could not be read, so Penguin Mail started from the "
 "defaults. The old file is kept as {file}."
@@ -2056,7 +2060,7 @@ msgid "Could not save {count} person to contacts in {account}"
 msgid_plural "Could not save {count} people to contacts in {account}"
 msgstr[0] "无法将 {count} 位联系人保存至 {account} 的联系人"
 
-#: app/src/core.rs:220
+#: app/src/core.rs:221
 msgid ""
 "Another copy of Penguin Mail, or penguin-mail-cli sync, is syncing your "
 "mail. Stop it, then open Penguin Mail again."
@@ -2064,28 +2068,28 @@ msgstr ""
 "另一个 Penguin Mail 或 penguin-mail-cli sync 正在同步邮件。请停止该程序，再重"
 "新打开 Penguin Mail。"
 
-#: app/src/core.rs:232
+#: app/src/core.rs:233
 msgid "Penguin Mail could not update its mail store, and kept the old one."
 msgstr "Penguin Mail 无法更新邮件数据库，已保留旧数据库。"
 
-#: app/src/core.rs:821 app/src/core.rs:899 app/src/core.rs:1028
-#: app/src/core.rs:1042 app/src/core.rs:1107 app/src/core.rs:1203
+#: app/src/core.rs:822 app/src/core.rs:900 app/src/core.rs:1029
+#: app/src/core.rs:1043 app/src/core.rs:1108 app/src/core.rs:1204
 msgid "Demo mode cannot add real accounts."
 msgstr "演示模式无法添加真实账号。"
 
-#: app/src/core.rs:835
+#: app/src/core.rs:836
 msgid "Canceled."
 msgstr "已取消。"
 
-#: app/src/core.rs:839
+#: app/src/core.rs:840
 msgid "Gave up waiting for the browser after five minutes."
 msgstr "已等待浏览器五分钟，停止等待。"
 
-#: app/src/core.rs:1373 app/src/core.rs:1398
+#: app/src/core.rs:1374 app/src/core.rs:1399
 msgid "This account keeps no password a calendar or contacts server takes."
 msgstr "此账号没有保存日历或联系人服务器接受的密码。"
 
-#: app/src/core.rs:1579 app/src/core.rs:1618
+#: app/src/core.rs:1580 app/src/core.rs:1619
 msgid "The demo cannot switch accounts."
 msgstr "演示模式无法切换账号。"
 
@@ -10128,7 +10132,7 @@ msgstr "此邮件"
 msgid "Copied {address}"
 msgstr "已复制 {address}"
 
-#: app/src/ui/window/notice.rs:101
+#: app/src/ui/window/notice.rs:104
 msgid "A rule that waited was refused: {reason}"
 msgstr "等待中的规则遭到拒绝：{reason}"
 
@@ -11008,19 +11012,19 @@ msgstr[0] "{count} 秒"
 msgid "a minute"
 msgstr "一分钟"
 
-#: sync/src/actions.rs:124 sync/src/actions.rs:724
+#: sync/src/actions.rs:124 sync/src/actions.rs:739
 msgid "Change labels"
 msgstr "更改标签"
 
-#: sync/src/actions.rs:372
+#: sync/src/actions.rs:387
 msgid "Delete Forever failed: {reason}"
 msgstr "[永久删除] 失败：{reason}"
 
-#: sync/src/actions.rs:616
+#: sync/src/actions.rs:631
 msgid "This mail has moved since, so Undo left it where it is."
 msgstr "此邮件之后已移动，因此 [撤销] 将邮件留在原处。"
 
-#: sync/src/actions.rs:677 sync/src/actions.rs:731
+#: sync/src/actions.rs:692 sync/src/actions.rs:746
 msgid "Could not undo: {reason}"
 msgstr "无法撤销：{reason}"
 

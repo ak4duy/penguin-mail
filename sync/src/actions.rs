@@ -290,6 +290,21 @@ impl<A: Accounts> MailActions<A> {
         history: History,
         from: &MovedFrom,
     ) -> Outcome {
+        self.run_joining(targets, action, history, from, None).await
+    }
+
+    /// Runs `action` as [`Self::run_from`] does. With `joining`, a
+    /// recorded change goes into that entry of the undo stack rather than
+    /// a new one, so an action run in parts is undone as one. An entry
+    /// that has left the stack, undone or pushed off, starts a new one.
+    pub(crate) async fn run_joining(
+        &self,
+        targets: &[Target],
+        action: MailAction,
+        history: History,
+        from: &MovedFrom,
+        joining: Option<Recorded>,
+    ) -> Outcome {
         let mut outcome = Outcome::default();
         let mut undo = Undo {
             id: self.next.fetch_add(1, Ordering::Relaxed),
@@ -357,7 +372,7 @@ impl<A: Accounts> MailActions<A> {
             }
         }
         if history == History::Record && !outcome.done.is_empty() {
-            outcome.recorded = Some(self.record(undo).await);
+            outcome.recorded = Some(self.record(undo, joining).await);
         }
         outcome
     }
@@ -753,8 +768,9 @@ impl<A: Accounts> MailActions<A> {
 
     /// Puts `undo` on the stack, noting where the action left each target
     /// so a later undo can tell whether the world moved under it. The
-    /// oldest entry goes when the stack is full.
-    async fn record(&self, mut undo: Undo) -> Recorded {
+    /// oldest entry goes when the stack is full. With `joining` still on
+    /// the stack, `undo` goes into that entry instead.
+    async fn record(&self, mut undo: Undo, joining: Option<Recorded>) -> Recorded {
         let targets: Vec<Target> = undo.relabel.iter().map(|r| r.target.clone()).collect();
         let folders = self.folders_of(&targets).await.unwrap_or_else(|err| {
             tracing::warn!(error = %err, "could not read where the action left the mail");
@@ -763,8 +779,17 @@ impl<A: Accounts> MailActions<A> {
         for (reversal, folder) in undo.relabel.iter_mut().zip(folders) {
             reversal.folder = folder;
         }
-        let recorded = Recorded(undo.id);
         let mut stack = self.lock();
+        if let Some(joined) = joining
+            && let Some(entry) = stack.iter_mut().find(|entry| entry.id == joined.0)
+        {
+            entry.relabel.append(&mut undo.relabel);
+            entry.colors.append(&mut undo.colors);
+            entry.reminders.append(&mut undo.reminders);
+            entry.follow_ups.append(&mut undo.follow_ups);
+            return joined;
+        }
+        let recorded = Recorded(undo.id);
         while stack.len() >= DEPTH {
             stack.pop_front();
         }

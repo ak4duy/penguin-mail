@@ -1065,7 +1065,11 @@ msgstr "{provider} używa logowania przez przeglądarkę"
 msgid "Continue opens {provider}'s sign-in page in your browser."
 msgstr "Dalej otworzy stronę logowania dostawcy {provider} w przeglądarce."
 
-#: app/src/app.rs:440
+#: app/src/app.rs:392
+msgid "Could not mark all mail as read: {reason}"
+msgstr "Nie można oznaczyć całej poczty jako przeczytanej: {reason}"
+
+#: app/src/app.rs:439
 msgid ""
 "Your preferences could not be read, so Penguin Mail started from the "
 "defaults. The old file is kept as {file}."
@@ -2220,7 +2224,7 @@ msgstr[0] "Nie udało się zapisać {count} osoby w kontaktach konta {account}"
 msgstr[1] "Nie udało się zapisać {count} osób w kontaktach konta {account}"
 msgstr[2] "Nie udało się zapisać {count} osób w kontaktach konta {account}"
 
-#: app/src/core.rs:220
+#: app/src/core.rs:221
 msgid ""
 "Another copy of Penguin Mail, or penguin-mail-cli sync, is syncing your "
 "mail. Stop it, then open Penguin Mail again."
@@ -2228,31 +2232,31 @@ msgstr ""
 "Inna kopia Penguin Mail lub penguin-mail-cli sync synchronizuje pocztę. "
 "Zatrzymaj ją, a następnie otwórz ponownie Penguin Mail."
 
-#: app/src/core.rs:232
+#: app/src/core.rs:233
 msgid "Penguin Mail could not update its mail store, and kept the old one."
 msgstr ""
 "Penguin Mail nie mógł zaktualizować magazynu poczty i zachował poprzedni."
 
-#: app/src/core.rs:821 app/src/core.rs:899 app/src/core.rs:1028
-#: app/src/core.rs:1042 app/src/core.rs:1107 app/src/core.rs:1203
+#: app/src/core.rs:822 app/src/core.rs:900 app/src/core.rs:1029
+#: app/src/core.rs:1043 app/src/core.rs:1108 app/src/core.rs:1204
 msgid "Demo mode cannot add real accounts."
 msgstr "W trybie demonstracyjnym nie można dodawać prawdziwych kont."
 
-#: app/src/core.rs:835
+#: app/src/core.rs:836
 msgid "Canceled."
 msgstr "Anulowano."
 
-#: app/src/core.rs:839
+#: app/src/core.rs:840
 msgid "Gave up waiting for the browser after five minutes."
 msgstr "Przerwano oczekiwanie na przeglądarkę po pięciu minutach."
 
-#: app/src/core.rs:1373 app/src/core.rs:1398
+#: app/src/core.rs:1374 app/src/core.rs:1399
 msgid "This account keeps no password a calendar or contacts server takes."
 msgstr ""
 "To konto nie przechowuje hasła akceptowanego przez serwer kalendarza lub "
 "kontaktów."
 
-#: app/src/core.rs:1579 app/src/core.rs:1618
+#: app/src/core.rs:1580 app/src/core.rs:1619
 msgid "The demo cannot switch accounts."
 msgstr "W trybie demonstracyjnym nie można przełączać kont."
 
@@ -10695,7 +10699,7 @@ msgstr "Ta wiadomość"
 msgid "Copied {address}"
 msgstr "Skopiowano {address}"
 
-#: app/src/ui/window/notice.rs:101
+#: app/src/ui/window/notice.rs:104
 msgid "A rule that waited was refused: {reason}"
 msgstr "Odrzucono oczekującą regułę: {reason}"
 
@@ -11666,21 +11670,21 @@ msgstr[2] "{count} sekund"
 msgid "a minute"
 msgstr "minutę"
 
-#: sync/src/actions.rs:124 sync/src/actions.rs:724
+#: sync/src/actions.rs:124 sync/src/actions.rs:739
 msgid "Change labels"
 msgstr "Zmień etykiety"
 
-#: sync/src/actions.rs:372
+#: sync/src/actions.rs:387
 msgid "Delete Forever failed: {reason}"
 msgstr "Trwałe usunięcie nie powiodło się: {reason}"
 
-#: sync/src/actions.rs:616
+#: sync/src/actions.rs:631
 msgid "This mail has moved since, so Undo left it where it is."
 msgstr ""
 "Ta poczta została od tego czasu przeniesiona, więc cofnięcie pozostawiło ją "
 "na miejscu."
 
-#: sync/src/actions.rs:677 sync/src/actions.rs:731
+#: sync/src/actions.rs:692 sync/src/actions.rs:746
 msgid "Could not undo: {reason}"
 msgstr "Nie udało się cofnąć: {reason}"
 

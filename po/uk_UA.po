@@ -1062,6 +1062,10 @@ msgid "Continue opens {provider}'s sign-in page in your browser."
 msgstr ""
 "Кнопка «Продовжити» відкриває сторінку входу {provider} у вашому браузері."
 
+#: app/src/app.rs:392
+msgid "Could not mark all mail as read: {reason}"
+msgstr "Не вдалося позначити всю пошту як прочитану: {reason}"
+
 #: app/src/app.rs:416
 msgid ""
 "Your preferences could not be read, so Penguin Mail started from the "
