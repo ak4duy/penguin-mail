@@ -5,6 +5,14 @@ the [releases page](https://github.com/c9dev/penguin-mail/releases).
 
 ## Unreleased
 
+### New
+
+- Empty Trash from its mailbox menu, including older mail outside the local cache, with bounded memory use and a fresh check before each delete batch.
+
+### Fixed
+
+- Empty Trash removes deleted JMAP messages from the app and Undo even when the server refuses another message in the same batch.
+
 ## 1.0.10 (2026-10-20)
 
 ### New
