@@ -1239,12 +1239,22 @@ fn messages_walking(
     Ok(rows.collect::<rusqlite::Result<Vec<_>>>()?)
 }
 
-/// The unread messages of every account's inbox, which is what the tray's
-/// "Mark All as Read" acts on.
-pub fn unread_inbox_messages(conn: &Connection) -> Result<Vec<ThreadSummary>> {
-    let filter = ThreadFilter::unified(MailSet::Role(Role::Inbox));
-    let rows = list_messages(conn, &filter, 0, i64::MAX)?;
-    Ok(rows.into_iter().filter(|row| row.unread).collect())
+/// At most `limit` unread messages in the account's inbox, as thread and
+/// message ids. It reads no row's subject or sender, so a large inbox with
+/// a few unread messages costs a few rows.
+pub fn unread_inbox_ids(
+    conn: &Connection,
+    account_id: AccountId,
+    limit: i64,
+) -> Result<Vec<(String, String)>> {
+    let filter = ThreadFilter::account(account_id, MailSet::Role(Role::Inbox));
+    let mut sql = filter.counting(conn, Rows::Messages, "SELECT m.thread_id, m.id", true)?;
+    sql.push(MESSAGE_UNREAD).push(" LIMIT ").bind(limit);
+    let mut stmt = conn.prepare_cached(&sql.text)?;
+    let rows = stmt.query_map(params_from_iter(&sql.params), |row| {
+        Ok((row.get(0)?, row.get(1)?))
+    })?;
+    Ok(rows.collect::<rusqlite::Result<Vec<_>>>()?)
 }
 
 pub fn unread_messages(conn: &Connection, filter: &ThreadFilter) -> Result<i64> {

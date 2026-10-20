@@ -1056,7 +1056,7 @@ msgid "Continue opens {provider}'s sign-in page in your browser."
 msgstr ""
 "Continuar abre a página de início de sessão de {provider} no navegador."
 
-#: app/src/app.rs:463
+#: app/src/app.rs:451
 msgid ""
 "Your preferences could not be read, so Penguin Mail started from the "
 "defaults. The old file is kept as {file}."
@@ -2190,26 +2190,26 @@ msgstr ""
 "O Penguin Mail não conseguiu atualizar o arquivo de correio e manteve o "
 "anterior."
 
-#: app/src/core.rs:805 app/src/core.rs:883 app/src/core.rs:1012
-#: app/src/core.rs:1026 app/src/core.rs:1091 app/src/core.rs:1187
+#: app/src/core.rs:813 app/src/core.rs:891 app/src/core.rs:1020
+#: app/src/core.rs:1034 app/src/core.rs:1099 app/src/core.rs:1195
 msgid "Demo mode cannot add real accounts."
 msgstr "O modo de demonstração não adiciona contas reais."
 
-#: app/src/core.rs:819
+#: app/src/core.rs:827
 msgid "Canceled."
 msgstr "Cancelado."
 
-#: app/src/core.rs:823
+#: app/src/core.rs:831
 msgid "Gave up waiting for the browser after five minutes."
 msgstr "Desistiu de esperar pelo navegador ao fim de cinco minutos."
 
-#: app/src/core.rs:1357 app/src/core.rs:1382
+#: app/src/core.rs:1365 app/src/core.rs:1390
 msgid "This account keeps no password a calendar or contacts server takes."
 msgstr ""
 "Esta conta não guarda nenhuma palavra-passe que um servidor de calendário ou "
 "de contactos aceite."
 
-#: app/src/core.rs:1563 app/src/core.rs:1602
+#: app/src/core.rs:1571 app/src/core.rs:1610
 msgid "The demo cannot switch accounts."
 msgstr "O modo de demonstração não muda contas."
 

@@ -373,43 +373,31 @@ impl App {
         });
     }
 
+    /// Marks the unread mail in every account's inbox read, the tray's
+    /// Mark All as Read. Each account goes in pages on its own server, so
+    /// mail older than this computer keeps goes read too.
     fn read_all(self: &Rc<Self>) {
-        use mailrs_domain::Target;
-        use mailrs_store::threads;
-        use mailrs_sync::{MailAction, TriageAction};
+        use mailrs_sync::{MailAction, Outcome, TriageAction};
 
         let this = Rc::clone(self);
         glib::spawn_future_local(async move {
-            let targets = this
-                .core
-                .read(|c| {
-                    let rows = threads::unread_inbox_messages(c)?;
-                    Ok(rows.iter().map(Target::from_row).collect::<Vec<_>>())
-                })
-                .await;
-
-            let targets = match targets {
-                Ok(targets) => targets,
-                Err(err) => {
-                    tracing::warn!(error = %err, "could not list unread inbox mail");
-                    return;
+            let mut outcome = Outcome::default();
+            for account in this.mail_accounts() {
+                match this.core.read_inbox(account.id).await {
+                    Ok(one) => {
+                        outcome.done.extend(one.done);
+                        outcome.failed.extend(one.failed);
+                        outcome.recorded = one.recorded.or(outcome.recorded);
+                    }
+                    Err(err) => {
+                        tracing::warn!(account = account.id, error = %err, "could not list unread inbox mail");
+                    }
                 }
-            };
-            if targets.is_empty() {
+            }
+            if outcome.done.is_empty() && outcome.failed.is_empty() {
                 return;
             }
-
             let action = MailAction::Triage(TriageAction::MarkRead);
-            let outcome = this
-                .core
-                .act(
-                    targets,
-                    action.clone(),
-                    History::Record,
-                    MovedFrom::nowhere(),
-                )
-                .await;
-
             this.tell_window(Notice::MailChanged {
                 action: &action,
                 outcome: &outcome,

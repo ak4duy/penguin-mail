@@ -710,6 +710,14 @@ impl Core {
         })
     }
 
+    /// Marks every unread message in the account's inbox read, on its
+    /// server as well as here. See `MailActions::read_inbox`.
+    pub async fn read_inbox(&self, account_id: AccountId) -> Result<Outcome> {
+        let actions = Arc::clone(&self.actions);
+        self.call(async move { actions.read_inbox(account_id, History::Record).await })
+            .await
+    }
+
     /// Reverses the one action `recorded` names, wherever it sits on the
     /// undo stack. `None` when it is no longer there.
     pub async fn undo_this(&self, recorded: mailrs_sync::Recorded) -> Option<Undone> {
