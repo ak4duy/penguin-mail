@@ -453,7 +453,7 @@ impl<J: JmapApi> MailBackend for Jmap<J> {
         &self,
         messages: &[String],
         mailbox: &str,
-    ) -> Result<Vec<Relocated>, Unapplied> {
+    ) -> Vec<Result<(), BackendError>> {
         let result = self.destroy_in(messages, mailbox).await;
         self.known().writes += 1;
         result

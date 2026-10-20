@@ -78,28 +78,38 @@ impl AccountSync {
         let named = moves.named(&all).await?;
         let mut chunks = named.chunks(limit);
         while let Some(chunk) = chunks.next() {
-            let result = match mailbox {
+            let results = match mailbox {
                 Some(mailbox) => moves.destroy_checked(chunk, mailbox).await,
-                None => moves.apply(chunk, &[MailOp::Destroy]).await,
+                None => match moves.apply(chunk, &[MailOp::Destroy]).await {
+                    Ok(_) => vec![Ok(()); chunk.len()],
+                    Err(Unapplied { taken, error, .. }) => (0..chunk.len())
+                        .map(|at| {
+                            if at < taken {
+                                Ok(())
+                            } else {
+                                Err(error.clone())
+                            }
+                        })
+                        .collect(),
+                },
             };
-            if let Err(Unapplied { error, taken, .. }) = result {
+            let needs_permission = results
+                .iter()
+                .any(|r| matches!(r, Err(BackendError::NeedsPermission)));
+            refused.extend(chunk.iter().zip(results).filter_map(|(message, result)| {
+                result.err().map(|error| (message.id().to_string(), error))
+            }));
+            // A missing permission stops later batches, but preserves deletions already made.
+            if needs_permission {
                 refused.extend(
-                    chunk
-                        .iter()
-                        .skip(taken)
-                        .map(|m| (m.id().to_string(), error.clone())),
+                    chunks
+                        .flatten()
+                        .map(|m| (m.id().to_string(), BackendError::NeedsPermission)),
                 );
-                // A missing permission stops later batches, but preserves deletions already made.
-                if matches!(error, BackendError::NeedsPermission) {
-                    refused.extend(
-                        chunks
-                            .flatten()
-                            .map(|m| (m.id().to_string(), error.clone())),
-                    );
-                    break;
-                }
+                break;
             }
         }
+
         let erased: Vec<String> = all
             .iter()
             .filter(|id| !refused.contains_key(*id))

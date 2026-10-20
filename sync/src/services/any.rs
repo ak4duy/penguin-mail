@@ -263,7 +263,7 @@ impl MailBackend for AnyMail {
         &self,
         messages: &[String],
         mailbox: &str,
-    ) -> Result<Vec<Relocated>, Unapplied> {
+    ) -> Vec<Result<(), BackendError>> {
         forward_all!(AnyMail, self, destroy_checked(messages, mailbox))
     }
 

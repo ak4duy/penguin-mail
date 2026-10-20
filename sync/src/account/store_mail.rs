@@ -598,7 +598,7 @@ impl Moves<'_> {
         &self,
         messages: &[Named],
         mailbox: &str,
-    ) -> Result<Vec<Relocated>, Unapplied> {
+    ) -> Vec<Result<(), BackendError>> {
         let names: Vec<String> = messages.iter().map(|m| m.name.clone()).collect();
         self.mail.mail.destroy_checked(&names, mailbox).await
     }

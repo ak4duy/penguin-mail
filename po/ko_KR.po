@@ -11205,12 +11205,12 @@ msgstr "이 메시지는 읽음 확인을 요청하지 않았습니다."
 msgid "The server refused this request."
 msgstr "서버가 이 요청을 거부했습니다."
 
-#: sync/src/account/writes.rs:781
+#: sync/src/account/writes.rs:791
 msgid "{provider} is busy. Still working on {conversations}."
 msgstr ""
 "{provider}이(가) 사용 중입니다. {conversations} 작업을 계속 진행 중입니다."
 
-#: sync/src/account/writes.rs:804
+#: sync/src/account/writes.rs:814
 msgid ""
 "{provider} is busy, so “{action}” did not go through for {conversations}. "
 "Try again in a moment."
@@ -11218,7 +11218,7 @@ msgstr ""
 "{provider}이(가) 사용 중이어서 {conversations}에 “{action}” 작업을 수행하지 "
 "못했습니다. 잠시 후 다시 시도하세요."
 
-#: sync/src/account/writes.rs:813
+#: sync/src/account/writes.rs:823
 msgid ""
 "{provider} stayed busy for {waited}, so “{action}” did not go through for "
 "{conversations}."
@@ -11226,20 +11226,20 @@ msgstr ""
 "{provider}이(가) {waited} 동안 사용 중이어서 {conversations}에 “{action}” 작"
 "업을 수행하지 못했습니다."
 
-#: sync/src/account/writes.rs:820
+#: sync/src/account/writes.rs:830
 msgid "{action} failed: {reason}"
 msgstr "{action} 실패: {reason}"
 
-#: sync/src/account/writes.rs:838
+#: sync/src/account/writes.rs:848
 msgid "a moment"
 msgstr "잠시"
 
-#: sync/src/account/writes.rs:840
+#: sync/src/account/writes.rs:850
 msgid "{count} second"
 msgid_plural "{count} seconds"
 msgstr[0] "{count}초"
 
-#: sync/src/account/writes.rs:845
+#: sync/src/account/writes.rs:855
 msgid "a minute"
 msgstr "1분"
 
@@ -11701,15 +11701,15 @@ msgstr ""
 msgid "The server did not take the rules."
 msgstr "서버가 규칙을 받지 않았습니다."
 
-#: sync/src/services/jmap/writes.rs:103
+#: sync/src/services/jmap/writes.rs:104
 msgid "The server has no mailbox for this."
 msgstr "서버에 이 작업을 위한 메일함이 없습니다."
 
-#: sync/src/services/jmap/writes.rs:135
+#: sync/src/services/jmap/writes.rs:136
 msgid "This server does not sort mail into categories."
 msgstr "이 서버는 메일을 카테고리별로 분류하지 않습니다."
 
-#: sync/src/services/jmap/writes.rs:177
+#: sync/src/services/jmap/writes.rs:178
 msgid ""
 "A message must stay in at least one mailbox, and this server has no Archive."
 msgstr ""

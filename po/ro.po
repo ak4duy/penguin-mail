@@ -11738,11 +11738,11 @@ msgstr "Acest mesaj nu cere confirmare de citire."
 msgid "The server refused this request."
 msgstr "Serverul a refuzat această cerere."
 
-#: sync/src/account/writes.rs:781
+#: sync/src/account/writes.rs:791
 msgid "{provider} is busy. Still working on {conversations}."
 msgstr "{provider} este ocupat. Se lucrează încă la {conversations}."
 
-#: sync/src/account/writes.rs:804
+#: sync/src/account/writes.rs:814
 msgid ""
 "{provider} is busy, so “{action}” did not go through for {conversations}. "
 "Try again in a moment."
@@ -11750,7 +11750,7 @@ msgstr ""
 "{provider} este ocupat, așa că „{action}” nu s-a aplicat pentru "
 "{conversations}. Încercați din nou peste câteva clipe."
 
-#: sync/src/account/writes.rs:813
+#: sync/src/account/writes.rs:823
 msgid ""
 "{provider} stayed busy for {waited}, so “{action}” did not go through for "
 "{conversations}."
@@ -11758,22 +11758,22 @@ msgstr ""
 "{provider} a rămas ocupat timp de {waited}, așa că „{action}” nu s-a aplicat "
 "pentru {conversations}."
 
-#: sync/src/account/writes.rs:820
+#: sync/src/account/writes.rs:830
 msgid "{action} failed: {reason}"
 msgstr "{action} a eșuat: {reason}"
 
-#: sync/src/account/writes.rs:838
+#: sync/src/account/writes.rs:848
 msgid "a moment"
 msgstr "câteva clipe"
 
-#: sync/src/account/writes.rs:840
+#: sync/src/account/writes.rs:850
 msgid "{count} second"
 msgid_plural "{count} seconds"
 msgstr[0] "{count} secundă"
 msgstr[1] "{count} secunde"
 msgstr[2] "{count} de secunde"
 
-#: sync/src/account/writes.rs:845
+#: sync/src/account/writes.rs:855
 msgid "a minute"
 msgstr "un minut"
 
@@ -12264,15 +12264,15 @@ msgstr ""
 msgid "The server did not take the rules."
 msgstr "Serverul nu a acceptat regulile."
 
-#: sync/src/services/jmap/writes.rs:103
+#: sync/src/services/jmap/writes.rs:104
 msgid "The server has no mailbox for this."
 msgstr "Serverul nu are o căsuță poștală pentru aceasta."
 
-#: sync/src/services/jmap/writes.rs:135
+#: sync/src/services/jmap/writes.rs:136
 msgid "This server does not sort mail into categories."
 msgstr "Acest server nu sortează mesajele pe categorii."
 
-#: sync/src/services/jmap/writes.rs:177
+#: sync/src/services/jmap/writes.rs:178
 msgid ""
 "A message must stay in at least one mailbox, and this server has no Archive."
 msgstr ""

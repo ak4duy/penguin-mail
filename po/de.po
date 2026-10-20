@@ -11667,11 +11667,11 @@ msgstr "Diese Nachricht fordert keine Lesebestätigung an."
 msgid "The server refused this request."
 msgstr "Der Server hat diese Anfrage abgelehnt."
 
-#: sync/src/account/writes.rs:781
+#: sync/src/account/writes.rs:791
 msgid "{provider} is busy. Still working on {conversations}."
 msgstr "{provider} ist ausgelastet. Noch in Bearbeitung: {conversations}."
 
-#: sync/src/account/writes.rs:804
+#: sync/src/account/writes.rs:814
 msgid ""
 "{provider} is busy, so “{action}” did not go through for {conversations}. "
 "Try again in a moment."
@@ -11679,7 +11679,7 @@ msgstr ""
 "{provider} ist ausgelastet, daher wurde „{action}“ für {conversations} nicht "
 "ausgeführt. Versuchen Sie es gleich noch einmal."
 
-#: sync/src/account/writes.rs:813
+#: sync/src/account/writes.rs:823
 msgid ""
 "{provider} stayed busy for {waited}, so “{action}” did not go through for "
 "{conversations}."
@@ -11687,21 +11687,21 @@ msgstr ""
 "{provider} war {waited} lang ausgelastet, daher wurde „{action}“ für "
 "{conversations} nicht ausgeführt."
 
-#: sync/src/account/writes.rs:820
+#: sync/src/account/writes.rs:830
 msgid "{action} failed: {reason}"
 msgstr "{action} fehlgeschlagen: {reason}"
 
-#: sync/src/account/writes.rs:838
+#: sync/src/account/writes.rs:848
 msgid "a moment"
 msgstr "einen Moment"
 
-#: sync/src/account/writes.rs:840
+#: sync/src/account/writes.rs:850
 msgid "{count} second"
 msgid_plural "{count} seconds"
 msgstr[0] "{count} Sekunde"
 msgstr[1] "{count} Sekunden"
 
-#: sync/src/account/writes.rs:845
+#: sync/src/account/writes.rs:855
 msgid "a minute"
 msgstr "eine Minute"
 
@@ -12191,15 +12191,15 @@ msgstr ""
 msgid "The server did not take the rules."
 msgstr "Der Server hat die Regeln nicht angenommen."
 
-#: sync/src/services/jmap/writes.rs:103
+#: sync/src/services/jmap/writes.rs:104
 msgid "The server has no mailbox for this."
 msgstr "Der Server hat dafür kein Postfach."
 
-#: sync/src/services/jmap/writes.rs:135
+#: sync/src/services/jmap/writes.rs:136
 msgid "This server does not sort mail into categories."
 msgstr "Dieser Server sortiert E-Mails nicht in Kategorien."
 
-#: sync/src/services/jmap/writes.rs:177
+#: sync/src/services/jmap/writes.rs:178
 msgid ""
 "A message must stay in at least one mailbox, and this server has no Archive."
 msgstr ""

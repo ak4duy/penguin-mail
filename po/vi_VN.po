@@ -11208,11 +11208,11 @@ msgstr "Thư này không yêu cầu xác nhận đã đọc."
 msgid "The server refused this request."
 msgstr "Máy chủ từ chối yêu cầu này."
 
-#: sync/src/account/writes.rs:781
+#: sync/src/account/writes.rs:791
 msgid "{provider} is busy. Still working on {conversations}."
 msgstr "{provider} đang bận. Vẫn đang xử lý {conversations}."
 
-#: sync/src/account/writes.rs:804
+#: sync/src/account/writes.rs:814
 msgid ""
 "{provider} is busy, so “{action}” did not go through for {conversations}. "
 "Try again in a moment."
@@ -11220,7 +11220,7 @@ msgstr ""
 "{provider} đang bận nên “{action}” chưa thực hiện được cho {conversations}. "
 "Thử lại sau một lát."
 
-#: sync/src/account/writes.rs:813
+#: sync/src/account/writes.rs:823
 msgid ""
 "{provider} stayed busy for {waited}, so “{action}” did not go through for "
 "{conversations}."
@@ -11228,20 +11228,20 @@ msgstr ""
 "{provider} vẫn bận sau {waited} nên “{action}” chưa thực hiện được cho "
 "{conversations}."
 
-#: sync/src/account/writes.rs:820
+#: sync/src/account/writes.rs:830
 msgid "{action} failed: {reason}"
 msgstr "{action} thất bại: {reason}"
 
-#: sync/src/account/writes.rs:838
+#: sync/src/account/writes.rs:848
 msgid "a moment"
 msgstr "một lát"
 
-#: sync/src/account/writes.rs:840
+#: sync/src/account/writes.rs:850
 msgid "{count} second"
 msgid_plural "{count} seconds"
 msgstr[0] "{count} giây"
 
-#: sync/src/account/writes.rs:845
+#: sync/src/account/writes.rs:855
 msgid "a minute"
 msgstr "một phút"
 
@@ -11698,15 +11698,15 @@ msgstr ""
 msgid "The server did not take the rules."
 msgstr "Máy chủ không nhận các quy tắc."
 
-#: sync/src/services/jmap/writes.rs:103
+#: sync/src/services/jmap/writes.rs:104
 msgid "The server has no mailbox for this."
 msgstr "Máy chủ không có hộp thư cho thao tác này."
 
-#: sync/src/services/jmap/writes.rs:135
+#: sync/src/services/jmap/writes.rs:136
 msgid "This server does not sort mail into categories."
 msgstr "Máy chủ này không phân loại thư theo danh mục."
 
-#: sync/src/services/jmap/writes.rs:177
+#: sync/src/services/jmap/writes.rs:178
 msgid ""
 "A message must stay in at least one mailbox, and this server has no Archive."
 msgstr ""

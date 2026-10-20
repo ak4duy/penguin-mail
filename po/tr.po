@@ -11465,11 +11465,11 @@ msgstr "Bu ileti okundu bildirimi istemiyor."
 msgid "The server refused this request."
 msgstr "Sunucu bu isteği reddetti."
 
-#: sync/src/account/writes.rs:781
+#: sync/src/account/writes.rs:791
 msgid "{provider} is busy. Still working on {conversations}."
 msgstr "{provider} meşgul. {conversations} üzerinde çalışılıyor."
 
-#: sync/src/account/writes.rs:804
+#: sync/src/account/writes.rs:814
 msgid ""
 "{provider} is busy, so “{action}” did not go through for {conversations}. "
 "Try again in a moment."
@@ -11477,7 +11477,7 @@ msgstr ""
 "{provider} meşgul olduğu için {conversations} üzerinde “{action}” "
 "yapılamadı. Biraz sonra tekrar deneyin."
 
-#: sync/src/account/writes.rs:813
+#: sync/src/account/writes.rs:823
 msgid ""
 "{provider} stayed busy for {waited}, so “{action}” did not go through for "
 "{conversations}."
@@ -11485,21 +11485,21 @@ msgstr ""
 "{provider}, {waited} boyunca meşgul kaldığı için {conversations} üzerinde "
 "“{action}” yapılamadı."
 
-#: sync/src/account/writes.rs:820
+#: sync/src/account/writes.rs:830
 msgid "{action} failed: {reason}"
 msgstr "{action} başarısız oldu: {reason}"
 
-#: sync/src/account/writes.rs:838
+#: sync/src/account/writes.rs:848
 msgid "a moment"
 msgstr "biraz"
 
-#: sync/src/account/writes.rs:840
+#: sync/src/account/writes.rs:850
 msgid "{count} second"
 msgid_plural "{count} seconds"
 msgstr[0] "{count} saniye"
 msgstr[1] "{count} saniye"
 
-#: sync/src/account/writes.rs:845
+#: sync/src/account/writes.rs:855
 msgid "a minute"
 msgstr "bir dakika"
 
@@ -11972,15 +11972,15 @@ msgstr ""
 msgid "The server did not take the rules."
 msgstr "Sunucu kuralları kabul etmedi."
 
-#: sync/src/services/jmap/writes.rs:103
+#: sync/src/services/jmap/writes.rs:104
 msgid "The server has no mailbox for this."
 msgstr "Sunucuda bunun için posta kutusu yok."
 
-#: sync/src/services/jmap/writes.rs:135
+#: sync/src/services/jmap/writes.rs:136
 msgid "This server does not sort mail into categories."
 msgstr "Bu sunucu postaları kategorilere ayırmıyor."
 
-#: sync/src/services/jmap/writes.rs:177
+#: sync/src/services/jmap/writes.rs:178
 msgid ""
 "A message must stay in at least one mailbox, and this server has no Archive."
 msgstr ""

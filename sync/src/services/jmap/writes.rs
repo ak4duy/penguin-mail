@@ -2,7 +2,8 @@
 //! only what it changes, so another client's change to the same message
 //! stays. A message never sits in no mailbox: taking it out of its last
 //! one files it in Archive. A write the server takes for some messages and
-//! refuses for one says how many from the front went through.
+//! refuses for one says how many from the front went through. Checked
+//! deletions report each message separately, including later successes.
 
 use std::collections::BTreeSet;
 
@@ -187,43 +188,65 @@ impl<J: JmapApi> Jmap<J> {
         &self,
         messages: &[String],
         mailbox: &str,
-    ) -> Result<Vec<Relocated>, Unapplied> {
-        let limits = self
-            .api()
-            .session()
-            .await
-            .map_err(|e| unapplied(0, backend(e)))?
-            .limits();
+    ) -> Vec<Result<(), BackendError>> {
+        let limits = match self.api().session().await {
+            Ok(session) => session.limits(),
+            Err(error) => return vec![Err(backend(error)); messages.len()],
+        };
         let limit = limits
             .max_objects_in_set
             .min(limits.max_objects_in_get)
             .clamp(1, PER_SET);
-        let mut taken = 0;
+        let mut results = Vec::with_capacity(messages.len());
         for chunk in messages.chunks(limit) {
-            let got = self
-                .api()
-                .emails(chunk, &["id", "mailboxIds"])
-                .await
-                .map_err(|e| unapplied(taken, backend(e)))?;
-            if got.state.is_empty()
-                || got
-                    .list
-                    .iter()
-                    .any(|m| m.mailbox_ids.get(mailbox) != Some(&true))
-            {
-                return Err(unapplied(taken, BackendError::Changed));
+            let answer = async {
+                let got = self
+                    .api()
+                    .emails(chunk, &["id", "mailboxIds"])
+                    .await
+                    .map_err(backend)?;
+                if got.state.is_empty()
+                    || got
+                        .list
+                        .iter()
+                        .any(|m| m.mailbox_ids.get(mailbox) != Some(&true))
+                {
+                    return Err(BackendError::Changed);
+                }
+                self.api()
+                    .set_emails(&Map::new(), chunk, Some(&got.state))
+                    .await
+                    .map_err(backend)
             }
-            let answer = self
-                .api()
-                .set_emails(&Map::new(), chunk, Some(&got.state))
-                .await
-                .map_err(|e| unapplied(taken, backend(e)))?;
-            if let Some((at, error)) = first_refusal(chunk, &answer) {
-                return Err(unapplied(taken + at, error));
+            .await;
+            let answer = match answer {
+                Ok(answer) => answer,
+                Err(error) => {
+                    results.resize(messages.len(), Err(error));
+                    break;
+                }
+            };
+            let destroyed = answer.destroyed.unwrap_or_default();
+            let refused = answer.not_destroyed.unwrap_or_default();
+            let mut failure = None;
+            for id in chunk {
+                let result = match refused.get(id) {
+                    Some(error) if error.kind == "notFound" => Ok(()),
+                    Some(error) => Err(backend(error.error())),
+                    None if destroyed.contains(id) => Ok(()),
+                    None => Err(BackendError::StateLost),
+                };
+                if let Err(error) = &result {
+                    failure.get_or_insert_with(|| error.clone());
+                }
+                results.push(result);
             }
-            taken += chunk.len();
+            if let Some(error) = failure {
+                results.resize(messages.len(), Err(error));
+                break;
+            }
         }
-        Ok(Vec::new())
+        results
     }
 
     pub(super) async fn write(

@@ -11010,38 +11010,38 @@ msgstr "此邮件未要求已读回执。"
 msgid "The server refused this request."
 msgstr "服务器拒绝了此请求。"
 
-#: sync/src/account/writes.rs:781
+#: sync/src/account/writes.rs:791
 msgid "{provider} is busy. Still working on {conversations}."
 msgstr "{provider} 忙碌中。仍在处理 {conversations}。"
 
-#: sync/src/account/writes.rs:804
+#: sync/src/account/writes.rs:814
 msgid ""
 "{provider} is busy, so “{action}” did not go through for {conversations}. "
 "Try again in a moment."
 msgstr ""
 "{provider} 忙碌中，因此「{action}」未能应用至 {conversations}。请稍后重试。"
 
-#: sync/src/account/writes.rs:813
+#: sync/src/account/writes.rs:823
 msgid ""
 "{provider} stayed busy for {waited}, so “{action}” did not go through for "
 "{conversations}."
 msgstr ""
 "{provider} 持续忙碌了 {waited}，因此「{action}」未能应用至 {conversations}。"
 
-#: sync/src/account/writes.rs:820
+#: sync/src/account/writes.rs:830
 msgid "{action} failed: {reason}"
 msgstr "{action} 失败：{reason}"
 
-#: sync/src/account/writes.rs:838
+#: sync/src/account/writes.rs:848
 msgid "a moment"
 msgstr "片刻"
 
-#: sync/src/account/writes.rs:840
+#: sync/src/account/writes.rs:850
 msgid "{count} second"
 msgid_plural "{count} seconds"
 msgstr[0] "{count} 秒"
 
-#: sync/src/account/writes.rs:845
+#: sync/src/account/writes.rs:855
 msgid "a minute"
 msgstr "一分钟"
 
@@ -11490,15 +11490,15 @@ msgstr "服务器已在草稿以外保存了这封完全相同的邮件，因此
 msgid "The server did not take the rules."
 msgstr "服务器未接受这些规则。"
 
-#: sync/src/services/jmap/writes.rs:103
+#: sync/src/services/jmap/writes.rs:104
 msgid "The server has no mailbox for this."
 msgstr "服务器没有可用于此操作的邮箱。"
 
-#: sync/src/services/jmap/writes.rs:135
+#: sync/src/services/jmap/writes.rs:136
 msgid "This server does not sort mail into categories."
 msgstr "此服务器不会将邮件分成类别。"
 
-#: sync/src/services/jmap/writes.rs:177
+#: sync/src/services/jmap/writes.rs:178
 msgid ""
 "A message must stay in at least one mailbox, and this server has no Archive."
 msgstr "邮件必须至少留在一个邮箱中，而此服务器没有 [归档] 邮箱。"
