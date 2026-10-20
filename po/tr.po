@@ -104,7 +104,13 @@ msgid ""
 "Italian, Japanese, Korean, Polish, Romanian, Russian, Spanish, European "
 "Portuguese, Simplified Chinese, Traditional Chinese (Taiwan), Turkish, "
 "Ukrainian and Vietnamese"
-msgstr "Her denetimin ekran okuyucular için bir adı vardır ve klavyeyle kullanılabilir. Arayüz Amerikan İngilizcesi, Britanya İngilizcesi, Fransızca, Almanca, Yunanca, Endonezce, İtalyanca, Japonca, Korece, Lehçe, Romence, Rusça, İspanyolca, Avrupa Portekizcesi, Basitleştirilmiş Çince, Geleneksel Çince (Tayvan), Türkçe, Ukraynaca ve Vietnamca olarak kullanılabilir"
+msgstr ""
+"Her denetimin ekran okuyucular için bir adı vardır ve klavyeyle "
+"kullanılabilir. Arayüz Amerikan İngilizcesi, Britanya İngilizcesi, "
+"Fransızca, Almanca, Yunanca, Endonezce, İtalyanca, Japonca, Korece, Lehçe, "
+"Romence, Rusça, İspanyolca, Avrupa Portekizcesi, Basitleştirilmiş Çince, "
+"Geleneksel Çince (Tayvan), Türkçe, Ukraynaca ve Vietnamca olarak "
+"kullanılabilir"
 
 #: app/data/io.github.c9dev.PenguinMail.metainfo.xml:35
 msgid ""
@@ -10290,19 +10296,19 @@ msgstr[1] "{name}, {count} okunmamış"
 
 #: app/src/ui/window/column_width.rs:31
 msgid "Mailbox sidebar width"
-msgstr ""
+msgstr "Posta kutusu kenar çubuğu genişliği"
 
 #: app/src/ui/window/column_width.rs:32
-#, fuzzy
-#| msgid "Message sent"
 msgid "Message list width"
-msgstr "İleti gönderildi"
+msgstr "İleti listesi genişliği"
 
 #: app/src/ui/window/column_width.rs:38
 msgid ""
 "Drag to resize, or use Left and Right. Home and End choose the smallest and "
 "largest widths."
 msgstr ""
+"Boyutlandırmak için sürükleyin veya Sol ve Sağ tuşlarını kullanın. Home ve "
+"End en küçük ve en büyük genişliği seçer."
 
 #: app/src/ui/window/detached.rs:39 app/src/ui/window/export.rs:72
 #: app/src/ui/window/export.rs:124

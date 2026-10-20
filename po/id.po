@@ -103,7 +103,12 @@ msgid ""
 "Italian, Japanese, Korean, Polish, Romanian, Russian, Spanish, European "
 "Portuguese, Simplified Chinese, Traditional Chinese (Taiwan), Turkish, "
 "Ukrainian and Vietnamese"
-msgstr "Setiap kontrol memiliki nama untuk pembaca layar dan dapat digunakan dengan papan ketik. Antarmuka tersedia dalam bahasa Inggris Amerika, Inggris Britania, Prancis, Jerman, Yunani, Indonesia, Italia, Jepang, Korea, Polandia, Rumania, Rusia, Spanyol, Portugis Eropa, Tionghoa Sederhana, Tionghoa Tradisional (Taiwan), Turki, Ukraina, dan Vietnam"
+msgstr ""
+"Setiap kontrol memiliki nama untuk pembaca layar dan dapat digunakan dengan "
+"papan ketik. Antarmuka tersedia dalam bahasa Inggris Amerika, Inggris "
+"Britania, Prancis, Jerman, Yunani, Indonesia, Italia, Jepang, Korea, "
+"Polandia, Rumania, Rusia, Spanyol, Portugis Eropa, Tionghoa Sederhana, "
+"Tionghoa Tradisional (Taiwan), Turki, Ukraina, dan Vietnam"
 
 #: app/data/io.github.c9dev.PenguinMail.metainfo.xml:35
 msgid ""
@@ -10344,19 +10349,19 @@ msgstr[1] "{name}, {count} belum dibaca"
 
 #: app/src/ui/window/column_width.rs:31
 msgid "Mailbox sidebar width"
-msgstr ""
+msgstr "Lebar bilah sisi kotak surat"
 
 #: app/src/ui/window/column_width.rs:32
-#, fuzzy
-#| msgid "Message sent"
 msgid "Message list width"
-msgstr "Pesan terkirim"
+msgstr "Lebar daftar pesan"
 
 #: app/src/ui/window/column_width.rs:38
 msgid ""
 "Drag to resize, or use Left and Right. Home and End choose the smallest and "
 "largest widths."
 msgstr ""
+"Seret untuk mengubah ukuran, atau gunakan Kiri dan Kanan. Home dan End "
+"memilih lebar terkecil dan terbesar."
 
 #: app/src/ui/window/detached.rs:39 app/src/ui/window/export.rs:72
 #: app/src/ui/window/export.rs:124

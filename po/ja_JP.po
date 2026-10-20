@@ -10114,19 +10114,19 @@ msgstr[0] "{name}、未読{count}件"
 
 #: app/src/ui/window/column_width.rs:31
 msgid "Mailbox sidebar width"
-msgstr ""
+msgstr "メールボックスのサイドバーの幅"
 
 #: app/src/ui/window/column_width.rs:32
-#, fuzzy
-#| msgid "Message sent"
 msgid "Message list width"
-msgstr "メッセージを送信しました"
+msgstr "メッセージ一覧の幅"
 
 #: app/src/ui/window/column_width.rs:38
 msgid ""
 "Drag to resize, or use Left and Right. Home and End choose the smallest and "
 "largest widths."
 msgstr ""
+"ドラッグするか左右キーで幅を変更します。Home と End で最小と最大の幅を選べま"
+"す。"
 
 #: app/src/ui/window/detached.rs:39 app/src/ui/window/export.rs:72
 #: app/src/ui/window/export.rs:124

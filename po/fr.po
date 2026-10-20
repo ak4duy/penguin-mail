@@ -107,7 +107,12 @@ msgid ""
 "Italian, Japanese, Korean, Polish, Romanian, Russian, Spanish, European "
 "Portuguese, Simplified Chinese, Traditional Chinese (Taiwan), Turkish, "
 "Ukrainian and Vietnamese"
-msgstr "Chaque contrôle est nommé pour les lecteurs d’écran et accessible au clavier, en anglais américain, anglais britannique, français, allemand, grec, indonésien, italien, japonais, coréen, polonais, roumain, russe, espagnol, portugais européen, chinois simplifié, chinois traditionnel (Taïwan), turc, ukrainien et vietnamien"
+msgstr ""
+"Chaque contrôle est nommé pour les lecteurs d’écran et accessible au "
+"clavier, en anglais américain, anglais britannique, français, allemand, "
+"grec, indonésien, italien, japonais, coréen, polonais, roumain, russe, "
+"espagnol, portugais européen, chinois simplifié, chinois traditionnel "
+"(Taïwan), turc, ukrainien et vietnamien"
 
 #: app/data/io.github.c9dev.PenguinMail.metainfo.xml:35
 msgid ""
@@ -10441,19 +10446,19 @@ msgstr[1] "{name}, {count} non lus"
 
 #: app/src/ui/window/column_width.rs:31
 msgid "Mailbox sidebar width"
-msgstr ""
+msgstr "Largeur du panneau des boîtes aux lettres"
 
 #: app/src/ui/window/column_width.rs:32
-#, fuzzy
-#| msgid "Message sent"
 msgid "Message list width"
-msgstr "Message envoyé"
+msgstr "Largeur de la liste des messages"
 
 #: app/src/ui/window/column_width.rs:38
 msgid ""
 "Drag to resize, or use Left and Right. Home and End choose the smallest and "
 "largest widths."
 msgstr ""
+"Faites glisser pour redimensionner, ou utilisez Gauche et Droite. Début et "
+"Fin choisissent la largeur minimale et maximale."
 
 #: app/src/ui/window/detached.rs:39 app/src/ui/window/export.rs:72
 #: app/src/ui/window/export.rs:124

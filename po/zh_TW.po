@@ -9909,19 +9909,17 @@ msgstr[0] "{name}，{count} 封未讀"
 
 #: app/src/ui/window/column_width.rs:31
 msgid "Mailbox sidebar width"
-msgstr ""
+msgstr "信箱側邊欄寬度"
 
 #: app/src/ui/window/column_width.rs:32
-#, fuzzy
-#| msgid "Message sent"
 msgid "Message list width"
-msgstr "已傳送郵件"
+msgstr "郵件列表寬度"
 
 #: app/src/ui/window/column_width.rs:38
 msgid ""
 "Drag to resize, or use Left and Right. Home and End choose the smallest and "
 "largest widths."
-msgstr ""
+msgstr "拖曳以調整大小，或使用左右方向鍵。Home 與 End 鍵可選擇最小與最大寬度。"
 
 #: app/src/ui/window/detached.rs:39 app/src/ui/window/export.rs:72
 #: app/src/ui/window/export.rs:124
