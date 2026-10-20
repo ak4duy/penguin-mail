@@ -1016,7 +1016,7 @@ msgstr "{provider} đăng nhập qua trình duyệt"
 msgid "Continue opens {provider}'s sign-in page in your browser."
 msgstr "Tiếp tục sẽ mở trang đăng nhập của {provider} trong trình duyệt."
 
-#: app/src/app.rs:451
+#: app/src/app.rs:440
 msgid ""
 "Your preferences could not be read, so Penguin Mail started from the "
 "defaults. The old file is kept as {file}."
@@ -2115,25 +2115,25 @@ msgstr ""
 msgid "Penguin Mail could not update its mail store, and kept the old one."
 msgstr "Penguin Mail không thể cập nhật kho thư và đã giữ lại kho cũ."
 
-#: app/src/core.rs:813 app/src/core.rs:891 app/src/core.rs:1020
-#: app/src/core.rs:1034 app/src/core.rs:1099 app/src/core.rs:1195
+#: app/src/core.rs:821 app/src/core.rs:899 app/src/core.rs:1028
+#: app/src/core.rs:1042 app/src/core.rs:1107 app/src/core.rs:1203
 msgid "Demo mode cannot add real accounts."
 msgstr "Chế độ minh họa không thể thêm tài khoản thật."
 
-#: app/src/core.rs:827
+#: app/src/core.rs:835
 msgid "Canceled."
 msgstr "Đã hủy."
 
-#: app/src/core.rs:831
+#: app/src/core.rs:839
 msgid "Gave up waiting for the browser after five minutes."
 msgstr "Đã ngừng chờ trình duyệt sau năm phút."
 
-#: app/src/core.rs:1365 app/src/core.rs:1390
+#: app/src/core.rs:1373 app/src/core.rs:1398
 msgid "This account keeps no password a calendar or contacts server takes."
 msgstr ""
 "Tài khoản này không lưu mật khẩu dùng được cho máy chủ lịch hoặc danh bạ."
 
-#: app/src/core.rs:1571 app/src/core.rs:1610
+#: app/src/core.rs:1579 app/src/core.rs:1618
 msgid "The demo cannot switch accounts."
 msgstr "Chế độ minh họa không thể chuyển tài khoản."
 

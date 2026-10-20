@@ -977,7 +977,7 @@ msgstr "{provider} 透過瀏覽器登入"
 msgid "Continue opens {provider}'s sign-in page in your browser."
 msgstr "選擇 [繼續] 會在瀏覽器中開啟 {provider} 的登入頁面。"
 
-#: app/src/app.rs:451
+#: app/src/app.rs:440
 msgid ""
 "Your preferences could not be read, so Penguin Mail started from the "
 "defaults. The old file is kept as {file}."
@@ -2069,24 +2069,24 @@ msgstr ""
 msgid "Penguin Mail could not update its mail store, and kept the old one."
 msgstr "Penguin Mail 無法更新郵件資料庫，已保留舊資料庫。"
 
-#: app/src/core.rs:813 app/src/core.rs:891 app/src/core.rs:1020
-#: app/src/core.rs:1034 app/src/core.rs:1099 app/src/core.rs:1195
+#: app/src/core.rs:821 app/src/core.rs:899 app/src/core.rs:1028
+#: app/src/core.rs:1042 app/src/core.rs:1107 app/src/core.rs:1203
 msgid "Demo mode cannot add real accounts."
 msgstr "示範模式無法新增真實帳號。"
 
-#: app/src/core.rs:827
+#: app/src/core.rs:835
 msgid "Canceled."
 msgstr "已取消。"
 
-#: app/src/core.rs:831
+#: app/src/core.rs:839
 msgid "Gave up waiting for the browser after five minutes."
 msgstr "已等候瀏覽器五分鐘，停止等候。"
 
-#: app/src/core.rs:1365 app/src/core.rs:1390
+#: app/src/core.rs:1373 app/src/core.rs:1398
 msgid "This account keeps no password a calendar or contacts server takes."
 msgstr "此帳號沒有保存行事曆或聯絡人伺服器接受的密碼。"
 
-#: app/src/core.rs:1571 app/src/core.rs:1610
+#: app/src/core.rs:1579 app/src/core.rs:1618
 msgid "The demo cannot switch accounts."
 msgstr "示範模式無法切換帳號。"
 

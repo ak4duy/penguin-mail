@@ -1022,7 +1022,7 @@ msgstr "{provider} はブラウザーでログインします"
 msgid "Continue opens {provider}'s sign-in page in your browser."
 msgstr "「続行」を押すと、ブラウザーで {provider} のログインページを開きます。"
 
-#: app/src/app.rs:451
+#: app/src/app.rs:440
 msgid ""
 "Your preferences could not be read, so Penguin Mail started from the "
 "defaults. The old file is kept as {file}."
@@ -2133,26 +2133,26 @@ msgstr ""
 msgid "Penguin Mail could not update its mail store, and kept the old one."
 msgstr "メールストアを更新できなかったため、以前のストアを残しました。"
 
-#: app/src/core.rs:813 app/src/core.rs:891 app/src/core.rs:1020
-#: app/src/core.rs:1034 app/src/core.rs:1099 app/src/core.rs:1195
+#: app/src/core.rs:821 app/src/core.rs:899 app/src/core.rs:1028
+#: app/src/core.rs:1042 app/src/core.rs:1107 app/src/core.rs:1203
 msgid "Demo mode cannot add real accounts."
 msgstr "デモモードでは実際のアカウントを追加できません。"
 
-#: app/src/core.rs:827
+#: app/src/core.rs:835
 msgid "Canceled."
 msgstr "キャンセルしました。"
 
-#: app/src/core.rs:831
+#: app/src/core.rs:839
 msgid "Gave up waiting for the browser after five minutes."
 msgstr "5 分経過したため、ブラウザーでの操作を待つのをやめました。"
 
-#: app/src/core.rs:1365 app/src/core.rs:1390
+#: app/src/core.rs:1373 app/src/core.rs:1398
 msgid "This account keeps no password a calendar or contacts server takes."
 msgstr ""
 "このアカウントには、カレンダーや連絡先のサーバーで使えるパスワードが保存され"
 "ていません。"
 
-#: app/src/core.rs:1571 app/src/core.rs:1610
+#: app/src/core.rs:1579 app/src/core.rs:1618
 msgid "The demo cannot switch accounts."
 msgstr "デモではアカウントを切り替えられません。"
 

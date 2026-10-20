@@ -710,12 +710,20 @@ impl Core {
         })
     }
 
-    /// Marks every unread message in the account's inbox read, on its
-    /// server as well as here. See `MailActions::read_inbox`.
-    pub async fn read_inbox(&self, account_id: AccountId) -> Result<Outcome> {
+    /// Marks every unread message in each account's inbox read, on its
+    /// server as well as here. See `MailActions::read_inboxes`.
+    pub async fn read_inboxes(&self, accounts: Vec<AccountId>) -> Outcome {
         let actions = Arc::clone(&self.actions);
-        self.call(async move { actions.read_inbox(account_id, History::Record).await })
-            .await
+        self.call(async move {
+            Ok::<_, std::convert::Infallible>(
+                actions.read_inboxes(&accounts, History::Record).await,
+            )
+        })
+        .await
+        .unwrap_or_else(|err| {
+            tracing::warn!(error = %err, "marking the inboxes read stopped");
+            Outcome::default()
+        })
     }
 
     /// Reverses the one action `recorded` names, wherever it sits on the

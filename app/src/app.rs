@@ -374,26 +374,15 @@ impl App {
     }
 
     /// Marks the unread mail in every account's inbox read, the tray's
-    /// Mark All as Read. Each account goes in pages on its own server, so
-    /// mail older than this computer keeps goes read too.
+    /// Mark All as Read. Each page asks the accounts' servers, so mail
+    /// older than this computer keeps goes read too.
     fn read_all(self: &Rc<Self>) {
-        use mailrs_sync::{MailAction, Outcome, TriageAction};
+        use mailrs_sync::{MailAction, TriageAction};
 
         let this = Rc::clone(self);
         glib::spawn_future_local(async move {
-            let mut outcome = Outcome::default();
-            for account in this.mail_accounts() {
-                match this.core.read_inbox(account.id).await {
-                    Ok(one) => {
-                        outcome.done.extend(one.done);
-                        outcome.failed.extend(one.failed);
-                        outcome.recorded = one.recorded.or(outcome.recorded);
-                    }
-                    Err(err) => {
-                        tracing::warn!(account = account.id, error = %err, "could not list unread inbox mail");
-                    }
-                }
-            }
+            let accounts: Vec<_> = this.mail_accounts().into_iter().map(|a| a.id).collect();
+            let outcome = this.core.read_inboxes(accounts).await;
             if outcome.done.is_empty() && outcome.failed.is_empty() {
                 return;
             }
