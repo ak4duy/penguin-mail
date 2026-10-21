@@ -11577,21 +11577,21 @@ msgstr[1] "{count} detik"
 msgid "a minute"
 msgstr "satu menit"
 
-#: sync/src/actions.rs:125 sync/src/actions.rs:807 sync/src/actions.rs:908
+#: sync/src/actions.rs:125 sync/src/actions.rs:804 sync/src/actions.rs:905
 msgid "Change labels"
 msgstr "Ubah label"
 
-#: sync/src/actions.rs:406
+#: sync/src/actions.rs:403
 msgid "Delete Forever failed: {reason}"
 msgstr "Hapus Permanen gagal: {reason}"
 
-#: sync/src/actions.rs:674 sync/src/actions.rs:798
+#: sync/src/actions.rs:671 sync/src/actions.rs:795
 msgid "This mail has moved since, so Undo left it where it is."
 msgstr ""
 "Email ini sudah dipindahkan, sehingga Urungkan membiarkannya di tempatnya "
 "sekarang."
 
-#: sync/src/actions.rs:738 sync/src/actions.rs:765 sync/src/actions.rs:915
+#: sync/src/actions.rs:735 sync/src/actions.rs:762 sync/src/actions.rs:912
 msgid "Could not undo: {reason}"
 msgstr "Tidak dapat mengurungkan: {reason}"
 

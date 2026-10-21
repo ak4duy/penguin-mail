@@ -11589,20 +11589,20 @@ msgstr[1] "{count} segundos"
 msgid "a minute"
 msgstr "um minuto"
 
-#: sync/src/actions.rs:125 sync/src/actions.rs:807 sync/src/actions.rs:908
+#: sync/src/actions.rs:125 sync/src/actions.rs:804 sync/src/actions.rs:905
 msgid "Change labels"
 msgstr "Alterar etiquetas"
 
-#: sync/src/actions.rs:406
+#: sync/src/actions.rs:403
 msgid "Delete Forever failed: {reason}"
 msgstr "Eliminar definitivamente falhou: {reason}"
 
-#: sync/src/actions.rs:674 sync/src/actions.rs:798
+#: sync/src/actions.rs:671 sync/src/actions.rs:795
 msgid "This mail has moved since, so Undo left it where it is."
 msgstr ""
 "Esta mensagem mudou de sítio entretanto, por isso Anular deixou-a onde está."
 
-#: sync/src/actions.rs:738 sync/src/actions.rs:765 sync/src/actions.rs:915
+#: sync/src/actions.rs:735 sync/src/actions.rs:762 sync/src/actions.rs:912
 msgid "Could not undo: {reason}"
 msgstr "Não foi possível anular: {reason}"
 

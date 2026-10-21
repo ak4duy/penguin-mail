@@ -11251,19 +11251,19 @@ msgstr[0] "{count}초"
 msgid "a minute"
 msgstr "1분"
 
-#: sync/src/actions.rs:125 sync/src/actions.rs:807 sync/src/actions.rs:908
+#: sync/src/actions.rs:125 sync/src/actions.rs:804 sync/src/actions.rs:905
 msgid "Change labels"
 msgstr "라벨 변경"
 
-#: sync/src/actions.rs:406
+#: sync/src/actions.rs:403
 msgid "Delete Forever failed: {reason}"
 msgstr "영구 삭제 실패: {reason}"
 
-#: sync/src/actions.rs:674 sync/src/actions.rs:798
+#: sync/src/actions.rs:671 sync/src/actions.rs:795
 msgid "This mail has moved since, so Undo left it where it is."
 msgstr "그동안 메일이 이동하여 실행 취소 시 현재 위치에 그대로 두었습니다."
 
-#: sync/src/actions.rs:738 sync/src/actions.rs:765 sync/src/actions.rs:915
+#: sync/src/actions.rs:735 sync/src/actions.rs:762 sync/src/actions.rs:912
 msgid "Could not undo: {reason}"
 msgstr "실행 취소할 수 없습니다: {reason}"
 

@@ -11675,20 +11675,20 @@ msgstr[1] "{count} secondes"
 msgid "a minute"
 msgstr "une minute"
 
-#: sync/src/actions.rs:125 sync/src/actions.rs:807 sync/src/actions.rs:908
+#: sync/src/actions.rs:125 sync/src/actions.rs:804 sync/src/actions.rs:905
 msgid "Change labels"
 msgstr "Modifier les étiquettes"
 
-#: sync/src/actions.rs:406
+#: sync/src/actions.rs:403
 msgid "Delete Forever failed: {reason}"
 msgstr "Échec de la suppression définitive : {reason}"
 
-#: sync/src/actions.rs:674 sync/src/actions.rs:798
+#: sync/src/actions.rs:671 sync/src/actions.rs:795
 msgid "This mail has moved since, so Undo left it where it is."
 msgstr ""
 "Ce courrier a été déplacé depuis, l’annulation l’a donc laissé où il est."
 
-#: sync/src/actions.rs:738 sync/src/actions.rs:765 sync/src/actions.rs:915
+#: sync/src/actions.rs:735 sync/src/actions.rs:762 sync/src/actions.rs:912
 msgid "Could not undo: {reason}"
 msgstr "Annulation impossible : {reason}"
 

@@ -11059,19 +11059,19 @@ msgstr[0] "{count} 秒"
 msgid "a minute"
 msgstr "一分鐘"
 
-#: sync/src/actions.rs:125 sync/src/actions.rs:807 sync/src/actions.rs:908
+#: sync/src/actions.rs:125 sync/src/actions.rs:804 sync/src/actions.rs:905
 msgid "Change labels"
 msgstr "變更標籤"
 
-#: sync/src/actions.rs:406
+#: sync/src/actions.rs:403
 msgid "Delete Forever failed: {reason}"
 msgstr "[永久刪除] 失敗：{reason}"
 
-#: sync/src/actions.rs:674 sync/src/actions.rs:798
+#: sync/src/actions.rs:671 sync/src/actions.rs:795
 msgid "This mail has moved since, so Undo left it where it is."
 msgstr "此郵件之後已移動，因此 [復原] 將郵件留在原處。"
 
-#: sync/src/actions.rs:738 sync/src/actions.rs:765 sync/src/actions.rs:915
+#: sync/src/actions.rs:735 sync/src/actions.rs:762 sync/src/actions.rs:912
 msgid "Could not undo: {reason}"
 msgstr "無法復原：{reason}"
 

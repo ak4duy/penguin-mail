@@ -49,7 +49,10 @@ impl<A: Accounts> MailActions<A> {
         let mut read = InboxesRead::default();
         let mut staged = Vec::new();
         for &account_id in accounts {
+            let before = read.read;
             match self.read_inbox(account_id, page, &mut read).await {
+                // An account with nothing marked read has nothing to undo.
+                Ok(_) if read.read == before => {}
                 Ok(snapshot) => staged.push(Staged {
                     account_id,
                     snapshot,

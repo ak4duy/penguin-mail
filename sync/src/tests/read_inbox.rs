@@ -316,3 +316,48 @@ async fn erased_mail_leaves_the_staged_undo() {
         "nothing is left to take back"
     );
 }
+
+/// Emptying the Trash erases one message of a conversation, and Undo
+/// still reaches the reply of it that stayed in the inbox.
+#[tokio::test]
+async fn emptying_the_trash_keeps_the_inbox_half_of_a_conversation_in_undo() {
+    let h = harness().await;
+    let now = now_millis();
+    h.fake.seed(meta("a", "t1", now, &["INBOX", "UNREAD"]));
+    h.fake.seed(meta("z", "t1", now - 1, &["TRASH"]));
+    h.bootstrap_all().await;
+    let actions = actions(&[(h.account_id, &h.sync)], &h.db);
+    let read = actions.read_inboxes(&[h.account_id], History::Record).await;
+    assert_eq!(read.read, 1, "{:?}", read.failed);
+
+    let Permitted::Done(emptied) = actions.empty_trash(h.account_id).await.unwrap() else {
+        panic!("permission is granted");
+    };
+    assert_eq!(emptied.deleted, 1);
+
+    actions
+        .undo()
+        .await
+        .expect("the inbox message is still to undo");
+    assert!(h.fake.with(|s| has_label(&s.messages["a"], "UNREAD")));
+}
+
+/// An account with no unread mail puts nothing on the undo entry, so the
+/// entry goes with the only account it changed.
+#[tokio::test]
+async fn an_account_with_nothing_unread_leaves_no_undo_behind() {
+    let h = harness().await;
+    h.fake
+        .seed(meta("a", "t1", now_millis(), &["INBOX", "UNREAD"]));
+    h.bootstrap_all().await;
+    let (other_id, _, other) = second_gmail(&h, &[meta("r", "t2", now_millis(), &["INBOX"])]).await;
+    let actions = actions(&[(h.account_id, &h.sync), (other_id, &other)], &h.db);
+    let read = actions
+        .read_inboxes(&[h.account_id, other_id], History::Record)
+        .await;
+    assert_eq!(read.read, 1, "{:?}", read.failed);
+
+    actions.forget_account(h.account_id);
+
+    assert!(actions.undo().await.is_none());
+}

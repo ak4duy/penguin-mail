@@ -237,16 +237,13 @@ impl Undo {
         self.follow_ups.retain(|t| !same_thread(t, target));
     }
 
-    /// Drops the staged rows of `erased`'s threads, and a staged change
-    /// with nothing left to take back. One that cannot be read stays, and
-    /// its Undo reports the error.
+    /// Drops the staged rows of `erased`, and a staged change with nothing
+    /// left to take back. One that cannot be read stays, and its Undo
+    /// reports the error.
     fn forget_staged(&mut self, erased: &[Target]) {
         self.staged.retain(|staged| {
-            let threads = erased
-                .iter()
-                .filter(|t| t.account_id == staged.account_id)
-                .map(|t| t.thread_id.as_str());
-            staged.snapshot.forget(threads).unwrap_or_else(|err| {
+            let mine = erased.iter().filter(|t| t.account_id == staged.account_id);
+            staged.snapshot.forget(mine).unwrap_or_else(|err| {
                 tracing::warn!(error = %err, "could not drop erased mail from an undo");
                 true
             })
