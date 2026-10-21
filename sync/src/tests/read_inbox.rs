@@ -95,9 +95,9 @@ async fn the_inbox_goes_read_on_the_server_past_what_the_store_holds() {
     assert!(!h.labels_of("a").await.contains(&"UNREAD".to_string()));
 }
 
-/// Outlook lists unread inbox mail on the server, so a message the store
-/// never fetched goes read too. A POP3 account's mail lives in the store,
-/// which answers for it.
+/// Outlook lists unread inbox mail on the server, following its next link
+/// past a short page, so a message the store never fetched goes read too.
+/// A POP3 account's mail lives in the store, which answers for it.
 #[tokio::test]
 async fn outlook_asks_the_server_and_pop3_the_store() {
     let ms = outlook().await;
@@ -118,6 +118,7 @@ async fn outlook_asks_the_server_and_pop3_the_store() {
         },
     );
     assert!(!ms.stored(&unseen).await);
+    ms.fake.with(|s| s.listing_page = Some(1));
 
     let read = actions(&[(ms.account_id, &ms.sync)], &ms.db)
         .read_inboxes_in_pages(&[ms.account_id], History::Record, 2)
@@ -139,35 +140,46 @@ async fn outlook_asks_the_server_and_pop3_the_store() {
     assert!(!pop.ids_in(MailSet::Unseen).await.contains(&pop_id));
 }
 
-/// A page the server refuses comes back in the next listing. The run
-/// reaches past it to the mail after, and reports the refusal.
+/// Refused pages that fill more than one listing page of the server still
+/// leave the mail behind them reachable, since the run lists the whole
+/// inbox before it changes any of it. The refusal is reported.
 #[tokio::test]
-async fn a_refused_page_is_stepped_past_to_the_mail_after_it() {
+async fn refused_pages_longer_than_a_listing_page_do_not_hide_the_mail_after() {
     let h = harness().await;
     let now = now_millis();
-    h.fake.seed(meta("a", "t1", now, &["INBOX", "UNREAD"]));
-    h.fake.seed(meta("b", "t2", now - 1, &["INBOX", "UNREAD"]));
-    h.fake.seed(meta("c", "t3", now - 2, &["INBOX", "UNREAD"]));
+    let ids = ["a", "b", "c", "d", "e"];
+    for (i, id) in ids.iter().enumerate() {
+        h.fake.seed(meta(
+            id,
+            &format!("t{i}"),
+            now - i as i64,
+            &["INBOX", "UNREAD"],
+        ));
+    }
     h.bootstrap_all().await;
-    h.fake.with(|s| s.page_size = 1000);
+    h.fake.with(|s| s.page_size = 2);
     // A refusal stops the batch, so the rest of the page fails with it.
-    h.fake.fail_call(
-        "users.messages.modify",
-        0,
-        GmailError::Http {
-            status: 400,
-            body: "no".into(),
-        },
-    );
+    for _ in 0..2 {
+        h.fake.fail_call(
+            "users.messages.modify",
+            0,
+            GmailError::Http {
+                status: 400,
+                body: "no".into(),
+            },
+        );
+    }
 
     let read = actions(&[(h.account_id, &h.sync)], &h.db)
         .read_inboxes_in_pages(&[h.account_id], History::Record, 2)
         .await;
 
     let unread = |id: &str| h.fake.with(|s| has_label(&s.messages[id], "UNREAD"));
-    assert!(unread("a") && unread("b"), "the refused page stays unread");
-    assert!(!unread("c"), "the mail past it goes read");
-    assert_eq!((read.read, read.refused), (1, 2));
+    for id in &ids[..4] {
+        assert!(unread(id), "{id} was in a refused page");
+    }
+    assert!(!unread("e"), "the mail past them goes read");
+    assert_eq!((read.read, read.refused), (1, 4));
     assert_eq!(read.failed.len(), 1);
     assert_eq!(read.failed[0].0, h.account_id);
 }
