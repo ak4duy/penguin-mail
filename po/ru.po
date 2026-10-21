@@ -11723,20 +11723,20 @@ msgstr[2] "{count} секунд"
 msgid "a minute"
 msgstr "минута"
 
-#: sync/src/actions.rs:125 sync/src/actions.rs:778 sync/src/actions.rs:845
+#: sync/src/actions.rs:125 sync/src/actions.rs:807 sync/src/actions.rs:908
 msgid "Change labels"
 msgstr "Изменить ярлыки"
 
-#: sync/src/actions.rs:390
+#: sync/src/actions.rs:406
 msgid "Delete Forever failed: {reason}"
 msgstr "Не удалось удалить навсегда: {reason}"
 
-#: sync/src/actions.rs:657
+#: sync/src/actions.rs:674 sync/src/actions.rs:798
 msgid "This mail has moved since, so Undo left it where it is."
 msgstr ""
 "С тех пор это письмо было перемещено, поэтому отмена оставила его на месте."
 
-#: sync/src/actions.rs:721 sync/src/actions.rs:748 sync/src/actions.rs:852
+#: sync/src/actions.rs:738 sync/src/actions.rs:765 sync/src/actions.rs:915
 msgid "Could not undo: {reason}"
 msgstr "Не удалось отменить: {reason}"
 

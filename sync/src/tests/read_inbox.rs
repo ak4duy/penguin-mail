@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use std::time::Duration;
 
-use mailrs_domain::{AccountId, MailSet, MessageMeta, RemoveSetting, Role};
+use mailrs_domain::{AccountId, MailSet, MessageMeta, RemoveSetting, Role, Target};
 use mailrs_gmail::GmailError;
 use mailrs_store::{Db, accounts};
 
@@ -11,7 +11,10 @@ use super::pop3::pop3_harness;
 use super::{Connected, Harness, harness};
 use crate::fake::{FakeGmail, FakeMail, FakePop3, has_label, meta, pop3_mail};
 use crate::read_inbox::READ_PAGE;
-use crate::{AccountServices, AccountSync, History, MailActions, now_millis};
+use crate::{
+    AccountServices, AccountSync, History, MailAction, MailActions, Permitted, TriageAction,
+    now_millis,
+};
 
 const DAY: i64 = 24 * 60 * 60 * 1000;
 
@@ -243,4 +246,73 @@ async fn one_undo_takes_back_every_page_of_every_account() {
     assert_eq!(unread_mine(), READ_PAGE + 1, "one undo reaches every page");
     assert!(theirs(), "and every account");
     assert!(actions.undo().await.is_none(), "it was one action");
+}
+
+/// Undo leaves mail that left the inbox since alone, as the ordinary
+/// Undo does, and still takes back the rest.
+#[tokio::test]
+async fn undo_leaves_mail_archived_since_where_it_is() {
+    let h = harness().await;
+    let now = now_millis();
+    h.fake.seed(meta("a", "t1", now, &["INBOX", "UNREAD"]));
+    h.fake.seed(meta("b", "t2", now - 1, &["INBOX", "UNREAD"]));
+    h.bootstrap_all().await;
+    let actions = actions(&[(h.account_id, &h.sync)], &h.db);
+    let read = actions.read_inboxes(&[h.account_id], History::Record).await;
+    assert_eq!(read.read, 2, "{:?}", read.failed);
+    actions
+        .run(
+            &[Target::thread(h.account_id, "t1")],
+            MailAction::Triage(TriageAction::Archive),
+            History::Skip,
+        )
+        .await;
+
+    let undone = actions
+        .undo_this(read.recorded.expect("recorded"))
+        .await
+        .expect("an undo");
+
+    let unread = |id: &str| h.fake.with(|s| has_label(&s.messages[id], "UNREAD"));
+    assert!(!unread("a"), "the archived message stays read");
+    assert!(unread("b"), "the one still in the inbox goes unread");
+    assert_eq!(undone.outcome.failed.len(), 1);
+    assert_eq!(undone.outcome.failed[0].target.thread_id, "t1");
+}
+
+/// Delete Forever and Empty Trash take their mail out of the staged Undo,
+/// and the entry goes once nothing it changed is left.
+#[tokio::test]
+async fn erased_mail_leaves_the_staged_undo() {
+    let h = harness().await;
+    let now = now_millis();
+    h.fake.seed(meta("a", "t1", now, &["INBOX", "UNREAD"]));
+    h.fake.seed(meta("b", "t2", now - 1, &["INBOX", "UNREAD"]));
+    h.bootstrap_all().await;
+    let actions = actions(&[(h.account_id, &h.sync)], &h.db);
+    let read = actions.read_inboxes(&[h.account_id], History::Record).await;
+    assert_eq!(read.read, 2, "{:?}", read.failed);
+    let both = [
+        Target::thread(h.account_id, "t1"),
+        Target::thread(h.account_id, "t2"),
+    ];
+    actions
+        .run(
+            &both,
+            MailAction::Triage(TriageAction::Trash),
+            History::Skip,
+        )
+        .await;
+
+    let erased = actions.erase(&both[..1]).await.unwrap();
+    assert!(matches!(erased, Permitted::Done(o) if o.done.len() == 1));
+    let Permitted::Done(emptied) = actions.empty_trash(h.account_id).await.unwrap() else {
+        panic!("permission is granted");
+    };
+    assert_eq!(emptied.deleted, 1);
+
+    assert!(
+        actions.undo().await.is_none(),
+        "nothing is left to take back"
+    );
 }

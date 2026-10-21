@@ -99,6 +99,21 @@ impl Snapshot {
         }
         tx.commit().map_err(StoreError::from)
     }
+
+    /// Drops every row of `threads`, and says whether a checked row is left.
+    pub(crate) fn forget<'a>(&self, threads: impl Iterator<Item = &'a str>) -> StoreResult<bool> {
+        let mut c = self.0.lock().expect("snapshot poisoned");
+        let tx = c.transaction()?;
+        for thread in threads {
+            tx.execute("DELETE FROM refs WHERE thread = ?1", [thread])?;
+        }
+        tx.commit()?;
+        Ok(c.query_row(
+            "SELECT EXISTS(SELECT 1 FROM refs WHERE checked = 1)",
+            [],
+            |row| row.get(0),
+        )?)
+    }
 }
 
 #[cfg(test)]

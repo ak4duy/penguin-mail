@@ -237,6 +237,22 @@ impl Undo {
         self.follow_ups.retain(|t| !same_thread(t, target));
     }
 
+    /// Drops the staged rows of `erased`'s threads, and a staged change
+    /// with nothing left to take back. One that cannot be read stays, and
+    /// its Undo reports the error.
+    fn forget_staged(&mut self, erased: &[Target]) {
+        self.staged.retain(|staged| {
+            let threads = erased
+                .iter()
+                .filter(|t| t.account_id == staged.account_id)
+                .map(|t| t.thread_id.as_str());
+            staged.snapshot.forget(threads).unwrap_or_else(|err| {
+                tracing::warn!(error = %err, "could not drop erased mail from an undo");
+                true
+            })
+        });
+    }
+
     /// Drops whatever would reverse a change in `account_id`.
     fn forget_account(&mut self, account_id: AccountId) {
         self.relabel.retain(|r| r.target.account_id != account_id);
@@ -466,10 +482,11 @@ impl<A: Accounts> MailActions<A> {
 
     fn forget_erased(&self, outcome: &Outcome) {
         let mut stack = self.lock();
-        for target in &outcome.done {
-            for undo in stack.iter_mut() {
+        for undo in stack.iter_mut() {
+            for target in &outcome.done {
                 undo.forget(target);
             }
+            undo.forget_staged(&outcome.done);
         }
         stack.retain(|undo| !undo.is_empty());
     }
@@ -749,6 +766,7 @@ impl<A: Accounts> MailActions<A> {
         };
         let mut after = 0;
         let mut failed = None;
+        let mut moved = None;
         loop {
             let (last, refs) = match staged.snapshot.batch(after, STAGED_BATCH, true) {
                 Ok(batch) => batch,
@@ -773,6 +791,17 @@ impl<A: Accounts> MailActions<A> {
                     message_id: Some(r.id),
                 })
                 .collect();
+            let (targets, left) = self.split_left_inbox(targets).await;
+            if let Some(target) = left.into_iter().next() {
+                moved.get_or_insert(Failure {
+                    target,
+                    error: gettext("This mail has moved since, so Undo left it where it is."),
+                });
+            }
+            if targets.is_empty() {
+                after = last;
+                continue;
+            }
             let done = match self.sync(account_id) {
                 Ok(sync) => sync
                     .change_all(&targets, &staged.undo, &gettext("Change labels"), None)
@@ -790,7 +819,41 @@ impl<A: Accounts> MailActions<A> {
             }
             after = last;
         }
+        outcome.failed.extend(moved);
         outcome.failed.extend(failed);
+    }
+
+    /// Splits staged targets into those still in the inbox and those the
+    /// store shows outside it. The snapshot listed inbox mail, so the inbox
+    /// is where the action left all of it, and mail that went elsewhere
+    /// since is left alone as `moved` leaves it. A message the store does
+    /// not hold, or a store that cannot be read, counts as still there.
+    async fn split_left_inbox(&self, targets: Vec<Target>) -> (Vec<Target>, Vec<Target>) {
+        let checking = targets.clone();
+        let split = self
+            .db
+            .read(move |c| {
+                let mut kept = Vec::new();
+                let mut left = Vec::new();
+                for target in checking {
+                    let id = target.message_id.as_deref().expect("message target");
+                    let gone = messages::thread_messages(c, target.account_id, &target.thread_id)?
+                        .iter()
+                        .find(|m| m.id == id)
+                        .is_some_and(|m| !m.in_role(Role::Inbox));
+                    if gone {
+                        left.push(target);
+                    } else {
+                        kept.push(target);
+                    }
+                }
+                Ok((kept, left))
+            })
+            .await;
+        split.unwrap_or_else(|err| {
+            tracing::warn!(error = %err, "could not check where the mail stands now");
+            (targets, Vec::new())
+        })
     }
 
     /// Puts a whole-mailbox action on the stack as one entry, its changed
